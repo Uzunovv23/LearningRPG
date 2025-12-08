@@ -1,0 +1,27 @@
+extends layout
+
+block content
+  .container.mt-5
+    .row.justify-content-center
+      .col-md-6
+        .card
+          .card-header.bg-primary.text-white Регистрация
+          .card-body
+            if error
+              .alert.alert-danger= error
+            
+            form(action="/register" method="POST")
+              .mb-3
+                label.form-label Потребителско име
+                input.form-control(type="text" name="username" required)
+              .mb-3
+                label.form-label Имейл
+                input.form-control(type="email" name="email" required)
+              .mb-3
+                label.form-label Парола
+                input.form-control(type="password" name="password" required)
+              button.btn.btn-success.w-100(type="submit") Създай Герой
+            
+            p.mt-3.text-center
+              | Вече имаш акаунт? 
+              a(href="/login") Влез тук

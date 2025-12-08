@@ -1,3 +1,5 @@
+var session = require('express-session'); 
+var passport = require('passport');
 require('dotenv').config();
 var createError = require('http-errors');
 var express = require('express');
@@ -30,6 +32,23 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules/bootstrap/dist')));
+
+require('./config/passport')(passport);
+
+app.use(session({
+  secret: process.env.SECRET_KEY || 'secret_key_backup', 
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 1000 * 60 * 60 * 24 } 
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use(function(req, res, next) {
+  res.locals.currentUser = req.user; 
+  next();
+});
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
