@@ -10,6 +10,16 @@ var usersRouter = require('./routes/users');
 
 var app = express();
 
+var db = require('./models');
+
+db.sequelize.sync()
+  .then(() => {
+    console.log('Connection to MySQL has been established successfully.');
+  })
+  .catch(err => {
+    console.error('Unable to connect to the database:', err);
+  });
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
