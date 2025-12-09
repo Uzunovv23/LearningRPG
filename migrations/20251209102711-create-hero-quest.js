@@ -2,27 +2,21 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Tasks', {
+    await queryInterface.createTable('HeroQuests', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      question: {
-        type: Sequelize.TEXT
-      },
-      options: {
-        type: Sequelize.JSON
-      },
-      correctAnswer: {
-        type: Sequelize.STRING
-      },
-      points: {
+      heroId: {
         type: Sequelize.INTEGER
       },
       questId: {
         type: Sequelize.INTEGER
+      },
+      status: {
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
@@ -35,6 +29,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Tasks');
+    await queryInterface.dropTable('HeroQuests');
   }
 };
