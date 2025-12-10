@@ -1,0 +1,40 @@
+extends ../layout
+
+block content
+ 
+  link(rel='stylesheet', href='/stylesheets/admin.css')
+
+  .container.mt-5
+    h2.mb-4.text-primary Създаване на нов Куест
+    
+   
+    .card.mb-4.shadow-sm
+      .card-header.bg-primary.text-white Основна информация
+      .card-body
+        .row
+          .col-md-8
+            .mb-3
+              label.form-label(for="title") Заглавие на мисията
+              input#title.form-control(type="text" placeholder="Напр. История на България - Част 1")
+          .col-md-4
+            .mb-3
+              label.form-label(for="xp") XP Награда
+              input#xp.form-control(type="number" value="100")
+        .mb-3
+          label.form-label(for="desc") Описание
+          textarea#desc.form-control(rows="3" placeholder="Кратко описание какво ще научат учениците...")
+
+    
+    h4.mb-3 Въпроси
+    #questionsContainer
+
+    
+    .d-flex.justify-content-between.mb-5.mt-4
+      button.btn.btn-outline-primary#addQBtn(type="button") 
+        i.bi.bi-plus-circle 
+        |  + Добави нов въпрос
+      
+      button.btn.btn-success.btn-lg#saveBtn(type="button") 
+        | Запази Куеста
+
+  script(src='/javascripts/admin_quest.js')
