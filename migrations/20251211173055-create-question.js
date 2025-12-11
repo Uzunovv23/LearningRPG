@@ -2,21 +2,29 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Quizzes', {
+    await queryInterface.createTable('Questions', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      question: {
-        type: Sequelize.TEXT
+      text: {
+        type: Sequelize.TEXT,
+        allowNull: false
       },
       points: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        defaultValue: 10 // Добавено
       },
-      questId: {
-        type: Sequelize.INTEGER
+      quizId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'Quizzes', 
+          key: 'id'
+        },
+        onDelete: 'CASCADE'
       },
       createdAt: {
         allowNull: false,
@@ -29,6 +37,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Quizzes');
+    await queryInterface.dropTable('Questions');
   }
 };

@@ -1,30 +1,29 @@
 'use strict';
 const { Model } = require('sequelize');
-
 module.exports = (sequelize, DataTypes) => {
-  class QuizAnswer extends Model {
+  class Answer extends Model {
     static associate(models) {
-      QuizAnswer.belongsTo(models.Quiz, { foreignKey: 'quizId', onDelete: 'CASCADE' });
+      Answer.belongsTo(models.Question, { foreignKey: 'questionId', onDelete: 'CASCADE' });
     }
   }
-
-  QuizAnswer.init({
-    answer: {
+  
+  Answer.init({
+    text: {
       type: DataTypes.STRING,
-      allowNull: false 
+      allowNull: false
     },
     isCorrect: {
       type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false 
+      defaultValue: false, 
+      allowNull: false
     },
-    quizId: {
+    questionId: {
       type: DataTypes.INTEGER,
       allowNull: false
     }
   }, {
     sequelize,
-    modelName: 'QuizAnswer',
+    modelName: 'Answer',
   });
-  return QuizAnswer;
+  return Answer;
 };

@@ -1,0 +1,46 @@
+extends ../layout
+
+block content
+  .container.mt-5
+    .row.justify-content-center
+      .col-lg-8
+      
+        .text-center.mb-5
+          h1.display-4.text-primary= quest.title
+          p.lead.text-muted= quest.description
+          span.badge.bg-warning.text-dark XP Награда: #{quest.xpReward}
+
+        form(action=`/quests/${quest.id}/submit` method="POST")
+          
+         
+          each quiz in quest.Quizzes
+            .card.mb-4.shadow-sm.border-0
+              .card-header.bg-secondary.text-white
+                h4.mb-0= quiz.title
+              
+              .card-body
+              
+                each question, qIndex in quiz.Questions
+                  .mb-4.p-3.border.rounded.bg-light
+                    h5.mb-3
+                      span.badge.bg-primary.me-2 #{question.points} т.
+                      | #{question.text}
+                    
+                    
+                    .row
+                      each answer in question.Answers
+                        .col-md-6.mb-2
+                          .form-check.p-3.border.rounded.bg-white
+                            input.form-check-input(
+                              type="radio" 
+                              name=`answers[${question.id}]` 
+                              value=answer.id 
+                              id=`ans_${answer.id}`
+                              required
+                            )
+                            label.form-check-label.w-100(for=`ans_${answer.id}`)
+                              = answer.text
+
+          button.btn.btn-success.btn-lg.w-100.mb-5(type="submit") 
+            i.bi.bi-check-circle-fill 
+            |  Предай Куеста

@@ -1,0 +1,23 @@
+extends ../layout
+
+block content
+  .container.mt-5
+    h1.text-center.mb-5.text-primary 🛡️ Избери своето приключение
+
+    if quests.length === 0
+      .alert.alert-info.text-center
+        | Все още няма налични мисии. Изчакай учителят да добави!
+
+    .row
+      each quest in quests
+        .col-md-4.mb-4
+          .card.h-100.shadow-sm.quest-card
+            .card-header.bg-dark.text-white.d-flex.justify-content-between
+              span= quest.title
+              span.badge.bg-warning.text-dark #{quest.xpReward} XP
+            .card-body
+              p.card-text= quest.description
+            .card-footer.bg-white.border-top-0
+              a.btn.btn-primary.w-100(href=`/quests/${quest.id}`) 
+                i.bi.bi-play-circle-fill 
+                |  Започни Мисията

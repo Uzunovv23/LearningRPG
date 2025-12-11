@@ -1,118 +1,148 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const addBtn = document.getElementById("addQBtn");
-  const container = document.getElementById("questionsContainer");
+  const quizzesContainer = document.getElementById("quizzesContainer");
+  let quizCounter = 0;
 
-  addBtn.addEventListener("click", function () {
-    const qIndex = document.querySelectorAll(".question-card").length;
+  document.getElementById("addQuizBtn").addEventListener("click", function () {
+    quizCounter++;
+    const quizId = quizCounter;
 
     const html = `
-        <div class="card mb-4 question-card">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <span>Въпрос #${qIndex + 1}</span>
-                <button type="button" class="btn btn-outline-danger btn-sm remove-q-btn">Изтрий</button>
+        <div class="card mb-5 quiz-section border-dark shadow">
+            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Раздел #${quizId}</h5>
+                <button type="button" class="btn btn-danger btn-sm remove-btn">Изтрий раздел</button>
             </div>
-            <div class="card-body">
+            <div class="card-body bg-light">
                 <div class="mb-3">
-                    <label class="form-label">Текст на въпроса:</label>
-                    <input type="text" class="form-control q-text" placeholder="Напиши въпроса тук...">
+                    <label class="form-label fw-bold">Заглавие на раздела (напр. "Събиране"):</label>
+                    <input type="text" class="form-control quiz-title" placeholder="Име на теста...">
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Точки за верен отговор:</label>
-                    <input type="number" class="form-control q-points" value="10">
-                </div>
-                
-                <div class="answers-box">
-                    <label class="form-label mb-2">Отговори (маркирай кръгчето на верния):</label>
-                    ${[0, 1, 2, 3]
-                      .map(
-                        (i) => `
-                        <div class="input-group mb-2">
-                            <div class="input-group-text">
-                                <input class="form-check-input mt-0 q-correct" type="radio" name="correct_${qIndex}" value="${i}">
-                            </div>
-                            <input type="text" class="form-control q-answer" placeholder="Отговор ${
-                              i + 1
-                            }">
-                        </div>
-                    `
-                      )
-                      .join("")}
-                </div>
-            </div>
-        </div>
-        `;
 
-    container.insertAdjacentHTML("beforeend", html);
+                <div class="questions-container ms-3 border-start border-3 border-primary ps-3"></div>
+
+                <button type="button" class="btn btn-outline-primary btn-sm mt-3 add-question-btn">
+                    + Добави Въпрос към този раздел
+                </button>
+            </div>
+        </div>`;
+
+    quizzesContainer.insertAdjacentHTML("beforeend", html);
   });
 
-  container.addEventListener("click", function (e) {
-    if (e.target.classList.contains("remove-q-btn")) {
-      e.target.closest(".question-card").remove();
+  quizzesContainer.addEventListener("click", function (e) {
+    if (e.target.classList.contains("remove-btn")) {
+      e.target.closest(".card").remove();
+    }
+
+    if (e.target.classList.contains("add-question-btn")) {
+      const questionsContainer = e.target.previousElementSibling;
+      const qIndex = Date.now();
+
+      const questionHtml = `
+            <div class="card mb-3 question-card mt-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <label class="form-label fw-bold text-primary">Въпрос:</label>
+                        <button type="button" class="btn btn-outline-danger btn-sm remove-btn">X</button>
+                    </div>
+                    <input type="text" class="form-control mb-2 q-text" placeholder="Текст на въпроса...">
+                    
+                    <div class="row g-2">
+                        <div class="col-md-3"><input type="number" class="form-control q-points" value="10" placeholder="Точки"></div>
+                    </div>
+
+                    <label class="form-label mt-2 small text-muted">Отговори (маркирай верния):</label>
+                    <div class="answers-box">
+                        ${[0, 1, 2, 3]
+                          .map(
+                            (i) => `
+                            <div class="input-group mb-1">
+                                <div class="input-group-text">
+                                    <input class="form-check-input mt-0 q-correct" type="radio" name="correct_${qIndex}" value="${i}">
+                                </div>
+                                <input type="text" class="form-control q-answer" placeholder="Отговор ${
+                                  i + 1
+                                }">
+                            </div>
+                        `
+                          )
+                          .join("")}
+                    </div>
+                </div>
+            </div>`;
+
+      questionsContainer.insertAdjacentHTML("beforeend", questionHtml);
     }
   });
 
   document
-    .getElementById("saveBtn")
+    .getElementById("saveQuestBtn")
     .addEventListener("click", async function () {
-      // Валидация
-      const title = document.getElementById("title").value;
+      const title = document.getElementById("questTitle").value;
       if (!title) return alert("Моля, въведете заглавие на куеста!");
 
       const data = {
         title: title,
-        description: document.getElementById("desc").value,
-        xpReward: document.getElementById("xp").value,
+        description: document.getElementById("questDesc").value,
+        xpReward: document.getElementById("questXP").value,
         quizzes: [],
       };
 
-      const cards = document.querySelectorAll(".question-card");
+      document.querySelectorAll(".quiz-section").forEach((quizCard) => {
+        const quizTitle = quizCard.querySelector(".quiz-title").value;
+        const quizQuestions = [];
 
-      if (cards.length === 0) return alert("Моля, добавете поне един въпрос!");
+        quizCard.querySelectorAll(".question-card").forEach((qCard) => {
+          const qText = qCard.querySelector(".q-text").value;
+          const qPoints = qCard.querySelector(".q-points").value;
+          const answers = [];
 
-      cards.forEach((card) => {
-        const questionText = card.querySelector(".q-text").value;
-        const points = card.querySelector(".q-points").value;
+          const answerInputs = qCard.querySelectorAll(".q-answer");
+          const correctRadios = qCard.querySelectorAll(".q-correct");
 
-        const answers = [];
-        const answerInputs = card.querySelectorAll(".q-answer");
-        const correctRadios = card.querySelectorAll(".q-correct");
+          answerInputs.forEach((inp, idx) => {
+            if (inp.value.trim() !== "") {
+              answers.push({
+                text: inp.value,
+                isCorrect: correctRadios[idx].checked,
+              });
+            }
+          });
 
-        answerInputs.forEach((input, i) => {
-          if (input.value.trim() !== "") {
-            answers.push({
-              answer: input.value,
-              isCorrect: correctRadios[i].checked,
+          if (qText) {
+            quizQuestions.push({
+              text: qText,
+              points: qPoints,
+              Answers: answers,
             });
           }
         });
 
-        if (questionText) {
+        if (quizTitle) {
           data.quizzes.push({
-            question: questionText,
-            points: points,
-            QuizAnswers: answers,
+            title: quizTitle,
+            Questions: quizQuestions,
           });
         }
       });
 
       try {
-        const response = await fetch("/admin/create-quest", {
+        const res = await fetch("/admin/create-quest", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data),
         });
-
-        const result = await response.json();
+        const result = await res.json();
 
         if (result.success) {
-          alert("Успех! Куестът е създаден.");
-          window.location.href = "/";
+          alert("Успех!");
+          window.location.href = "/quests";
         } else {
           alert("Грешка: " + result.message);
         }
-      } catch (err) {
-        console.error(err);
-        alert("Възникна грешка при връзката.");
+      } catch (e) {
+        console.error(e);
+        alert("Сървърна грешка");
       }
     });
 });
