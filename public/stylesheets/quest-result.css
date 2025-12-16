@@ -1,0 +1,50 @@
+.result-card {
+    background: #1a1d21; 
+    border: 1px solid #2d3238;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.result-card:hover {
+    transform: translateY(-5px);
+}
+
+.score-value {
+    font-size: 3rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.text-success-glow {
+    color: #28a745;
+    text-shadow: 0 0 15px rgba(40, 167, 69, 0.6);
+}
+
+.text-danger-glow {
+    color: #dc3545;
+    text-shadow: 0 0 15px rgba(220, 53, 69, 0.6);
+}
+
+.reward-box {
+    background: rgba(40, 167, 69, 0.05);
+    border: 1px solid rgba(40, 167, 69, 0.3);
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    animation: pulseReward 2s infinite;
+}
+
+.reward-box.failed {
+    background: rgba(220, 53, 69, 0.05);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    animation: none;
+}
+
+@keyframes pulseReward {
+    0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+}

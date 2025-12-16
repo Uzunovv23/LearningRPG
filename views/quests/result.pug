@@ -1,0 +1,46 @@
+extends ../layout
+
+block content
+  link(rel='stylesheet', href='/css/quest-result.css')
+
+  .container.mt-5
+    .row.justify-content-center
+      .col-md-8
+        .card.result-card.text-white.mb-5
+          .card-header.text-center.border-secondary
+            h4.mb-0.text-muted Резултат от Мисията
+
+          .card-body.text-center.py-5
+            h1.display-5.text-primary.mb-4 #{questTitle}
+
+            .score-container.mb-4
+              h2.mb-2
+                span.text-muted Точки: 
+                span#scoreDisplay.score-value(
+                  class=points > 0 ? "text-success-glow" : "text-danger-glow",
+                  data-target=points
+                ) 0
+                span.text-muted  / #{maxPoints}
+              
+              p.lead
+                | Верни отговори: 
+                strong #{correctCount}
+
+            hr.border-secondary.my-4
+
+            if xpEarned > 0
+              .reward-box.mb-4
+                h3.text-success.mb-2 
+                  | + 
+                  span#xpDisplay(data-target=xpEarned) 0 
+                  |  XP
+                p.mb-0.text-light Поздравления! Героят ти стана по-силен!
+                 i.fas.fa-level-up-alt.fa-3x.text-success.mt-3
+            else
+              .reward-box.failed.mb-4
+                h3.text-danger.mb-2 0 XP
+                p.mb-0.text-light Не се отказвай! Упражнявай се и опитай пак.
+            
+            a.btn.btn-primary.btn-lg.mt-3(href='/quests') 
+              | Обратно към мисиите
+  script(src='/js/quest-result.js')

@@ -9,4 +9,6 @@ router.use(isLogged);
 router.get("/", questController.index);
 router.get("/:id", questController.show);
 
+router.post("/:id/submit", questController.submit);
+
 module.exports = router;
