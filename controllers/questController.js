@@ -105,19 +105,20 @@ exports.submit = async (req, res) => {
 
     quest.Quizzes.forEach((quiz) => {
       quiz.Questions.forEach((question) => {
-        const qPoints = question.points || 10;
+        const qPoints = Number(question.points) || 10;
         maxPoints += qPoints;
 
-        const submittedAnswerId = userAnswers[`question_${question.id}`];
+        const submittedAnswerId = userAnswers[`answers[${question.id}]`];
 
-        if (submittedAnswerId) {
-          const pickedAnswer = question.Answers.find(
-            (a) => a.id == Number(submittedAnswerId)
-          );
-          if (pickedAnswer && pickedAnswer.isCorrect) {
-            totalPoints += qPoints;
-            correctCount++;
-          }
+        if (!submittedAnswerId) return;
+
+        const pickedAnswer = question.Answers.find(
+          (a) => a.id === Number(submittedAnswerId)
+        );
+
+        if (pickedAnswer?.isCorrect) {
+          totalPoints += qPoints;
+          correctCount++;
         }
       });
     });
