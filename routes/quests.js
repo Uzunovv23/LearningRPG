@@ -1,7 +1,6 @@
 var express = require("express");
 var router = express.Router();
 var questController = require("../controllers/questController");
-
 var isLogged = require("../middleware/isLogged");
 
 router.use(isLogged);
@@ -9,6 +8,8 @@ router.use(isLogged);
 router.get("/", questController.index);
 router.get("/:id", questController.show);
 
-router.post("/:id/submit", questController.submit);
+router.get("/:id/quizzes/:quizId", questController.showQuiz);
+
+router.post("/:id/quizzes/:quizId/submit", questController.submitQuiz);
 
 module.exports = router;

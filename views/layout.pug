@@ -2,21 +2,52 @@ doctype html
 html
   head
     title= title
-
     link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css')
     link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css')
+
   body
     nav.navbar.navbar-expand-lg.navbar-dark.bg-dark.mb-4
       .container
-        a.navbar-brand(href='/') Learning RPG
-        
-        .d-flex
-          if currentUser
-            span.navbar-text.me-3 Здравей, #{currentUser.username}!
-            a.btn.btn-outline-light.btn-sm(href='/logout') Изход
-          else
-            a.btn.btn-outline-primary.me-2(href='/login') Вход
-            a.btn.btn-primary(href='/register') Регистрация
+        a.navbar-brand(href='/') 
+          i.fas.fa-dungeon.me-2
+          | Learning RPG
+
+        button.navbar-toggler(type='button', data-bs-toggle='collapse', data-bs-target='#navbarMain', aria-controls='navbarMain', aria-expanded='false', aria-label='Toggle navigation')
+          span.navbar-toggler-icon
+
+        #navbarMain.collapse.navbar-collapse
+          ul.navbar-nav.me-auto.mb-2.mb-lg-0
+            li.nav-item
+              a.nav-link(href='/') Начало
+            
+            if currentUser
+              li.nav-item
+                a.nav-link(href='/quests') ⚔️ Мисии
+
+              if currentUser.role === 'admin'
+                li.nav-item.dropdown
+                  a.nav-link.dropdown-toggle(href='#', id='adminDropdown', role='button', data-bs-toggle='dropdown', aria-expanded='false')
+                    | 🛡️ Админ
+                  ul.dropdown-menu(aria-labelledby='adminDropdown')
+                    li
+                      a.dropdown-item(href='/admin/create-quest') + Създай Куест
+                    li
+                      hr.dropdown-divider
+                    li
+                      a.dropdown-item.disabled(href='#') Други опции...
+
+          .d-flex.align-items-center
+            if currentUser
+              span.navbar-text.me-3.text-light
+                | Здравей, 
+                strong #{currentUser.username} 
+                if currentUser.role === 'admin'
+                  span.badge.bg-danger.ms-1 Admin
+              a.btn.btn-outline-danger.btn-sm(href='/logout') Изход
+            else
+              a.btn.btn-outline-primary.me-2(href='/login') Вход
+              a.btn.btn-primary(href='/register') Регистрация
 
     block content
 

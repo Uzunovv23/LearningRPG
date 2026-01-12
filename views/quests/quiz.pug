@@ -1,0 +1,45 @@
+extends ../layout
+
+block content
+  .container.mt-5
+    .row.justify-content-center
+      .col-lg-8
+        
+        .mb-4
+          a.btn.btn-outline-secondary(href=`/quests/${questId}`) 
+            i.fas.fa-arrow-left.me-2
+            | Back to Quest Menu
+        
+        .card.mb-4.shadow-sm.border-0
+          .card-header.bg-primary.text-white
+            h2.mb-0= quiz.title
+            
+          .card-body
+            form(action=`/quests/${questId}/quizzes/${quiz.id}/submit` method="POST")
+              
+              if quiz.Questions && quiz.Questions.length > 0
+                each question, qIndex in quiz.Questions
+                  .mb-4.p-3.border.rounded.bg-light
+                    h5.mb-3
+                      span.badge.bg-secondary.me-2 #{question.points} pts
+                      | #{question.text}
+                    
+                    .row
+                      each answer in question.Answers
+                        .col-md-6.mb-2
+                          .form-check.p-3.border.rounded.bg-white
+                            input.form-check-input(
+                              type="radio" 
+                              name=`answers[${question.id}]` 
+                              value=answer.id 
+                              id=`ans_${answer.id}`
+                              required
+                            )
+                            label.form-check-label.w-100(for=`ans_${answer.id}`)
+                              = answer.text
+
+                button.btn.btn-success.btn-lg.w-100.mb-3(type="submit") 
+                  i.fas.fa-check-circle.me-2
+                  | Submit Answers
+              else
+                p.text-center.text-muted No questions in this quiz.

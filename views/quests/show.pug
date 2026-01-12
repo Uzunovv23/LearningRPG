@@ -4,43 +4,30 @@ block content
   .container.mt-5
     .row.justify-content-center
       .col-lg-8
-      
+        
         .text-center.mb-5
           h1.display-4.text-primary= quest.title
           p.lead.text-muted= quest.description
-          span.badge.bg-warning.text-dark XP Награда: #{quest.xpReward}
+          span.badge.bg-warning.text-dark XP Reward: #{quest.xpReward}
 
-        form(action=`/quests/${quest.id}/submit` method="POST")
+        .card.shadow-sm.border-0
+          .card-header.bg-dark.text-white
+            h3.mb-0 Available Quizzes
           
-         
-          each quiz in quest.Quizzes
-            .card.mb-4.shadow-sm.border-0
-              .card-header.bg-secondary.text-white
-                h4.mb-0= quiz.title
-              
-              .card-body
-              
-                each question, qIndex in quiz.Questions
-                  .mb-4.p-3.border.rounded.bg-light
-                    h5.mb-3
-                      span.badge.bg-primary.me-2 #{question.points} т.
-                      | #{question.text}
-                    
-                    
-                    .row
-                      each answer in question.Answers
-                        .col-md-6.mb-2
-                          .form-check.p-3.border.rounded.bg-white
-                            input.form-check-input(
-                              type="radio" 
-                              name=`answers[${question.id}]` 
-                              value=answer.id 
-                              id=`ans_${answer.id}`
-                              required
-                            )
-                            label.form-check-label.w-100(for=`ans_${answer.id}`)
-                              = answer.text
-
-          button.btn.btn-success.btn-lg.w-100.mb-5(type="submit") 
-            i.bi.bi-check-circle-fill 
-            |  Предай Куеста
+          .list-group.list-group-flush
+            if quest.Quizzes && quest.Quizzes.length > 0
+              each quiz in quest.Quizzes
+                a.list-group-item.list-group-item-action.d-flex.justify-content-between.align-items-center.p-4(
+                  href=`/quests/${quest.id}/quizzes/${quiz.id}`
+                )
+                  div
+                    h5.mb-1.text-primary= quiz.title
+                    small.text-muted Click to start this challenge
+                  
+                  i.fas.fa-chevron-right.text-muted
+            else
+              .p-4.text-center.text-muted
+                p No quizzes available yet.
+        
+        .mt-4.text-center
+            a.btn.btn-outline-secondary(href="/quests") Back to All Quests

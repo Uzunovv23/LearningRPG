@@ -16,12 +16,12 @@ exports.index = async (req, res) => {
     });
 
     res.render("quests/index", {
-      title: "Налични Мисии",
+      title: "Available Quests",
       quests: quests,
     });
   } catch (error) {
     console.error("Error in index:", error);
-    res.status(500).send("Грешка при зареждане на куестовете.");
+    res.status(500).send("Error loading quests.");
   }
 };
 
@@ -31,26 +31,13 @@ exports.show = async (req, res) => {
       include: [
         {
           model: Quiz,
-          include: [
-            {
-              model: Question,
-              include: [
-                {
-                  model: Answer,
-
-                  attributes: ["id", "text"],
-                },
-              ],
-            },
-          ],
+          attributes: ['id', 'title'] 
         },
       ],
     });
 
     if (!quest) {
-      return res
-        .status(404)
-        .render("error", { message: "Куестът не е намерен." });
+      return res.status(404).render("error", { message: "Quest not found." });
     }
 
     if (req.session.user) {
@@ -71,47 +58,77 @@ exports.show = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in show:", error);
-    res.status(500).send("Грешка при зареждане на куеста.");
+    res.status(500).send("Error loading quest.");
   }
 };
 
-exports.submit = async (req, res) => {
+exports.showQuiz = async (req, res) => {
   try {
-    const questId = req.params.id;
-    const userId = req.user.id;
-    const userAnswers = req.body;
+    const { id, quizId } = req.params;
 
-    const quest = await Quest.findByPk(questId, {
+    // Find the specific quiz
+    const quiz = await Quiz.findOne({
+      where: { id: quizId, questId: id },
       include: [
         {
-          model: Quiz,
+          model: Question,
           include: [
             {
-              model: Question,
-              include: [Answer],
+              model: Answer,
+              attributes: ["id", "text"], 
             },
           ],
         },
       ],
     });
 
-    if (!quest) {
-      return res.status(404).send("Куестът не е намерен.");
+    if (!quiz) {
+      return res.status(404).send("Quiz not found.");
+    }
+
+    res.render("quests/quiz", {
+      title: quiz.title,
+      questId: id,
+      quiz: quiz,
+    });
+  } catch (error) {
+    console.error("Error in showQuiz:", error);
+    res.status(500).send("Error loading quiz.");
+  }
+};
+
+exports.submitQuiz = async (req, res) => {
+  try {
+    const { id, quizId } = req.params;
+    const userId = req.user.id;
+    const userAnswers = req.body;
+
+    const quiz = await Quiz.findOne({
+      where: { id: quizId, questId: id },
+      include: [
+        {
+          model: Question,
+          include: [Answer],
+        },
+      ],
+    });
+
+    if (!quiz) {
+      return res.status(404).send("Quiz not found.");
     }
 
     let totalPoints = 0;
     let maxPoints = 0;
     let correctCount = 0;
 
-    quest.Quizzes.forEach((quiz) => {
-      quiz.Questions.forEach((question) => {
-        const qPoints = Number(question.points) || 10;
-        maxPoints += qPoints;
 
-        const submittedAnswerId = userAnswers[`answers[${question.id}]`];
+    quiz.Questions.forEach((question) => {
+      const qPoints = Number(question.points) || 10;
+      maxPoints += qPoints;
 
-        if (!submittedAnswerId) return;
+      const submittedAnswerId = userAnswers[`answers[${question.id}]`];
 
+      if (submittedAnswerId) {
         const pickedAnswer = question.Answers.find(
           (a) => a.id === Number(submittedAnswerId)
         );
@@ -120,47 +137,26 @@ exports.submit = async (req, res) => {
           totalPoints += qPoints;
           correctCount++;
         }
-      });
+      }
     });
 
     await Score.create({
       points: totalPoints,
       userId: userId,
-      questId: questId,
+      questId: id,
     });
 
-    let xpAwarded = 0;
-
-    const hero = await Hero.findOne({ where: { userId: userId } });
-
-    if (hero) {
-      if (totalPoints > 0) {
-        hero.xp += quest.xpReward;
-        await hero.save();
-        xpAwarded = quest.xpReward;
-      }
-
-      const [hq, created] = await HeroQuest.findOrCreate({
-        where: { heroId: hero.id, questId: questId },
-        defaults: { status: "completed" },
-      });
-
-      if (!created) {
-        hq.status = "completed";
-        await hq.save();
-      }
-    }
-
     res.render("quests/result", {
-      title: "Резултат от куеста",
-      questTitle: quest.title,
+      title: "Quiz Result",
+      questTitle: quiz.title,
       points: totalPoints,
       maxPoints: maxPoints,
       correctCount: correctCount,
-      xpEarned: xpAwarded,
+      xpEarned: 0, 
     });
+
   } catch (error) {
-    console.error("Error in submit:", error);
-    res.status(500).send("Грешка при обработка на резултатите.");
+    console.error("Error in submitQuiz:", error);
+    res.status(500).send("Error processing results.");
   }
 };
