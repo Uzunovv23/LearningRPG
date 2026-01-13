@@ -13,9 +13,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 <button type="button" class="btn btn-danger btn-sm remove-btn">Изтрий раздел</button>
             </div>
             <div class="card-body bg-light">
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Заглавие на раздела (напр. "Събиране"):</label>
-                    <input type="text" class="form-control quiz-title" placeholder="Име на теста...">
+                
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Заглавие на раздела (напр. "Събиране"):</label>
+                            <input type="text" class="form-control quiz-title" placeholder="Име на теста...">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">XP Награда:</label>
+                            <input type="number" class="form-control quiz-xp" value="50" min="0">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="questions-container ms-3 border-start border-3 border-primary ps-3"></div>
@@ -81,15 +92,17 @@ document.addEventListener("DOMContentLoaded", function () {
       const title = document.getElementById("questTitle").value;
       if (!title) return alert("Моля, въведете заглавие на куеста!");
 
-      const data = {
-        title: title,
-        description: document.getElementById("questDesc").value,
-        xpReward: document.getElementById("questXP").value,
-        quizzes: [],
-      };
+      const quizzesData = [];
+      let calculatedTotalXP = 0;
 
       document.querySelectorAll(".quiz-section").forEach((quizCard) => {
         const quizTitle = quizCard.querySelector(".quiz-title").value;
+        
+        const xpInput = quizCard.querySelector(".quiz-xp");
+        const quizXP = xpInput ? (parseInt(xpInput.value) || 0) : 0;
+        
+        calculatedTotalXP += quizXP;
+
         const quizQuestions = [];
 
         quizCard.querySelectorAll(".question-card").forEach((qCard) => {
@@ -119,12 +132,20 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         if (quizTitle) {
-          data.quizzes.push({
+          quizzesData.push({
             title: quizTitle,
+            xpReward: quizXP,
             Questions: quizQuestions,
           });
         }
       });
+
+      const data = {
+        title: title,
+        description: document.getElementById("questDesc").value,
+        xpReward: calculatedTotalXP, 
+        quizzes: quizzesData,
+      };
 
       try {
         const res = await fetch("/admin/create-quest", {
@@ -135,7 +156,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const result = await res.json();
 
         if (result.success) {
-          alert("Успех!");
+          alert("Успех! Куестът е създаден.");
           window.location.href = "/quests";
         } else {
           alert("Грешка: " + result.message);

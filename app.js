@@ -16,7 +16,7 @@ var app = express();
 
 var db = require('./models');
 
-db.sequelize.sync()
+db.sequelize.sync({ alter: true }) 
   .then(() => {
     console.log('Connection to MySQL has been established successfully.');
   })

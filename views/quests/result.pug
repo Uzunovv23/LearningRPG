@@ -13,6 +13,11 @@ block content
           .card-body.text-center.py-5
             h1.display-5.text-primary.mb-4 #{questTitle}
 
+            if message
+              div(class=`alert mb-4 ${isSuccess ? 'alert-success' : 'alert-warning'}`)
+                i(class=`fas ${isSuccess ? 'fa-check-circle' : 'fa-exclamation-triangle'} me-2`)
+                | #{message}
+
             .score-container.mb-4
               h2.mb-2
                 span.text-muted Точки: 
@@ -35,12 +40,18 @@ block content
                   span#xpDisplay(data-target=xpEarned) 0 
                   |  XP
                 p.mb-0.text-light Поздравления! Героят ти стана по-силен!
-                 i.fas.fa-level-up-alt.fa-3x.text-success.mt-3
+                i.fas.fa-level-up-alt.fa-3x.text-success.mt-3
             else
               .reward-box.failed.mb-4
-                h3.text-danger.mb-2 0 XP
-                p.mb-0.text-light Не се отказвай! Упражнявай се и опитай пак.
+                h3.text-muted.mb-2 0 XP
+                
+                if isSuccess
+                   p.mb-0.text-light Вече си усвоил това знание! (XP се дава еднократно)
+                   i.fas.fa-check-double.fa-3x.text-muted.mt-3
+                else
+                   p.mb-0.text-light Не се отказвай! Упражнявай се и опитай пак.
             
             a.btn.btn-primary.btn-lg.mt-3(href='/quests') 
               | Обратно към мисиите
+
   script(src='/javascripts/quest-result.js')

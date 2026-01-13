@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Quiz.belongsTo(models.Quest, { foreignKey: 'questId', onDelete: 'CASCADE' });
       Quiz.hasMany(models.Question, { foreignKey: 'quizId', onDelete: 'CASCADE' });
+      Quiz.hasMany(models.Score, { foreignKey: 'quizId' });
     }
   }
   
@@ -12,6 +13,11 @@ module.exports = (sequelize, DataTypes) => {
     title: {
       type: DataTypes.STRING,
       allowNull: false 
+    },
+    xpReward: {
+      type: DataTypes.INTEGER,
+      defaultValue: 50, 
+      allowNull: false
     },
     questId: {
       type: DataTypes.INTEGER,

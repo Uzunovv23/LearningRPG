@@ -10,14 +10,12 @@ block content
       .card-header.bg-primary.text-white Основна информация
       .card-body
         .row
-          .col-md-8
+          // Промяна: Вече е col-12 и няма input за общо XP
+          .col-12
             .mb-3
               label.form-label Заглавие на Куеста (напр. "Математика 1. клас")
               input#questTitle.form-control(type="text")
-          .col-md-4
-            .mb-3
-              label.form-label XP Награда
-              input#questXP.form-control(type="number" value="100")
+        
         .mb-3
           label.form-label Описание
           textarea#questDesc.form-control(rows="3")

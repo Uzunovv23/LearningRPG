@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Score.belongsTo(models.User, {foreignKey: "userId",onDelete: "CASCADE",});
       Score.belongsTo(models.Quest, {foreignKey: "questId",onDelete: "CASCADE",});
-      //Score.hasMany(models.HeroQuizTaken, { foreignKey: 'scoreId' });
+      Score.belongsTo(models.Quiz, { foreignKey: 'quizId', onDelete: 'CASCADE' });
     }
   }
 
@@ -25,6 +25,16 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
+      quizId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      isPassed: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false, 
+        allowNull: false
+      }
+      // -----------------
     },
     {
       sequelize,

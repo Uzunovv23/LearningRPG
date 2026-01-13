@@ -105,12 +105,7 @@ exports.submitQuiz = async (req, res) => {
 
     const quiz = await Quiz.findOne({
       where: { id: quizId, questId: id },
-      include: [
-        {
-          model: Question,
-          include: [Answer],
-        },
-      ],
+      include: [{ model: Question, include: [Answer] }],
     });
 
     if (!quiz) {
@@ -121,18 +116,15 @@ exports.submitQuiz = async (req, res) => {
     let maxPoints = 0;
     let correctCount = 0;
 
-
     quiz.Questions.forEach((question) => {
       const qPoints = Number(question.points) || 10;
       maxPoints += qPoints;
 
       const submittedAnswerId = userAnswers[`answers[${question.id}]`];
-
       if (submittedAnswerId) {
         const pickedAnswer = question.Answers.find(
           (a) => a.id === Number(submittedAnswerId)
         );
-
         if (pickedAnswer?.isCorrect) {
           totalPoints += qPoints;
           correctCount++;
@@ -140,10 +132,45 @@ exports.submitQuiz = async (req, res) => {
       }
     });
 
+    const scorePercentage = maxPoints > 0 ? (totalPoints / maxPoints) : 0;
+    const PASS_THRESHOLD = 0.5; // 50%
+    
+    const isCurrentAttemptSuccess = scorePercentage >= PASS_THRESHOLD;
+
+    const alreadyPassed = await Score.findOne({
+      where: { 
+        userId: userId, 
+        quizId: quizId,
+        isPassed: true 
+      }
+    });
+
+    let xpAwarded = 0;
+    let message = "";
+    
+    if (isCurrentAttemptSuccess) {
+        if (!alreadyPassed) {
+            const hero = await Hero.findOne({ where: { userId: userId } });
+            if (hero) {
+                const reward = quiz.xpReward || 50; 
+                hero.xp += reward;
+                await hero.save();
+                xpAwarded = reward;
+                message = `Поздравления! Мисията изпълнена: +${reward} XP!`;
+            }
+        } else {
+            message = "Тестът е преминат успешно! (XP вече е получено при предишен опит)";
+        }
+    } else {
+        message = "Слаб резултат. Трябват ти поне 50% верни отговори. Опитай пак!";
+    }
+
     await Score.create({
       points: totalPoints,
       userId: userId,
       questId: id,
+      quizId: quizId,
+      isPassed: isCurrentAttemptSuccess 
     });
 
     res.render("quests/result", {
@@ -152,7 +179,9 @@ exports.submitQuiz = async (req, res) => {
       points: totalPoints,
       maxPoints: maxPoints,
       correctCount: correctCount,
-      xpEarned: 0, 
+      xpEarned: xpAwarded,
+      message: message,
+      isSuccess: isCurrentAttemptSuccess
     });
 
   } catch (error) {
