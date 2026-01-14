@@ -1,0 +1,100 @@
+extends ../layout
+
+block content
+  link(rel='stylesheet', href='/stylesheets/admin.css')
+
+  .container.mt-5
+    .d-flex.justify-content-between.align-items-center.mb-4
+        h2.text-primary Редактиране на Куест
+        a.btn.btn-outline-secondary(href="/quests") Отказ
+
+    input#questId(type="hidden" value=quest.id)
+
+    .card.mb-4.shadow-sm
+      .card-header.bg-warning.text-dark Основна информация
+      .card-body
+        .row
+          .col-12
+            .mb-3
+              label.form-label Заглавие
+              input#questTitle.form-control(type="text" value=quest.title)
+        
+        .mb-3
+          label.form-label Описание
+          textarea#questDesc.form-control(rows="3")= quest.description
+
+    #quizzesContainer
+        if quest.Quizzes
+            each quiz, index in quest.Quizzes
+                - var isLocked = (quiz.dataValues.attemptCount > 0)
+                .card.mb-5.quiz-section.border-dark.shadow(data-id=quiz.id class=isLocked ? "locked-quiz" : "")
+                    .card-header.bg-secondary.text-white.d-flex.justify-content-between.align-items-center
+                        div
+                            h5.mb-0 Раздел ##{index + 1}
+                            if isLocked
+                                span.badge.bg-warning.text-dark.mt-1
+                                    i.bi.bi-lock-fill 
+                                    |  Решаван от #{quiz.dataValues.attemptCount} потребители (Заключен)
+                            else
+                                span.badge.bg-success.mt-1.text-wrap Свободен за редакция (0 решавания)
+                        
+                        div
+                            span.badge.bg-light.text-dark.me-2 ID: #{quiz.id}
+                            button.btn.btn-danger.btn-sm.delete-existing-quiz-btn(type="button")
+                                i.bi.bi-trash
+                                |  Изтрий
+                    
+                    .card-body.bg-light
+                        .row
+                            .col-md-8
+                                .mb-3
+                                    label.form-label.fw-bold Заглавие на раздела:
+                                    input.form-control.quiz-title(type="text" value=quiz.title disabled=isLocked)
+                            .col-md-4
+                                .mb-3
+                                    label.form-label.fw-bold XP Награда:
+                                    input.form-control.quiz-xp(type="number" value=quiz.xpReward min="0" disabled=isLocked)
+
+                        if isLocked
+                             .alert.alert-warning.small.mb-3
+                                i.bi.bi-exclamation-circle-fill 
+                                |  Този раздел не може да бъде редактиран, защото вече има резултати. Можете само да го изтриете.
+                        else                           
+                             .questions-container.ms-3.border-start.border-3.border-primary.ps-3
+                                if quiz.Questions
+                                    each question in quiz.Questions                                   
+                                        - var qIndex = question.id 
+                                        .card.mb-3.question-card.mt-3
+                                            .card-body
+                                                .d-flex.justify-content-between
+                                                    label.form-label.fw-bold.text-primary Въпрос:
+                                                    button.btn.btn-outline-danger.btn-sm.remove-btn(type="button") X
+                                                
+                                                input.form-control.mb-2.q-text(type="text" value=question.text placeholder="Текст на въпроса...")
+                                                
+                                                .row.g-2
+                                                    .col-md-3
+                                                        input.form-control.q-points(type="number" value=question.points placeholder="Точки")
+                                                
+                                                label.form-label.mt-2.small.text-muted Отговори:
+                                                .answers-box
+                                                    each answer, aIndex in question.Answers
+                                                        
+                                                        .input-group.mb-1
+                                                            .input-group-text
+                                                                
+                                                                input.form-check-input.mt-0.q-correct(type="radio" name=`correct_${qIndex}` checked=answer.isCorrect)
+                                                            input.form-control.q-answer(type="text" value=answer.text)
+                                                            
+                             button.btn.btn-outline-primary.btn-sm.mt-3.add-question-btn(type="button")
+                                | + Добави Въпрос
+
+    .d-flex.justify-content-between.mb-5.pb-5
+      button.btn.btn-outline-dark.btn-lg#addQuizBtn(type="button") 
+        i.bi.bi-folder-plus 
+        |  + Добави НОВ Раздел
+      
+      button.btn.btn-success.btn-lg#saveQuestBtn(type="button") 
+        | ЗАПАЗИ ПРОМЕНИТЕ
+
+  script(src='/javascripts/admin_edit_quest.js')

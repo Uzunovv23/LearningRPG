@@ -15,9 +15,16 @@ block content
             .card-header.bg-dark.text-white.d-flex.justify-content-between
               span= quest.title
               span.badge.bg-warning.text-dark #{quest.xpReward} XP
+            
             .card-body
               p.card-text= quest.description
+            
             .card-footer.bg-white.border-top-0
-              a.btn.btn-primary.w-100(href=`/quests/${quest.id}`) 
+              a.btn.btn-primary.w-100.mb-2(href=`/quests/${quest.id}`) 
                 i.bi.bi-play-circle-fill 
                 |  Започни Мисията
+
+              if currentUser && currentUser.role === 'admin'
+                a.btn.btn-outline-success.w-100(href=`/admin/quests/${quest.id}/edit`)
+                  i.bi.bi-pencil-square 
+                  |  Редактирай / Добави Quiz
