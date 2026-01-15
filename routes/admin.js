@@ -13,4 +13,9 @@ router.post("/quests/:id/edit", adminController.updateQuest);
 
 router.delete("/quizzes/:id", adminController.deleteQuiz);
 
+router.get("/users", adminController.getAllUsers);
+router.patch("/users/:id/role", adminController.toggleUserRole);
+router.post("/users/:id/update", adminController.updateUser);
+router.delete("/users/:id", adminController.deleteUser);
+
 module.exports = router;

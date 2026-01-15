@@ -1,0 +1,72 @@
+extends ../layout
+
+block content
+  .container.mt-5
+    h2.text-primary.mb-4 👥 Потребители
+
+    .card.shadow-sm
+      .card-body
+        .table-responsive
+          table.table.table-hover.align-middle
+            thead.table-light
+              tr
+                th ID
+                th Потребител
+                th Email
+                th Роля
+                th Регистриран на
+                th Действия
+            tbody
+              each user in users
+                tr(id=`user-row-${user.id}`)
+                  td #{user.id}
+                  td.fw-bold #{user.username}
+                  td #{user.email}
+                  td
+                    if user.role === 'admin'
+                      span.badge.bg-danger Админ
+                    else
+                      span.badge.bg-info.text-dark Потребител
+                  td #{new Date(user.createdAt).toLocaleDateString('bg-BG')}
+                  td
+                    button.btn.btn-sm.btn-outline-primary.me-2(
+                        data-bs-toggle="modal" 
+                        data-bs-target="#editUserModal"
+                        data-id=user.id
+                        data-username=user.username
+                        data-email=user.email
+                    ) 
+                      i.bi.bi-pencil
+                      |  Редакция
+
+                    if user.role === 'admin'
+                        button.btn.btn-sm.btn-outline-dark.me-2.role-btn(data-id=user.id data-new-role="user")
+                            i.bi.bi-person
+                            |  Направи User
+                    else
+                        button.btn.btn-sm.btn-outline-warning.me-2.role-btn(data-id=user.id data-new-role="admin")
+                            i.bi.bi-shield-lock
+                            |  Направи Admin
+
+                    button.btn.btn-sm.btn-outline-danger.delete-user-btn(data-id=user.id)
+                      i.bi.bi-trash
+
+    #editUserModal.modal.fade(tabindex="-1" aria-hidden="true")
+      .modal-dialog
+        form#editUserForm(method="POST" action="")
+          .modal-content
+            .modal-header
+              h5.modal-title Редакция на потребител
+              button.btn-close(type="button" data-bs-dismiss="modal" aria-label="Close")
+            .modal-body
+              .mb-3
+                label.form-label Потребителско име
+                input#modalUsername.form-control(type="text" name="username" required)
+              .mb-3
+                label.form-label Email адрес
+                input#modalEmail.form-control(type="email" name="email" required)
+            .modal-footer
+              button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Отказ
+              button.btn.btn-primary(type="submit") Запази промените
+
+  script(src="/javascripts/admin_users.js")

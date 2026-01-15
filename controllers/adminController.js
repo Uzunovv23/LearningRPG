@@ -1,4 +1,4 @@
-const { Quest, Quiz, Question, Answer, Score } = require("../models");
+const { Quest, Quiz, Question, Answer, Score, User } = require("../models");
 
 exports.showCreateQuestForm = (req, res) => {
   res.render("admin/create_quest", { title: "Създаване на Куест" });
@@ -166,5 +166,91 @@ exports.deleteQuiz = async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Сървърна грешка при изтриване." });
+  }
+};
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.findAll({
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.render("admin/users_list", {
+      title: "Управление на потребители",
+      users: users,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Грешка при зареждане на потребителите.");
+  }
+};
+
+exports.toggleUserRole = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { newRole } = req.body;
+
+    const userToUpdate = await User.findByPk(userId);
+
+    if (!userToUpdate) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Потребителят не е намерен." });
+    }
+
+    if (userToUpdate.role === "admin" && newRole === "user") {
+      const adminCount = await User.count({ where: { role: "admin" } });
+
+      if (adminCount <= 1) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Внимание: Не можете да премахнете правата на последния администратор! Системата трябва да има поне един админ.",
+        });
+      }
+    }
+
+    await User.update({ role: newRole }, { where: { id: userId } });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ success: false, message: "Грешка при смяна на роля." });
+  }
+};
+
+exports.updateUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { username, email } = req.body;
+
+    await User.update({ username, email }, { where: { id: userId } });
+
+    res.redirect("/admin/users");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Грешка при обновяване.");
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    if (req.user.id == userId) {
+      return res.status(400).json({
+        success: false,
+        message: "Не можете да изтриете собствения си профил!",
+      });
+    }
+
+    await User.destroy({ where: { id: userId } });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Грешка при изтриване." });
   }
 };
