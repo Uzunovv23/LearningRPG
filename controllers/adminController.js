@@ -246,6 +246,22 @@ exports.deleteUser = async (req, res) => {
       });
     }
 
+    const userToDelete = await User.findByPk(userId);
+
+    if (!userToDelete) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Потребителят не е намерен." });
+    }
+
+    if (userToDelete.role === "admin") {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Не можете да изтриете администратор! Първо променете ролята му на 'Потребител'.",
+      });
+    }
+
     await User.destroy({ where: { id: userId } });
 
     res.json({ success: true });

@@ -48,8 +48,14 @@ block content
                             i.bi.bi-shield-lock
                             |  Направи Admin
 
-                    button.btn.btn-sm.btn-outline-danger.delete-user-btn(data-id=user.id)
-                      i.bi.bi-trash
+                    if user.role !== 'admin'
+                        button.btn.btn-sm.btn-outline-danger.delete-user-btn(data-id=user.id)
+                          i.bi.bi-trash
+                          |  Изтрий
+                    else
+                        span.text-muted.small.ms-2
+                            i.bi.bi-shield-check 
+                            |  Защитен
 
     #editUserModal.modal.fade(tabindex="-1" aria-hidden="true")
       .modal-dialog
