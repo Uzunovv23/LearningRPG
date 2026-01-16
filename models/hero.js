@@ -4,9 +4,12 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Hero extends Model {
     static associate(models) {
-      Hero.belongsTo(models.User, { foreignKey: "userId" }); 
-      Hero.belongsToMany(models.Quest, { through: models.HeroQuest, foreignKey: 'heroId' });
-      Hero.hasMany(models.HeroAnswer, { foreignKey: 'heroId' });
+      Hero.belongsTo(models.User, { foreignKey: "userId" });
+      Hero.belongsToMany(models.Quest, {
+        through: models.HeroQuest,
+        foreignKey: "heroId",
+      });
+      Hero.hasMany(models.HeroAnswer, { foreignKey: "heroId" });
     }
   }
 
@@ -21,6 +24,10 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 1,
       },
       xp: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+      },
+      knowcoins: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
       },

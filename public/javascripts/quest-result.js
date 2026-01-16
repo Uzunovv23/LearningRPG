@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const scoreElement = document.getElementById("scoreDisplay");
   const xpElement = document.getElementById("xpDisplay");
+  const coinsElement = document.getElementById("coinsDisplay");
 
   if (scoreElement) {
     const targetScore = parseInt(scoreElement.getAttribute("data-target"));
@@ -13,10 +14,20 @@ document.addEventListener("DOMContentLoaded", () => {
       animateValue(xpElement, 0, targetXP, 1000);
     }, 1000);
   }
+
+  if (coinsElement) {
+    const targetCoins = parseInt(coinsElement.getAttribute("data-target"));
+    setTimeout(() => {
+      animateValue(coinsElement, 0, targetCoins, 1000);
+    }, 1000);
+  }
 });
 
 function animateValue(obj, start, end, duration) {
-  if (end === 0) return;
+  if (end === 0) {
+    obj.innerHTML = 0;
+    return;
+  }
 
   let startTimestamp = null;
   const step = (timestamp) => {

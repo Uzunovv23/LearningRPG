@@ -31,7 +31,7 @@ exports.show = async (req, res) => {
       include: [
         {
           model: Quiz,
-          attributes: ['id', 'title'] 
+          attributes: ["id", "title"],
         },
       ],
     });
@@ -66,7 +66,6 @@ exports.showQuiz = async (req, res) => {
   try {
     const { id, quizId } = req.params;
 
-    // Find the specific quiz
     const quiz = await Quiz.findOne({
       where: { id: quizId, questId: id },
       include: [
@@ -75,7 +74,7 @@ exports.showQuiz = async (req, res) => {
           include: [
             {
               model: Answer,
-              attributes: ["id", "text"], 
+              attributes: ["id", "text"],
             },
           ],
         },
@@ -132,37 +131,49 @@ exports.submitQuiz = async (req, res) => {
       }
     });
 
-    const scorePercentage = maxPoints > 0 ? (totalPoints / maxPoints) : 0;
-    const PASS_THRESHOLD = 0.5; // 50%
-    
+    const scorePercentage = maxPoints > 0 ? totalPoints / maxPoints : 0;
+    const PASS_THRESHOLD = 0.5;
+
     const isCurrentAttemptSuccess = scorePercentage >= PASS_THRESHOLD;
 
     const alreadyPassed = await Score.findOne({
-      where: { 
-        userId: userId, 
+      where: {
+        userId: userId,
         quizId: quizId,
-        isPassed: true 
-      }
+        isPassed: true,
+      },
     });
 
     let xpAwarded = 0;
+    let coinsAwarded = 0;
     let message = "";
-    
+
     if (isCurrentAttemptSuccess) {
-        if (!alreadyPassed) {
-            const hero = await Hero.findOne({ where: { userId: userId } });
-            if (hero) {
-                const reward = quiz.xpReward || 50; 
-                hero.xp += reward;
-                await hero.save();
-                xpAwarded = reward;
-                message = `Поздравления! Мисията изпълнена: +${reward} XP!`;
-            }
-        } else {
-            message = "Тестът е преминат успешно! (XP вече е получено при предишен опит)";
+      if (!alreadyPassed) {
+        const hero = await Hero.findOne({ where: { userId: userId } });
+
+        if (hero) {
+          const reward = quiz.xpReward || 50;
+
+          hero.xp += reward;
+
+          const coins = Math.floor(reward / 10);
+          hero.knowcoins += coins;
+
+          await hero.save();
+
+          xpAwarded = reward;
+          coinsAwarded = coins;
+
+          message = `Поздравления! Мисията изпълнена: +${reward} XP и +${coins} KC!`;
         }
+      } else {
+        message =
+          "Тестът е преминат успешно! (XP и KC вече са получени при предишен опит)";
+      }
     } else {
-        message = "Слаб резултат. Трябват ти поне 50% верни отговори. Опитай пак!";
+      message =
+        "Слаб резултат. Трябват ти поне 50% верни отговори. Опитай пак!";
     }
 
     await Score.create({
@@ -170,7 +181,7 @@ exports.submitQuiz = async (req, res) => {
       userId: userId,
       questId: id,
       quizId: quizId,
-      isPassed: isCurrentAttemptSuccess 
+      isPassed: isCurrentAttemptSuccess,
     });
 
     res.render("quests/result", {
@@ -180,10 +191,10 @@ exports.submitQuiz = async (req, res) => {
       maxPoints: maxPoints,
       correctCount: correctCount,
       xpEarned: xpAwarded,
+      coinsEarned: coinsAwarded,
       message: message,
-      isSuccess: isCurrentAttemptSuccess
+      isSuccess: isCurrentAttemptSuccess,
     });
-
   } catch (error) {
     console.error("Error in submitQuiz:", error);
     res.status(500).send("Error processing results.");

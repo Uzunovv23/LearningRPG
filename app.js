@@ -16,7 +16,7 @@ var app = express();
 
 var db = require('./models');
 
-db.sequelize.sync({ alter: true }) 
+db.sequelize.sync() 
   .then(() => {
     console.log('Connection to MySQL has been established successfully.');
   })
@@ -47,10 +47,21 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(function(req, res, next) {
+app.use(async function(req, res, next) {
+  
+  if (req.user) {
+    try {
+      const hero = await db.Hero.findOne({ where: { userId: req.user.id } });
+      req.user.Hero = hero; 
+    } catch (err) {
+      console.error("Грешка при зареждане на герой в middleware:", err);
+    }
+  }
+
   res.locals.currentUser = req.user; 
   next();
 });
+// -----------------------
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);

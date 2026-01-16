@@ -33,20 +33,38 @@ block content
 
             hr.border-secondary.my-4
 
-            if xpEarned > 0
+            if xpEarned > 0 || coinsEarned > 0
               .reward-box.mb-4
-                h3.text-success.mb-2 
-                  | + 
-                  span#xpDisplay(data-target=xpEarned) 0 
-                  |  XP
-                p.mb-0.text-light Поздравления! Героят ти стана по-силен!
-                i.fas.fa-level-up-alt.fa-3x.text-success.mt-3
+                h4.text-light.mb-3 Спечелени награди:
+                
+                .d-flex.justify-content-center.align-items-center.gap-5.flex-wrap
+                    
+                    if xpEarned > 0
+                        .reward-item
+                            h3.text-success.mb-0 
+                              | + 
+                              span#xpDisplay(data-target=xpEarned) 0 
+                              |  XP
+                            i.fas.fa-bolt.fa-2x.text-success.mt-2
+
+                    if coinsEarned > 0
+                        .reward-item
+                            h3.text-warning.mb-0 
+                              | + 
+                              span#coinsDisplay(data-target=coinsEarned) 0 
+                              |  KC
+                            i.fas.fa-coins.fa-2x.text-warning.mt-2
+
+                p.mb-0.text-light.mt-4 Поздравления! Героят ти стана по-силен и по-богат!
+            
             else
               .reward-box.failed.mb-4
-                h3.text-muted.mb-2 0 XP
+                .d-flex.justify-content-center.gap-4.mb-2
+                    h3.text-muted 0 XP
+                    h3.text-muted 0 KC
                 
                 if isSuccess
-                   p.mb-0.text-light Вече си усвоил това знание! (XP се дава еднократно)
+                   p.mb-0.text-light Вече си усвоил това знание! (Наградите се дават еднократно)
                    i.fas.fa-check-double.fa-3x.text-muted.mt-3
                 else
                    p.mb-0.text-light Не се отказвай! Упражнявай се и опитай пак.
