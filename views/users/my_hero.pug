@@ -1,0 +1,69 @@
+extends ../layout
+
+block content
+  .container.mt-5
+    .row.justify-content-center
+      .col-md-8
+        .card.shadow-lg.border-0.mb-4
+          .card-body.text-center.p-5
+            .mb-4
+                i.fas.fa-user-ninja.fa-6x.text-primary
+            
+            h1.display-4.fw-bold.mb-0 #{hero.name}
+            p.lead.text-muted Герой Ниво #{hero.level}
+
+            .d-flex.justify-content-center.gap-5.mt-4.mb-4
+                div
+                    i.fas.fa-heart.fa-2x.text-danger.mb-2
+                    h4 #{hero.health} HP
+                div
+                    i.fas.fa-bolt.fa-2x.text-primary.mb-2
+                    h4 #{hero.mana} MP
+
+            hr
+
+            .text-start.mt-4
+                h5.d-flex.justify-content-between
+                    span
+                        i.fas.fa-star.text-warning.me-2
+                        | Опит (XP)
+                    span.text-muted #{hero.xp} / #{xpNeeded}
+                
+                .progress.mb-2(style="height: 30px;")
+                    .progress-bar.bg-success(
+                        role="progressbar" 
+                        style=`width: ${currentLevelProgress}%`
+                        aria-valuenow=currentLevelProgress 
+                        aria-valuemin="0" 
+                        aria-valuemax="100"
+                    ) #{currentLevelProgress}%
+                
+                p.text-muted.small.text-center Още #{xpToNextLevel} XP до Ниво #{hero.level + 1}!
+
+    .row.justify-content-center
+        .col-md-8
+            .card.shadow-sm.mb-5
+                .card-header.bg-white
+                    h5.mb-0 📜 Дневник на приключенията
+                .card-body
+                    if activities.length > 0
+                        ul.list-group.list-group-flush
+                            each activity in activities
+                                li.list-group-item.d-flex.justify-content-between.align-items-center
+                                    div
+                                        if activity.isPassed
+                                            i.fas.fa-check.text-success.me-3
+                                        else
+                                            i.fas.fa-times.text-danger.me-3
+                                        
+                                        span Завършена мисия: 
+                                        strong 
+                                            if activity.Quest
+                                                | #{activity.Quest.title}
+                                            else
+                                                | Неизвестна
+                                    
+                                    span.badge.rounded-pill(class=activity.isPassed ? 'bg-success' : 'bg-secondary')
+                                        | +#{activity.points} т.
+                    else
+                        p.text-center.text-muted.py-3 Все още няма записани подвизи в дневника.

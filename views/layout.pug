@@ -25,6 +25,9 @@ html
               li.nav-item
                 a.nav-link(href='/quests') ⚔️ Мисии
 
+              li.nav-item
+                a.nav-link(href='/users/my-hero') 🧙‍♂️ Моят Герой
+
               if currentUser.role === 'admin'
                 li.nav-item.dropdown
                   a.nav-link.dropdown-toggle(href='#', id='adminDropdown', role='button', data-bs-toggle='dropdown', aria-expanded='false')
