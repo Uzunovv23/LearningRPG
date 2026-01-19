@@ -11,12 +11,13 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var adminRouter = require('./routes/admin');
 var questsRouter = require('./routes/quests');
+var shopRouter = require('./routes/shop');
 
 var app = express();
 
 var db = require('./models');
 
-db.sequelize.sync() 
+db.sequelize.sync()
   .then(() => {
     console.log('Connection to MySQL has been established successfully.');
   })
@@ -61,12 +62,12 @@ app.use(async function(req, res, next) {
   res.locals.currentUser = req.user; 
   next();
 });
-// -----------------------
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/admin', adminRouter);
 app.use('/quests', questsRouter);
+app.use('/shop', shopRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

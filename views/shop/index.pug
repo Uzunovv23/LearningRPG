@@ -1,0 +1,57 @@
+extends ../layout
+
+block content
+  .container.mt-5
+    
+    if alertMessage
+      div(class=`alert alert-${alertType} alert-dismissible fade show` role="alert")
+        if alertType === 'success'
+            i.fas.fa-check-circle.me-2
+        else
+            i.fas.fa-exclamation-circle.me-2
+        
+        strong #{alertMessage}
+        button.btn-close(type="button" data-bs-dismiss="alert" aria-label="Close")
+
+    .text-center.mb-5
+      h1.display-4.text-warning.fw-bold 
+        i.fas.fa-store.me-3
+        | Магазин за Награди
+      p.lead.text-muted Тук можеш да похарчиш спечелените с труд Knowcoins!
+
+      if hero
+        .d-inline-block.bg-dark.text-warning.px-4.py-2.rounded-pill.fs-4.fw-bold.mt-3.shadow
+            i.fas.fa-coins.me-2
+            | Баланс: #{hero.knowcoins} KC
+
+    .row
+      if items.length > 0
+        each item in items
+          .col-md-6.col-lg-3.mb-4
+            .card.h-100.shadow-lg.border-0.shop-card
+              .card-body.text-center.py-4
+                .mb-3
+                    i(class=`fas ${item.icon} fa-4x`)
+                
+                h4.card-title.fw-bold #{item.title}
+                p.card-text.text-muted.small.mb-4 #{item.description}
+                
+                h3.text-warning.fw-bold
+                    | #{item.cost} 
+                    small.fs-6.text-muted KC
+                
+              .card-footer.bg-white.border-0.pb-4.pt-0.text-center
+                if hero.knowcoins >= item.cost
+                    form(action=`/shop/buy/${item.id}` method="POST")
+                        button.btn.btn-primary.btn-lg.w-100.btn-buy(type="submit")
+                            i.fas.fa-shopping-cart.me-2
+                            | Купи
+                else
+                    button.btn.btn-secondary.btn-lg.w-100(disabled title="Нямаш достатъчно KC")
+                        i.fas.fa-lock.me-2
+                        | Недостъпно
+      else
+        .col-12.text-center
+            .alert.alert-info
+                i.fas.fa-info-circle.me-2
+                | В момента магазинът е празен. Очаквайте нови стоки скоро!

@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       User.hasOne(models.Hero, { foreignKey: "userId" });
       User.hasMany(models.Score, { foreignKey: "userId" });
+      User.hasMany(models.Purchase, { foreignKey: "userId" });
     }
   }
 
@@ -36,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "User",
-    }
+    },
   );
   return User;
 };

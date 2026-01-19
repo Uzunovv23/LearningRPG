@@ -12,17 +12,10 @@ exports.getMyHero = async (req, res) => {
 
     const hero = user.Hero;
 
-    // --- НОВА ЛОГИКА ЗА НИВОТО ---
-    // Формула: Ниво = (XP / 100) + 1 (закръглено надолу)
-    // Примери: 50 XP -> Ниво 1; 120 XP -> Ниво 2; 220 XP -> Ниво 3
     const calculatedLevel = Math.floor(hero.xp / 100) + 1;
 
-    // Ако записаното ниво е по-ниско от реалното, го обновяваме в базата
     if (hero.level < calculatedLevel) {
       hero.level = calculatedLevel;
-
-      // Бонус: Може да вдигаме здравето/маната при левел ъп
-      // hero.health += 10;
 
       await hero.save();
       console.log(`User ${user.username} leveled up to ${calculatedLevel}!`);
