@@ -9,7 +9,6 @@ block content
             i.fas.fa-check-circle.me-2
         else
             i.fas.fa-exclamation-circle.me-2
-        
         strong #{alertMessage}
         button.btn-close(type="button" data-bs-dismiss="alert" aria-label="Close")
 
@@ -17,19 +16,62 @@ block content
       h1.display-4.text-warning.fw-bold 
         i.fas.fa-store.me-3
         | Магазин за Награди
-      p.lead.text-muted Тук можеш да похарчиш спечелените с труд Knowcoins!
-
+      
       if hero
         .d-inline-block.bg-dark.text-warning.px-4.py-2.rounded-pill.fs-4.fw-bold.mt-3.shadow
             i.fas.fa-coins.me-2
             | Баланс: #{hero.knowcoins} KC
 
-    .row
-      if items.length > 0
-        each item in items
-          .col-md-6.col-lg-3.mb-4
-            .card.h-100.shadow-lg.border-0.shop-card
-              .card-body.text-center.py-4
+    if quests.length > 0
+        ul.nav.nav-pills.justify-content-center.mb-5#shopTabs(role="tablist")
+            li.nav-item(role="presentation")
+                button.nav-link.active.rounded-pill.px-4.me-2(
+                    id="pills-all-tab" 
+                    data-bs-toggle="pill" 
+                    data-bs-target="#pills-all" 
+                    type="button" 
+                    role="tab"
+                ) Всички
+
+            each quest in quests
+                li.nav-item(role="presentation")
+                    button.nav-link.rounded-pill.px-4.me-2(
+                        id=`pills-quest-${quest.id}-tab`
+                        data-bs-toggle="pill" 
+                        data-bs-target=`#pills-quest-${quest.id}`
+                        type="button" 
+                        role="tab"
+                    ) #{quest.title}
+    
+    .tab-content#shopTabsContent
+        
+        .tab-pane.fade.show.active(id="pills-all" role="tabpanel")
+            .row
+                if items.length > 0
+                    each item in items
+                        +shopItemCard(item, hero)
+                else
+                    .col-12.text-center.text-muted Няма налични стоки.
+
+        each quest in quests
+            .tab-pane.fade(id=`pills-quest-${quest.id}` role="tabpanel")
+                .row
+                    - const questItems = items.filter(i => i.questId === quest.id)
+                    
+                    if questItems.length > 0
+                        each item in questItems
+                            +shopItemCard(item, hero)
+                    else
+                        .col-12.text-center
+                            .alert.alert-secondary За този предмет все още няма добавени оценки в магазина.
+
+mixin shopItemCard(item, hero)
+    .col-md-6.col-lg-3.mb-4
+        .card.h-100.shadow.border-0.shop-card
+            .card-body.text-center.py-4
+                if item.Quest
+                    span.badge.bg-dark.mb-3 #{item.Quest.title}
+                
                 .mb-3
                     i(class=`fas ${item.icon} fa-4x`)
                 
@@ -39,19 +81,14 @@ block content
                 h3.text-warning.fw-bold
                     | #{item.cost} 
                     small.fs-6.text-muted KC
-                
-              .card-footer.bg-white.border-0.pb-4.pt-0.text-center
+            
+            .card-footer.bg-white.border-0.pb-4.pt-0.text-center
                 if hero.knowcoins >= item.cost
                     form(action=`/shop/buy/${item.id}` method="POST")
                         button.btn.btn-primary.btn-lg.w-100.btn-buy(type="submit")
                             i.fas.fa-shopping-cart.me-2
                             | Купи
                 else
-                    button.btn.btn-secondary.btn-lg.w-100(disabled title="Нямаш достатъчно KC")
+                    button.btn.btn-secondary.btn-lg.w-100(disabled)
                         i.fas.fa-lock.me-2
                         | Недостъпно
-      else
-        .col-12.text-center
-            .alert.alert-info
-                i.fas.fa-info-circle.me-2
-                | В момента магазинът е празен. Очаквайте нови стоки скоро!
