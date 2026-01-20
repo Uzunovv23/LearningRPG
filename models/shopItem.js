@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
   class ShopItem extends Model {
     static associate(models) {
       ShopItem.hasMany(models.Purchase, { foreignKey: "shopItemId" });
+      ShopItem.belongsTo(models.Quest, { foreignKey: "questId" });
     }
   }
 
@@ -30,6 +31,10 @@ module.exports = (sequelize, DataTypes) => {
       isActive: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
+      },
+      questId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
       },
     },
     {

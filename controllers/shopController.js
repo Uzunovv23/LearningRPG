@@ -1,18 +1,27 @@
-const { ShopItem, Hero, Purchase } = require("../models");
+const { ShopItem, Hero, Purchase, Quest } = require("../models");
+const { Op } = require("sequelize");
 
 exports.getShop = async (req, res) => {
   try {
-    const items = await ShopItem.findAll({
+    const quests = await Quest.findAll({
       where: { isActive: true },
-      order: [["cost", "ASC"]],
     });
 
-    const { status, item } = req.query;
+    const items = await ShopItem.findAll({
+      where: {
+        isActive: true,
+        questId: { [Op.ne]: null },
+      },
+      include: [Quest],
+      order: [["cost", "DESC"]],
+    });
+
+    const { status } = req.query;
     let message = null;
     let messageType = null;
 
     if (status === "success") {
-      message = `Успешна покупка! Вече притежаваш този предмет.`;
+      message = `Успешна покупка! Учителят ще бъде уведомен и ще нанесе оценката.`;
       messageType = "success";
     } else if (status === "no_funds") {
       message = "Нямаш достатъчно Knowcoins за тази покупка!";
@@ -24,6 +33,7 @@ exports.getShop = async (req, res) => {
 
     res.render("shop/index", {
       title: "Магазин за награди",
+      quests: quests,
       items: items,
       hero: req.user ? req.user.Hero : null,
       alertMessage: message,
@@ -57,6 +67,7 @@ exports.buyItem = async (req, res) => {
       return res.redirect("/shop?status=no_funds");
     }
 
+    // --- ТРАНЗАКЦИЯ ---
     hero.knowcoins -= item.cost;
     await hero.save();
 
@@ -75,40 +86,62 @@ exports.buyItem = async (req, res) => {
 
 exports.seedShop = async (req, res) => {
   try {
-    const items = [
-      {
-        title: "Оценка Отличен (6)",
-        description: "Купи си пълна шестица.",
-        cost: 1000,
-        icon: "fa-certificate text-success",
-      },
-      {
-        title: "Оценка Много Добър (5)",
-        description: "Много добра оценка.",
-        cost: 600,
-        icon: "fa-star text-primary",
-      },
-      {
-        title: "Оценка Добър (4)",
-        description: "Златната среда.",
-        cost: 300,
-        icon: "fa-check-circle text-info",
-      },
-      {
-        title: "Оценка Среден (3)",
-        description: "За да минеш.",
-        cost: 100,
-        icon: "fa-life-ring text-warning",
-      },
-    ];
+    const quests = await Quest.findAll({ where: { isActive: true } });
 
-    for (const item of items) {
-      await ShopItem.findOrCreate({
-        where: { title: item.title },
-        defaults: item,
-      });
+    if (quests.length === 0) {
+      return res.send(
+        "Няма активни куестове! Първо създайте куестове от админ панела, за да заредите магазина.",
+      );
     }
-    res.redirect("/shop");
+
+    let createdCount = 0;
+
+    for (const quest of quests) {
+      const items = [
+        {
+          title: `Оценка Отличен (6)`,
+          description: `Важи за предмета: ${quest.title}`,
+          cost: 1000,
+          icon: "fa-certificate text-success",
+          questId: quest.id,
+        },
+        {
+          title: `Оценка Мн. Добър (5)`,
+          description: `Важи за предмета: ${quest.title}`,
+          cost: 600,
+          icon: "fa-star text-primary",
+          questId: quest.id,
+        },
+        {
+          title: `Оценка Добър (4)`,
+          description: `Важи за предмета: ${quest.title}`,
+          cost: 300,
+          icon: "fa-check-circle text-info",
+          questId: quest.id,
+        },
+        {
+          title: `Оценка Среден (3)`,
+          description: `Важи за предмета: ${quest.title}`,
+          cost: 100,
+          icon: "fa-life-ring text-warning",
+          questId: quest.id,
+        },
+      ];
+
+      for (const item of items) {
+        await ShopItem.findOrCreate({
+          where: { title: item.title, questId: item.questId },
+          defaults: item,
+        });
+        createdCount++;
+      }
+    }
+
+    res.send(`
+        <h1>Магазинът е зареден успешно!</h1>
+        <p>Добавени/Проверени са стоки за ${quests.length} куеста.</p>
+        <a href="/shop">Към магазина</a>
+    `);
   } catch (error) {
     console.error(error);
     res.status(500).send("Seed Error");
