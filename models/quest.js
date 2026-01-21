@@ -33,7 +33,12 @@ module.exports = (sequelize, DataTypes) => {
       isCompleted: {
         type: DataTypes.BOOLEAN,
         defaultValue: false, 
-      }
+      },
+      requiredGradesCount: {
+        type: DataTypes.INTEGER,
+        defaultValue: 3, 
+        allowNull: false
+      },
     },
     {
       sequelize,

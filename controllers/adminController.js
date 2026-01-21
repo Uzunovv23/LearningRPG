@@ -363,60 +363,81 @@ exports.toggleQuestCompletion = async (req, res) => {
       return res.status(404).send("Куестът не е намерен.");
     }
 
-    const newStatus = !quest.isCompleted;
-    quest.isCompleted = newStatus;
+    if (quest.isCompleted) {
+      await t.rollback();
+      return res.redirect("/quests");
+    }
+
+    quest.isCompleted = true;
     await quest.save({ transaction: t });
 
-    if (newStatus === true) {
-      const itemsTemplate = [
-        {
-          title: `Оценка Отличен (6)`,
-          cost: 1000,
-          icon: "fa-certificate text-success",
-        },
-        {
-          title: `Оценка Мн. Добър (5)`,
-          cost: 600,
-          icon: "fa-star text-primary",
-        },
-        {
-          title: `Оценка Добър (4)`,
-          cost: 300,
-          icon: "fa-check-circle text-info",
-        },
-        {
-          title: `Оценка Среден (3)`,
-          cost: 100,
-          icon: "fa-life-ring text-warning",
-        },
-      ];
+    const quizzes = await Quiz.findAll({
+      where: { questId: quest.id },
+      include: [{ model: Question, attributes: ["points"] }],
+      transaction: t,
+    });
 
-      for (const tpl of itemsTemplate) {
-        await ShopItem.findOrCreate({
-          where: { title: tpl.title, questId: quest.id },
-          defaults: {
-            ...tpl,
-            description: `Важи за предмета: ${quest.title}`,
-            questId: quest.id,
-            isActive: true,
-          },
-          transaction: t,
+    let totalMaxPoints = 0;
+    quizzes.forEach((quiz) => {
+      if (quiz.Questions) {
+        quiz.Questions.forEach((q) => {
+          totalMaxPoints += q.points;
         });
       }
-      console.log(`Quest ${quest.title} completed. Shop items created.`);
-    } else {
-      await ShopItem.destroy({
-        where: { questId: quest.id },
+    });
+    if (totalMaxPoints === 0) totalMaxPoints = 100;
+
+    const gradesCount = quest.requiredGradesCount || 3;
+
+    const price6 = Math.ceil((totalMaxPoints * 0.85) / gradesCount);
+    const price5 = Math.ceil((totalMaxPoints * 0.7) / gradesCount);
+    const price4 = Math.ceil((totalMaxPoints * 0.5) / gradesCount);
+    const price3 = Math.ceil((totalMaxPoints * 0.3) / gradesCount);
+
+    const itemsTemplate = [
+      {
+        title: `Оценка Отличен (6)`,
+        cost: price6,
+        description: `Цена за 1 бр. Изисква ~85% от общия брой точки.`,
+        icon: "fa-certificate text-success",
+      },
+      {
+        title: `Оценка Мн. Добър (5)`,
+        cost: price5,
+        description: `Цена за 1 бр. Изисква ~70% от общия брой точки.`,
+        icon: "fa-star text-primary",
+      },
+      {
+        title: `Оценка Добър (4)`,
+        cost: price4,
+        description: `Цена за 1 бр. Изисква ~50% от общия брой точки.`,
+        icon: "fa-check-circle text-info",
+      },
+      {
+        title: `Оценка Среден (3)`,
+        cost: price3,
+        description: `Цена за 1 бр. Изисква ~30% от общия брой точки.`,
+        icon: "fa-life-ring text-warning",
+      },
+    ];
+
+    for (const tpl of itemsTemplate) {
+      await ShopItem.findOrCreate({
+        where: { title: tpl.title, questId: quest.id },
+        defaults: { ...tpl, questId: quest.id, isActive: true },
         transaction: t,
       });
-      console.log(`Quest ${quest.title} reopened. Shop items removed.`);
     }
+
+    console.log(
+      `Quest '${quest.title}' LOCKED permanently. Shop items created.`,
+    );
 
     await t.commit();
     res.redirect("/quests");
   } catch (error) {
     await t.rollback();
-    console.error("Toggle Completion Error:", error);
-    res.status(500).send("Грешка при промяна на статуса.");
+    console.error("Lock Quest Error:", error);
+    res.status(500).send("Грешка при завършване на предмета.");
   }
 };

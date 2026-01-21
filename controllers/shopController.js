@@ -15,9 +15,10 @@ exports.getShop = async (req, res) => {
 
     const quests = await Quest.findAll({
       where: { isActive: true },
-      attributes: ["id", "title"],
+      attributes: ["id", "title", "requiredGradesCount"],
     });
 
+    // 2. Взимаме стоките
     const items = await ShopItem.findAll({
       where: {
         isActive: true,
@@ -27,6 +28,7 @@ exports.getShop = async (req, res) => {
       order: [["cost", "DESC"]],
     });
 
+    // 3. Обработка на балансите
     let balances = {};
 
     if (hero) {
@@ -39,6 +41,7 @@ exports.getShop = async (req, res) => {
       });
     }
 
+    // 4. Обработка на съобщения
     const { status, questId } = req.query;
 
     let message = null;
@@ -147,69 +150,5 @@ exports.buyItem = async (req, res) => {
     await t.rollback();
     console.error("Transaction Error (buyItem):", error);
     res.redirect("/shop?status=error");
-  }
-};
-
-exports.seedShop = async (req, res) => {
-  try {
-    if (!req.user || req.user.role !== "admin") {
-      return res.status(403).send("Access Denied");
-    }
-
-    const quests = await Quest.findAll({ where: { isActive: true } });
-
-    if (quests.length === 0) {
-      return res.send("Няма активни куестове! Създайте куестове първо.");
-    }
-
-    let createdCount = 0;
-
-    for (const quest of quests) {
-      const itemsTemplate = [
-        {
-          title: `Оценка Отличен (6)`,
-          cost: 1000,
-          icon: "fa-certificate text-success",
-        },
-        {
-          title: `Оценка Мн. Добър (5)`,
-          cost: 600,
-          icon: "fa-star text-primary",
-        },
-        {
-          title: `Оценка Добър (4)`,
-          cost: 300,
-          icon: "fa-check-circle text-info",
-        },
-        {
-          title: `Оценка Среден (3)`,
-          cost: 100,
-          icon: "fa-life-ring text-warning",
-        },
-      ];
-
-      for (const tpl of itemsTemplate) {
-        await ShopItem.findOrCreate({
-          where: { title: tpl.title, questId: quest.id },
-          defaults: {
-            ...tpl,
-            description: `Важи за предмета: ${quest.title}`,
-            questId: quest.id,
-          },
-        });
-        createdCount++;
-      }
-    }
-
-    res.send(`
-        <div style="font-family: sans-serif; text-align: center; margin-top: 50px;">
-            <h1 style="color: green;">✔ Магазинът е зареден успешно!</h1>
-            <p>Обработени са <strong>${quests.length}</strong> куеста.</p>
-            <a href="/shop" style="font-size: 20px;">🛒 Към магазина</a>
-        </div>
-    `);
-  } catch (error) {
-    console.error("Seed Error:", error);
-    res.status(500).send("Възникна грешка при зареждането на стоките.");
   }
 };
