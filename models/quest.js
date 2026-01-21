@@ -30,6 +30,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
       },
+      isCompleted: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false, 
+      }
     },
     {
       sequelize,

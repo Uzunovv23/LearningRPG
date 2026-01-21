@@ -6,6 +6,9 @@ const {
   Score,
   User,
   ShopItem,
+  Purchase,
+  HeroBalance,
+  sequelize,
 } = require("../models");
 
 exports.showCreateQuestForm = (req, res) => {
@@ -280,24 +283,140 @@ exports.deleteUser = async (req, res) => {
 };
 
 exports.deleteQuest = async (req, res) => {
+  const t = await sequelize.transaction();
+
   try {
     const questId = req.params.id;
-
-    const quest = await Quest.findByPk(questId);
+    const quest = await Quest.findByPk(questId, { transaction: t });
 
     if (!quest) {
+      await t.rollback();
       return res.status(404).send("Куестът не е намерен.");
     }
 
-    await ShopItem.destroy({ where: { questId: quest.id } });
+    const shopItems = await ShopItem.findAll({
+      where: { questId: quest.id },
+      attributes: ["id"],
+      transaction: t,
+    });
 
-    await Quiz.destroy({ where: { questId: quest.id } });
+    const shopItemIds = shopItems.map((item) => item.id);
 
-    await quest.destroy();
+    if (shopItemIds.length > 0) {
+      await Purchase.destroy({
+        where: { shopItemId: shopItemIds },
+        transaction: t,
+      });
 
+      await ShopItem.destroy({
+        where: { id: shopItemIds },
+        transaction: t,
+      });
+    }
+
+    const quizzes = await Quiz.findAll({
+      where: { questId: quest.id },
+      attributes: ["id"],
+      transaction: t,
+    });
+
+    const quizIds = quizzes.map((q) => q.id);
+
+    if (quizIds.length > 0) {
+      await Question.destroy({
+        where: { quizId: quizIds },
+        transaction: t,
+      });
+
+      await Quiz.destroy({
+        where: { id: quizIds },
+        transaction: t,
+      });
+    }
+
+    await HeroBalance.destroy({
+      where: { questId: quest.id },
+      transaction: t,
+    });
+
+    await quest.destroy({ transaction: t });
+
+    await t.commit();
+    console.log(`Quest ${questId} and ALL related data deleted.`);
     res.redirect("/quests");
   } catch (error) {
-    console.error("Delete Quest Error:", error);
-    res.status(500).send("Грешка при изтриване на куеста.");
+    await t.rollback();
+    console.error("Delete Quest Error (Deep Clean):", error);
+    res.status(500).send("Грешка при изтриване: " + error.message);
+  }
+};
+
+exports.toggleQuestCompletion = async (req, res) => {
+  const t = await sequelize.transaction();
+
+  try {
+    const questId = req.params.id;
+    const quest = await Quest.findByPk(questId, { transaction: t });
+
+    if (!quest) {
+      await t.rollback();
+      return res.status(404).send("Куестът не е намерен.");
+    }
+
+    const newStatus = !quest.isCompleted;
+    quest.isCompleted = newStatus;
+    await quest.save({ transaction: t });
+
+    if (newStatus === true) {
+      const itemsTemplate = [
+        {
+          title: `Оценка Отличен (6)`,
+          cost: 1000,
+          icon: "fa-certificate text-success",
+        },
+        {
+          title: `Оценка Мн. Добър (5)`,
+          cost: 600,
+          icon: "fa-star text-primary",
+        },
+        {
+          title: `Оценка Добър (4)`,
+          cost: 300,
+          icon: "fa-check-circle text-info",
+        },
+        {
+          title: `Оценка Среден (3)`,
+          cost: 100,
+          icon: "fa-life-ring text-warning",
+        },
+      ];
+
+      for (const tpl of itemsTemplate) {
+        await ShopItem.findOrCreate({
+          where: { title: tpl.title, questId: quest.id },
+          defaults: {
+            ...tpl,
+            description: `Важи за предмета: ${quest.title}`,
+            questId: quest.id,
+            isActive: true,
+          },
+          transaction: t,
+        });
+      }
+      console.log(`Quest ${quest.title} completed. Shop items created.`);
+    } else {
+      await ShopItem.destroy({
+        where: { questId: quest.id },
+        transaction: t,
+      });
+      console.log(`Quest ${quest.title} reopened. Shop items removed.`);
+    }
+
+    await t.commit();
+    res.redirect("/quests");
+  } catch (error) {
+    await t.rollback();
+    console.error("Toggle Completion Error:", error);
+    res.status(500).send("Грешка при промяна на статуса.");
   }
 };
