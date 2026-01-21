@@ -45,11 +45,6 @@ html
 
           .d-flex.align-items-center
             if currentUser
-              if currentUser.Hero
-                span.navbar-text.me-3.text-warning.fw-bold(title="10 XP = 1 Knowcoin")
-                  i.fas.fa-coins.me-1
-                  | #{currentUser.Hero.knowcoins} KC
-
               span.navbar-text.me-3.text-light
                 | Здравей, 
                 strong #{currentUser.username} 

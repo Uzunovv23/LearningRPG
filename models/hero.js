@@ -5,11 +5,9 @@ module.exports = (sequelize, DataTypes) => {
   class Hero extends Model {
     static associate(models) {
       Hero.belongsTo(models.User, { foreignKey: "userId" });
-      Hero.belongsToMany(models.Quest, {
-        through: models.HeroQuest,
-        foreignKey: "heroId",
-      });
+      Hero.belongsToMany(models.Quest, {through: models.HeroQuest, foreignKey: "heroId"});
       Hero.hasMany(models.HeroAnswer, { foreignKey: "heroId" });
+      Hero.hasMany(models.HeroBalance, { foreignKey: "heroId" });
     }
   }
 

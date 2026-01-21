@@ -16,26 +16,24 @@ block content
       h1.display-4.text-warning.fw-bold 
         i.fas.fa-store.me-3
         | Магазин за Награди
-      
-      if hero
-        .d-inline-block.bg-dark.text-warning.px-4.py-2.rounded-pill.fs-4.fw-bold.mt-3.shadow
-            i.fas.fa-coins.me-2
-            | Баланс: #{hero.knowcoins} KC
+      p.lead.text-muted Избери предмет, за да видиш наличните награди и своя баланс.
 
     if quests.length > 0
         ul.nav.nav-pills.justify-content-center.mb-5#shopTabs(role="tablist")
             li.nav-item(role="presentation")
-                button.nav-link.active.rounded-pill.px-4.me-2(
-                    id="pills-all-tab" 
+                button.nav-link.rounded-pill.px-4.me-2(
+                    class=(!activeQuestId ? 'active' : '')
+                    id="pills-intro-tab" 
                     data-bs-toggle="pill" 
-                    data-bs-target="#pills-all" 
+                    data-bs-target="#pills-intro" 
                     type="button" 
                     role="tab"
-                ) Всички
+                ) ℹ️ Инфо
 
             each quest in quests
                 li.nav-item(role="presentation")
                     button.nav-link.rounded-pill.px-4.me-2(
+                        class=(activeQuestId === quest.id ? 'active' : '')
                         id=`pills-quest-${quest.id}-tab`
                         data-bs-toggle="pill" 
                         data-bs-target=`#pills-quest-${quest.id}`
@@ -45,27 +43,41 @@ block content
     
     .tab-content#shopTabsContent
         
-        .tab-pane.fade.show.active(id="pills-all" role="tabpanel")
-            .row
-                if items.length > 0
-                    each item in items
-                        +shopItemCard(item, hero)
-                else
-                    .col-12.text-center.text-muted Няма налични стоки.
+        .tab-pane.fade(
+            class=(!activeQuestId ? 'show active' : '')
+            id="pills-intro" 
+            role="tabpanel"
+        )
+            .text-center.py-5
+                i.fas.fa-hand-pointer.fa-4x.text-secondary.mb-3
+                h3.text-muted Моля, изберете предмет от менюто горе.
+                p Тук ще можете да обмените точките, спечелени по съответния предмет, за оценки и бонуси.
 
         each quest in quests
-            .tab-pane.fade(id=`pills-quest-${quest.id}` role="tabpanel")
+            - const currentBalance = balances && balances[quest.id] ? balances[quest.id] : 0
+
+            .tab-pane.fade(
+                class=(activeQuestId === quest.id ? 'show active' : '')
+                id=`pills-quest-${quest.id}` 
+                role="tabpanel"
+            )
+                
+                .text-center.mb-4
+                    .d-inline-block.bg-dark.text-warning.px-4.py-2.rounded-pill.fs-4.fw-bold.shadow
+                        i.fas.fa-coins.me-2
+                        | Баланс по #{quest.title}: #{currentBalance} KC
+                
                 .row
                     - const questItems = items.filter(i => i.questId === quest.id)
                     
                     if questItems.length > 0
                         each item in questItems
-                            +shopItemCard(item, hero)
+                            +shopItemCard(item, currentBalance)
                     else
                         .col-12.text-center
                             .alert.alert-secondary За този предмет все още няма добавени оценки в магазина.
 
-mixin shopItemCard(item, hero)
+mixin shopItemCard(item, balance)
     .col-md-6.col-lg-3.mb-4
         .card.h-100.shadow.border-0.shop-card
             .card-body.text-center.py-4
@@ -83,7 +95,7 @@ mixin shopItemCard(item, hero)
                     small.fs-6.text-muted KC
             
             .card-footer.bg-white.border-0.pb-4.pt-0.text-center
-                if hero.knowcoins >= item.cost
+                if balance >= item.cost
                     form(action=`/shop/buy/${item.id}` method="POST")
                         button.btn.btn-primary.btn-lg.w-100.btn-buy(type="submit")
                             i.fas.fa-shopping-cart.me-2
