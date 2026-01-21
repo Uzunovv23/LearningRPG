@@ -12,8 +12,8 @@ block content
       each quest in quests
         .col-md-4.mb-4
           .card.h-100.shadow-sm.quest-card
-            .card-header.bg-dark.text-white.d-flex.justify-content-between
-              span= quest.title
+            .card-header.bg-dark.text-white.d-flex.justify-content-between.align-items-center
+              span.fw-bold= quest.title
               span.badge.bg-warning.text-dark #{quest.xpReward} XP
             
             .card-body
@@ -21,10 +21,18 @@ block content
             
             .card-footer.bg-white.border-top-0
               a.btn.btn-primary.w-100.mb-2(href=`/quests/${quest.id}`) 
-                i.bi.bi-play-circle-fill 
-                |  Започни Мисията
+                i.fas.fa-play-circle.me-2
+                | Започни Мисията
 
               if currentUser && currentUser.role === 'admin'
-                a.btn.btn-outline-success.w-100(href=`/admin/quests/${quest.id}/edit`)
-                  i.bi.bi-pencil-square 
-                  |  Редактирай / Добави Quiz
+                hr.my-3
+                
+                .d-grid.gap-2
+                    a.btn.btn-outline-success(href=`/admin/quests/${quest.id}/edit`)
+                      i.fas.fa-pencil-alt.me-2
+                      | Редактирай / Quiz
+
+                    form(action=`/admin/delete-quest/${quest.id}` method="POST" onsubmit="return confirm('ВНИМАНИЕ: Сигурни ли сте? Това ще изтрие предмета, всички тестове към него и оценките в магазина!');")
+                      button.btn.btn-danger.w-100(type="submit")
+                        i.fas.fa-trash-alt.me-2
+                        | Изтрий Куеста

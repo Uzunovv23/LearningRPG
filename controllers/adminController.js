@@ -1,4 +1,12 @@
-const { Quest, Quiz, Question, Answer, Score, User } = require("../models");
+const {
+  Quest,
+  Quiz,
+  Question,
+  Answer,
+  Score,
+  User,
+  ShopItem,
+} = require("../models");
 
 exports.showCreateQuestForm = (req, res) => {
   res.render("admin/create_quest", { title: "Създаване на Куест" });
@@ -28,7 +36,7 @@ exports.createQuest = async (req, res) => {
             ],
           },
         ],
-      }
+      },
     );
 
     res.json({ success: true });
@@ -71,7 +79,7 @@ exports.editQuestForm = async (req, res) => {
             where: { quizId: quiz.id },
           });
           quiz.dataValues.attemptCount = count;
-        })
+        }),
       );
     }
 
@@ -92,7 +100,7 @@ exports.updateQuest = async (req, res) => {
 
     await Quest.update(
       { title, description, xpReward },
-      { where: { id: questId } }
+      { where: { id: questId } },
     );
 
     if (quizzes && quizzes.length > 0) {
@@ -100,7 +108,7 @@ exports.updateQuest = async (req, res) => {
         if (quizData.id) {
           await Quiz.update(
             { title: quizData.title, xpReward: quizData.xpReward },
-            { where: { id: quizData.id } }
+            { where: { id: quizData.id } },
           );
 
           if (quizData.Questions && quizData.Questions.length > 0) {
@@ -114,7 +122,7 @@ exports.updateQuest = async (req, res) => {
                   quizId: quizData.id,
                   Answers: q.Answers,
                 },
-                { include: [Answer] }
+                { include: [Answer] },
               );
             }
           }
@@ -133,7 +141,7 @@ exports.updateQuest = async (req, res) => {
                   include: [Answer],
                 },
               ],
-            }
+            },
           );
         }
       }
@@ -268,5 +276,28 @@ exports.deleteUser = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Грешка при изтриване." });
+  }
+};
+
+exports.deleteQuest = async (req, res) => {
+  try {
+    const questId = req.params.id;
+
+    const quest = await Quest.findByPk(questId);
+
+    if (!quest) {
+      return res.status(404).send("Куестът не е намерен.");
+    }
+
+    await ShopItem.destroy({ where: { questId: quest.id } });
+
+    await Quiz.destroy({ where: { questId: quest.id } });
+
+    await quest.destroy();
+
+    res.redirect("/quests");
+  } catch (error) {
+    console.error("Delete Quest Error:", error);
+    res.status(500).send("Грешка при изтриване на куеста.");
   }
 };

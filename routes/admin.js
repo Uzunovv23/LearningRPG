@@ -11,6 +11,8 @@ router.post("/create-quest", adminController.createQuest);
 router.get("/quests/:id/edit", adminController.editQuestForm);
 router.post("/quests/:id/edit", adminController.updateQuest);
 
+router.post('/delete-quest/:id', isAdmin, adminController.deleteQuest);
+
 router.delete("/quizzes/:id", adminController.deleteQuiz);
 
 router.get("/users", adminController.getAllUsers);
