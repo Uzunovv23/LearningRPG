@@ -11,7 +11,9 @@ router.post("/create-quest", adminController.createQuest);
 router.get("/quests/:id/edit", adminController.editQuestForm);
 router.post("/quests/:id/edit", adminController.updateQuest);
 
-router.post('/delete-quest/:id', isAdmin, adminController.deleteQuest);
+router.post("/toggle-quest-completion/:id", isAdmin, adminController.toggleQuestCompletion);
+
+router.post("/delete-quest/:id", isAdmin, adminController.deleteQuest);
 
 router.delete("/quizzes/:id", adminController.deleteQuiz);
 
@@ -19,5 +21,4 @@ router.get("/users", adminController.getAllUsers);
 router.patch("/users/:id/role", adminController.toggleUserRole);
 router.post("/users/:id/update", adminController.updateUser);
 router.delete("/users/:id", adminController.deleteUser);
-
 module.exports = router;

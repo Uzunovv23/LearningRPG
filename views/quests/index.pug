@@ -11,28 +11,56 @@ block content
     .row
       each quest in quests
         .col-md-4.mb-4
-          .card.h-100.shadow-sm.quest-card
-            .card-header.bg-dark.text-white.d-flex.justify-content-between.align-items-center
-              span.fw-bold= quest.title
+          div(class=`card h-100 shadow-sm quest-card ${quest.isCompleted ? 'border-success' : ''}`)
+            
+            div(class=`card-header text-white d-flex justify-content-between align-items-center ${quest.isCompleted ? 'bg-success' : 'bg-dark'}`)
+              span.fw-bold 
+                if quest.isCompleted
+                    i.fas.fa-lock.me-2
+                else
+                    i.fas.fa-book-open.me-2
+                | #{quest.title}
               span.badge.bg-warning.text-dark #{quest.xpReward} XP
             
             .card-body
               p.card-text= quest.description
+              if quest.isCompleted
+                .alert.alert-success.py-2.small.text-center.mb-0
+                    i.fas.fa-check-circle.me-1
+                    | Предметът е завършен! Оценките са налични в магазина.
             
             .card-footer.bg-white.border-top-0
+              
               a.btn.btn-primary.w-100.mb-2(href=`/quests/${quest.id}`) 
                 i.fas.fa-play-circle.me-2
-                | Започни Мисията
+                | Влез в предмета
 
               if currentUser && currentUser.role === 'admin'
                 hr.my-3
                 
-                .d-grid.gap-2
-                    a.btn.btn-outline-success(href=`/admin/quests/${quest.id}/edit`)
-                      i.fas.fa-pencil-alt.me-2
-                      | Редактирай / Quiz
+                if !quest.isCompleted
+                    .d-grid.gap-2
+                        a.btn.btn-outline-primary(href=`/admin/quests/${quest.id}/edit`)
+                            i.fas.fa-plus-circle.me-2
+                            | Добави Раздел (Quiz)
 
-                    form(action=`/admin/delete-quest/${quest.id}` method="POST" onsubmit="return confirm('ВНИМАНИЕ: Сигурни ли сте? Това ще изтрие предмета, всички тестове към него и оценките в магазина!');")
-                      button.btn.btn-danger.w-100(type="submit")
-                        i.fas.fa-trash-alt.me-2
+                        form(action=`/admin/toggle-quest-completion/${quest.id}` method="POST" onsubmit="return confirm('Приключвате ли този предмет? Това ще добави оценките в магазина и ще забрани нови тестове.');")
+                            button.btn.btn-success.w-100(type="submit")
+                                i.fas.fa-flag-checkered.me-2
+                                | Приключи предмета
+
+                else
+                    .d-grid.gap-2
+                        button.btn.btn-secondary.disabled(title="Предметът е приключен")
+                            i.fas.fa-lock.me-2
+                            | Добавянето спряно
+
+                        form(action=`/admin/toggle-quest-completion/${quest.id}` method="POST" onsubmit="return confirm('Искате ли да отворите предмета отново? ВНИМАНИЕ: Това ще премахне оценките от магазина!');")
+                            button.btn.btn-outline-warning.w-100(type="submit")
+                                i.fas.fa-lock-open.me-2
+                                | Отключи предмета
+
+                form.mt-2(action=`/admin/delete-quest/${quest.id}` method="POST" onsubmit="return confirm('ВНИМАНИЕ: Изтриване на целия предмет?');")
+                      button.btn.btn-danger.btn-sm.w-100(type="submit")
+                        i.fas.fa-trash.me-2
                         | Изтрий Куеста
