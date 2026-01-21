@@ -44,23 +44,21 @@ block content
                             i.fas.fa-plus-circle.me-2
                             | Добави Раздел (Quiz)
 
-                        form(action=`/admin/toggle-quest-completion/${quest.id}` method="POST" onsubmit="return confirm('Приключвате ли този предмет? Това ще добави оценките в магазина и ще забрани нови тестове.');")
+                        form(action=`/admin/toggle-quest-completion/${quest.id}` method="POST" onsubmit="return confirm('СИГУРНИ ЛИ СТЕ? След приключване, предметът НЕ МОЖЕ да се отключва повече и оценките влизат в магазина!');")
                             button.btn.btn-success.w-100(type="submit")
                                 i.fas.fa-flag-checkered.me-2
-                                | Приключи предмета
+                                | Приключи Срока (Финално)
 
                 else
                     .d-grid.gap-2
-                        button.btn.btn-secondary.disabled(title="Предметът е приключен")
+                        button.btn.btn-dark.disabled.w-100(title="Предметът е приключен окончателно")
                             i.fas.fa-lock.me-2
-                            | Добавянето спряно
+                            | Предметът е финализиран
+                        
+                        .text-center.text-muted.small
+                            | Оценките са в магазина. Редакцията е забранена.
 
-                        form(action=`/admin/toggle-quest-completion/${quest.id}` method="POST" onsubmit="return confirm('Искате ли да отворите предмета отново? ВНИМАНИЕ: Това ще премахне оценките от магазина!');")
-                            button.btn.btn-outline-warning.w-100(type="submit")
-                                i.fas.fa-lock-open.me-2
-                                | Отключи предмета
-
-                form.mt-2(action=`/admin/delete-quest/${quest.id}` method="POST" onsubmit="return confirm('ВНИМАНИЕ: Изтриване на целия предмет?');")
+                form.mt-2(action=`/admin/delete-quest/${quest.id}` method="POST" onsubmit="return confirm('ВНИМАНИЕ: Изтриване на целия предмет и всички данни?');")
                       button.btn.btn-danger.btn-sm.w-100(type="submit")
                         i.fas.fa-trash.me-2
                         | Изтрий Куеста

@@ -62,10 +62,14 @@ block content
                 role="tabpanel"
             )
                 
-                .text-center.mb-4
-                    .d-inline-block.bg-dark.text-warning.px-4.py-2.rounded-pill.fs-4.fw-bold.shadow
-                        i.fas.fa-coins.me-2
-                        | Баланс по #{quest.title}: #{currentBalance} KC
+                .text-center.mb-5
+                    .d-inline-block.bg-dark.text-warning.px-5.py-3.rounded-pill.shadow.position-relative
+                        .fs-4.fw-bold
+                            i.fas.fa-coins.me-2
+                            | Баланс: #{currentBalance} KC
+                        
+                        .mt-2.badge.bg-secondary.text-white.fw-normal
+                            | Минимален брой оценки за оформяне: #{quest.requiredGradesCount || 3}
                 
                 .row
                     - const questItems = items.filter(i => i.questId === quest.id)

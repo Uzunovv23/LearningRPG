@@ -6,6 +6,7 @@ const {
   Hero,
   HeroQuest,
   Score,
+  HeroBalance,
 } = require("../models");
 
 exports.index = async (req, res) => {
@@ -40,9 +41,11 @@ exports.show = async (req, res) => {
       return res.status(404).render("error", { message: "Quest not found." });
     }
 
-    if (req.session.user) {
+    const currentUser = req.user || req.session.user;
+
+    if (currentUser) {
       const hero = await Hero.findOne({
-        where: { userId: req.session.user.id },
+        where: { userId: currentUser.id },
       });
       if (hero) {
         await HeroQuest.findOrCreate({
@@ -99,7 +102,7 @@ exports.showQuiz = async (req, res) => {
 exports.submitQuiz = async (req, res) => {
   try {
     const { id, quizId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user ? req.user.id : req.session.user.id;
     const userAnswers = req.body;
 
     const quiz = await Quiz.findOne({
@@ -120,9 +123,10 @@ exports.submitQuiz = async (req, res) => {
       maxPoints += qPoints;
 
       const submittedAnswerId = userAnswers[`answers[${question.id}]`];
+
       if (submittedAnswerId) {
         const pickedAnswer = question.Answers.find(
-          (a) => a.id === Number(submittedAnswerId)
+          (a) => a.id === Number(submittedAnswerId),
         );
         if (pickedAnswer?.isCorrect) {
           totalPoints += qPoints;
@@ -132,7 +136,8 @@ exports.submitQuiz = async (req, res) => {
     });
 
     const scorePercentage = maxPoints > 0 ? totalPoints / maxPoints : 0;
-    const PASS_THRESHOLD = 0.5;
+
+    const PASS_THRESHOLD = 0.3;
 
     const isCurrentAttemptSuccess = scorePercentage >= PASS_THRESHOLD;
 
@@ -153,19 +158,27 @@ exports.submitQuiz = async (req, res) => {
         const hero = await Hero.findOne({ where: { userId: userId } });
 
         if (hero) {
-          const reward = quiz.xpReward || 50;
-
-          hero.xp += reward;
-
-          const coins = Math.floor(reward / 10);
-          hero.knowcoins += coins;
-
+          const rewardXP = quiz.xpReward || 50;
+          hero.xp += rewardXP;
           await hero.save();
 
-          xpAwarded = reward;
-          coinsAwarded = coins;
+          const rewardCoins = totalPoints;
 
-          message = `Поздравления! Мисията изпълнена: +${reward} XP и +${coins} KC!`;
+          const [balance] = await HeroBalance.findOrCreate({
+            where: {
+              heroId: hero.id,
+              questId: id,
+            },
+            defaults: { amount: 0 },
+          });
+
+          balance.amount += rewardCoins;
+          await balance.save();
+
+          xpAwarded = rewardXP;
+          coinsAwarded = rewardCoins;
+
+          message = `Поздравления! Мисията изпълнена (над 30%): +${rewardXP} XP и +${rewardCoins} KC!`;
         }
       } else {
         message =
@@ -173,7 +186,7 @@ exports.submitQuiz = async (req, res) => {
       }
     } else {
       message =
-        "Слаб резултат. Трябват ти поне 50% верни отговори. Опитай пак!";
+        "Слаб резултат. Трябват ти поне 30% верни отговори (за Среден 3), за да получиш награда. Опитай пак!";
     }
 
     await Score.create({
@@ -187,6 +200,7 @@ exports.submitQuiz = async (req, res) => {
     res.render("quests/result", {
       title: "Quiz Result",
       questTitle: quiz.title,
+      questId: id,
       points: totalPoints,
       maxPoints: maxPoints,
       correctCount: correctCount,
