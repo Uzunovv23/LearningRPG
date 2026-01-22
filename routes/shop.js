@@ -2,15 +2,10 @@ var express = require("express");
 var router = express.Router();
 var shopController = require("../controllers/shopController");
 
-const isAuthenticated = (req, res, next) => {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  res.redirect("/login");
-};
+var isLogged = require("../middleware/isLogged");
 
-router.get("/", isAuthenticated, shopController.getShop);
+router.get("/", isLogged, shopController.getShop);
 
-router.post("/buy/:id", isAuthenticated, shopController.buyItem);
+router.post("/buy/:id", isLogged, shopController.buyItem);
 
 module.exports = router;
