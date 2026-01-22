@@ -3,67 +3,93 @@ extends ../layout
 block content
   .container.mt-5
     .row.justify-content-center
-      .col-md-8
-        .card.shadow-lg.border-0.mb-4
+      .col-md-10
+        .card.shadow-lg.border-0.mb-5.bg-dark.text-white
           .card-body.text-center.p-5
             .mb-4
-                i.fas.fa-user-ninja.fa-6x.text-primary
+                i.fas.fa-user-astronaut.fa-6x.text-warning
             
             h1.display-4.fw-bold.mb-0 #{hero.name}
-            p.lead.text-muted Герой Ниво #{hero.level}
 
-            .d-flex.justify-content-center.gap-5.mt-4.mb-4
-                div
-                    i.fas.fa-heart.fa-2x.text-danger.mb-2
-                    h4 #{hero.health} HP
-                div
-                    i.fas.fa-bolt.fa-2x.text-primary.mb-2
-                    h4 #{hero.mana} MP
+            - const currentLevel = Math.floor(hero.xp / 1000) + 1
+            p.lead.text-warning Герой Ниво #{currentLevel}
 
-            hr
+            .row.justify-content-center.mt-4
+                .col-md-8
+                    - const levelProgress = (hero.xp % 1000) / 10
+                    
+                    h5.d-flex.justify-content-between.small
+                        span
+                            i.fas.fa-bolt.text-warning.me-2
+                            | Опит (XP)
+                        span #{hero.xp} XP Общо
+                    
+                    .progress.mb-2(style="height: 25px; background-color: rgba(255,255,255,0.2);")
+                        .progress-bar.bg-warning(
+                            role="progressbar" 
+                            style=`width: ${levelProgress}%`
+                            aria-valuenow=levelProgress 
+                            aria-valuemin="0" 
+                            aria-valuemax="100"
+                        ) #{levelProgress}%
+                    
+                    p.text-muted.small.fst-italic Още #{1000 - (hero.xp % 1000)} XP до следващо ниво!
 
-            .text-start.mt-4
-                h5.d-flex.justify-content-between
-                    span
-                        i.fas.fa-star.text-warning.me-2
-                        | Опит (XP)
-                    span.text-muted #{hero.xp} / #{xpNeeded}
-                
-                .progress.mb-2(style="height: 30px;")
-                    .progress-bar.bg-success(
-                        role="progressbar" 
-                        style=`width: ${currentLevelProgress}%`
-                        aria-valuenow=currentLevelProgress 
-                        aria-valuemin="0" 
-                        aria-valuemax="100"
-                    ) #{currentLevelProgress}%
-                
-                p.text-muted.small.text-center Още #{xpToNextLevel} XP до Ниво #{hero.level + 1}!
+        .card.shadow-sm.mb-5.border-0
+          .card-header.bg-white.border-bottom.py-3
+            h4.mb-0.text-primary 
+                i.fas.fa-book-journal-whills.me-2
+                | Дневник на приключенията & Бележник
+          
+          .card-body.p-4
+            if journal.length === 0
+                .alert.alert-info.text-center
+                    i.fas.fa-info-circle.me-2
+                    | Все още не си започнал нито един предмет. Отиди в секция "Мисии"!
+            else
+                .row
+                    each entry in journal
+                        .col-md-6.mb-4
+                            .card.h-100.shadow-sm.border-light
+                                .card-header.bg-light.d-flex.justify-content-between.align-items-center
+                                    h5.mb-0.fw-bold= entry.questTitle
+                                    if entry.status === 'completed' || entry.status === 'finished'
+                                        span.badge.bg-success Завършен
+                                    else
+                                        span.badge.bg-primary Активен
 
-    .row.justify-content-center
-        .col-md-8
-            .card.shadow-sm.mb-5
-                .card-header.bg-white
-                    h5.mb-0 📜 Дневник на приключенията
-                .card-body
-                    if activities.length > 0
-                        ul.list-group.list-group-flush
-                            each activity in activities
-                                li.list-group-item.d-flex.justify-content-between.align-items-center
-                                    div
-                                        if activity.isPassed
-                                            i.fas.fa-check.text-success.me-3
-                                        else
-                                            i.fas.fa-times.text-danger.me-3
-                                        
-                                        span Завършена мисия: 
-                                        strong 
-                                            if activity.Quest
-                                                | #{activity.Quest.title}
-                                            else
-                                                | Неизвестна
+                                .card-body
+                                    .row.text-center.mb-3
+                                        .col-6.border-end
+                                            h5.text-primary.fw-bold #{entry.xp}
+                                            small.text-muted Спечелени XP
+                                        .col-6
+                                            h5.text-warning.fw-bold #{entry.points}
+                                            small.text-muted Спечелени Точки
+
+                                    hr
+
+                                    h6.text-muted.mb-3.small.text-uppercase.fw-bold
+                                        i.fas.fa-graduation-cap.me-2
+                                        | Купени оценки:
                                     
-                                    span.badge.rounded-pill(class=activity.isPassed ? 'bg-success' : 'bg-secondary')
-                                        | +#{activity.points} т.
-                    else
-                        p.text-center.text-muted.py-3 Все още няма записани подвизи в дневника.
+                                    if entry.grades.length > 0
+                                        .d-flex.flex-wrap.gap-2
+                                            each grade in entry.grades
+                                                - let badgeClass = 'bg-secondary'
+                                                if grade.title.includes('6') 
+                                                    - badgeClass = 'bg-success'
+                                                else if grade.title.includes('5')
+                                                    - badgeClass = 'bg-primary'
+                                                else if grade.title.includes('4')
+                                                    - badgeClass = 'bg-info text-dark'
+                                                else if grade.title.includes('3')
+                                                    - badgeClass = 'bg-warning text-dark'
+                                                
+                                                .badge.p-2(class=badgeClass title=grade.description style="font-size: 0.9rem;")
+                                                    if grade.icon
+                                                        i(class=`fas ${grade.icon} me-1`)
+                                                    | #{grade.title}
+                                    else
+                                        .text-center.py-2
+                                            span.badge.bg-light.text-muted.fw-normal Няма закупени оценки
