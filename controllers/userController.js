@@ -7,6 +7,8 @@ const {
   Purchase,
   ShopItem,
   Quiz,
+  Homework,
+  HomeworkMaterial
 } = require("../models");
 
 exports.show = async (req, res) => {
@@ -88,5 +90,30 @@ exports.show = async (req, res) => {
       message: "Грешка при зареждане на профила.",
       error: error,
     });
+  }
+};
+
+exports.getHomework = async (req, res) => {
+  try {
+    const homeworkId = req.params.id;
+
+    const homework = await Homework.findByPk(homeworkId, {
+      include: [
+        { model: Quest, attributes: ["title"] },
+        { model: HomeworkMaterial },
+      ],
+    });
+
+    if (!homework) {
+      return res.render("error", { message: "Домашното не е намерено." });
+    }
+
+    res.render("users/homework/show", {
+      title: homework.title,
+      homework: homework,
+    });
+  } catch (error) {
+    console.error("Get Homework Error:", error);
+    res.render("error", { message: "Грешка при зареждане на домашното." });
   }
 };

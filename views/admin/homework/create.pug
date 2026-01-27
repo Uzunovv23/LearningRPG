@@ -1,0 +1,45 @@
+extends ../../layout
+
+block content
+  .container.mt-5
+    h2.text-center.mb-4.text-primary 📚 Създаване на Домашно
+
+    if query && query.status === 'success'
+        .alert.alert-success Успешно добавено домашно!
+    if query && query.status === 'error'
+        .alert.alert-danger Възникна грешка.
+
+    if quests.length === 0
+        .alert.alert-warning Няма активни куестове, към които да добавите домашно.
+    else
+        form(action="/admin/homework/create" method="POST" enctype="multipart/form-data")
+            .mb-3
+                label.form-label(for="questId") Избери Активен Куест
+                select.form-select(name="questId" required)
+                    each quest in quests
+                        option(value=quest.id) #{quest.title}
+
+            .mb-3
+                label.form-label(for="title") Заглавие на домашното
+                input.form-control(type="text" name="title" required placeholder="Напр. Есе за Наполеон")
+
+            .mb-3
+                label.form-label(for="description") Условие / Описание
+                textarea.form-control(name="description" rows="5" required placeholder="Опишете какво се изисква...")
+
+            .row
+                .col-md-6.mb-3
+                    label.form-label(for="startDate") Начало
+                    input.form-control(type="datetime-local" name="startDate" required)
+                .col-md-6.mb-3
+                    label.form-label(for="endDate") Краен срок
+                    input.form-control(type="datetime-local" name="endDate" required)
+
+            .mb-4
+                label.form-label(for="materials") Материали (Файлове)
+                input.form-control(type="file" name="materials" multiple)
+                .form-text Може да изберете няколко файла (PDF, Word, JPG). Те ще бъдат защитени.
+
+            button.btn.btn-primary.w-100(type="submit")
+                i.fas.fa-save.me-2
+                | Публикувай Домашното
