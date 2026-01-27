@@ -7,6 +7,7 @@ const {
   HeroQuest,
   Score,
   HeroBalance,
+  Homework,
 } = require("../models");
 
 exports.index = async (req, res) => {
@@ -28,11 +29,18 @@ exports.index = async (req, res) => {
 
 exports.show = async (req, res) => {
   try {
-    const quest = await Quest.findByPk(req.params.id, {
+    const questId = req.params.id;
+
+    const { status, msg } = req.query;
+
+    const quest = await Quest.findByPk(questId, {
       include: [
         {
           model: Quiz,
-          attributes: ["id", "title"],
+          attributes: ["id", "title", "xpReward"],
+        },
+        {
+          model: Homework,
         },
       ],
     });
@@ -42,22 +50,42 @@ exports.show = async (req, res) => {
     }
 
     const currentUser = req.user || req.session.user;
+    let isEnrolled = false;
+    let isCompleted = false;
 
     if (currentUser) {
       const hero = await Hero.findOne({
         where: { userId: currentUser.id },
       });
+
       if (hero) {
-        await HeroQuest.findOrCreate({
+        let heroQuest = await HeroQuest.findOne({
           where: { heroId: hero.id, questId: quest.id },
-          defaults: { status: "started" },
         });
+
+        if (!heroQuest) {
+          [heroQuest] = await HeroQuest.findOrCreate({
+            where: { heroId: hero.id, questId: quest.id },
+            defaults: { status: "started" },
+          });
+        }
+
+        if (heroQuest) {
+          isEnrolled = true;
+          if (heroQuest.status === "completed") {
+            isCompleted = true;
+          }
+        }
       }
     }
 
     res.render("quests/show", {
       title: quest.title,
       quest: quest,
+      isEnrolled: isEnrolled,
+      isCompleted: isCompleted,
+      alertType: status,
+      alertMessage: msg,
     });
   } catch (error) {
     console.error("Error in show:", error);
@@ -136,9 +164,7 @@ exports.submitQuiz = async (req, res) => {
     });
 
     const scorePercentage = maxPoints > 0 ? totalPoints / maxPoints : 0;
-
     const PASS_THRESHOLD = 0.3;
-
     const isCurrentAttemptSuccess = scorePercentage >= PASS_THRESHOLD;
 
     const alreadyPassed = await Score.findOne({

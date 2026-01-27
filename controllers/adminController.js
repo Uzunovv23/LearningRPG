@@ -8,6 +8,8 @@ const {
   ShopItem,
   Purchase,
   HeroBalance,
+  Homework,
+  HomeworkMaterial,
   sequelize,
 } = require("../models");
 
@@ -439,5 +441,60 @@ exports.toggleQuestCompletion = async (req, res) => {
     await t.rollback();
     console.error("Lock Quest Error:", error);
     res.status(500).send("Грешка при завършване на предмета.");
+  }
+};
+
+exports.createHomeworkPage = async (req, res) => {
+  try {
+    const activeQuests = await Quest.findAll({
+      where: { isCompleted: false },
+    });
+
+    res.render("admin/homework/create", {
+      title: "Добави Домашно",
+      quests: activeQuests,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Грешка при зареждане.");
+  }
+};
+
+exports.storeHomework = async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    const { title, description, questId, startDate, endDate } = req.body;
+    const files = req.files;
+
+    const newHomework = await Homework.create(
+      {
+        title,
+        description,
+        questId,
+        startDate,
+        endDate,
+      },
+      { transaction: t },
+    );
+
+    if (files && files.length > 0) {
+      const fileData = files.map((file) => ({
+        fileName: file.originalname,
+        filePath: file.filename,
+        mimeType: file.mimetype,
+        homeworkId: newHomework.id,
+      }));
+
+      await HomeworkMaterial.bulkCreate(fileData, { transaction: t });
+    }
+
+    await t.commit();
+
+    res.redirect(`/quests/${questId}?status=success&msg=Домашното+е+публикувано+успешно!`);
+
+  } catch (error) {
+    await t.rollback();
+    console.error("Create Homework Error:", error);
+    res.redirect("/admin/homework/create?status=error");
   }
 };

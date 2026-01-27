@@ -1,6 +1,8 @@
 var express = require("express");
 var router = express.Router();
 var adminController = require("../controllers/adminController");
+var fileController = require("../controllers/fileController");
+var upload = require("../middleware/upload");
 var isAdmin = require("../middleware/isAdmin");
 
 router.use(isAdmin);
@@ -12,7 +14,6 @@ router.get("/quests/:id/edit", adminController.editQuestForm);
 router.post("/quests/:id/edit", adminController.updateQuest);
 
 router.post("/toggle-quest-completion/:id", isAdmin, adminController.toggleQuestCompletion);
-
 router.post("/delete-quest/:id", isAdmin, adminController.deleteQuest);
 
 router.delete("/quizzes/:id", adminController.deleteQuiz);
@@ -21,4 +22,13 @@ router.get("/users", adminController.getAllUsers);
 router.patch("/users/:id/role", adminController.toggleUserRole);
 router.post("/users/:id/update", adminController.updateUser);
 router.delete("/users/:id", adminController.deleteUser);
+
+router.get("/homework/create", adminController.createHomeworkPage);
+
+router.post(
+  "/homework/create",
+  upload.array("materials", 5), 
+  adminController.storeHomework
+);
+
 module.exports = router;

@@ -2,33 +2,76 @@ extends ../layout
 
 block content
   .container.mt-5
-    .row.justify-content-center
-      .col-lg-8
-        
-        .text-center.mb-5
-          h1.display-4.text-primary= quest.title
-          p.lead.text-muted= quest.description
-          span.badge.bg-warning.text-dark XP Reward: #{quest.xpReward}
+    
+    if alertMessage
+      div(class=`alert alert-${alertType === 'success' ? 'success' : 'danger'} alert-dismissible fade show` role="alert")
+        strong #{alertType === 'success' ? 'Успех!' : 'Грешка!'} 
+        |  #{alertMessage}
+        button.btn-close(type="button" data-bs-dismiss="alert" aria-label="Close")
 
-        .card.shadow-sm.border-0
-          .card-header.bg-dark.text-white
-            h3.mb-0 Available Quizzes
-          
-          .list-group.list-group-flush
-            if quest.Quizzes && quest.Quizzes.length > 0
-              each quiz in quest.Quizzes
-                a.list-group-item.list-group-item-action.d-flex.justify-content-between.align-items-center.p-4(
-                  href=`/quests/${quest.id}/quizzes/${quiz.id}`
-                )
-                  div
-                    h5.mb-1.text-primary= quiz.title
-                    span.badge.bg-success.me-2 XP: #{quiz.xpReward}
-                    small.text-muted Click to start this challenge
-                  
-                  i.fas.fa-chevron-right.text-muted
-            else
-              .p-4.text-center.text-muted
-                p No quizzes available yet.
+    .jumbotron.p-5.bg-dark.text-white.rounded.mb-5.shadow
+      .d-md-flex.justify-content-between.align-items-center
+        div
+            h1.display-4.fw-bold #{quest.title}
+            p.lead.mb-0 #{quest.description}
+            if isCompleted
+                .badge.bg-success.mt-3.fs-6 Предметът е завършен
         
-        .mt-4.text-center
-            a.btn.btn-outline-secondary(href="/quests") Back to All Quests
+        div.mt-4.mt-md-0
+            if !isEnrolled
+                form(action=`/quests/${quest.id}/enroll` method="POST")
+                    button.btn.btn-warning.btn-lg.fw-bold.px-5(type="submit") Запиши се
+            else
+                .text-end
+                    .badge.bg-primary.fs-6 Записан
+
+    .row
+        .col-md-6.mb-5
+            h3.mb-3.text-secondary
+                i.fas.fa-tasks.me-2
+                | Тестове
+            
+            if quest.Quizzes && quest.Quizzes.length > 0
+                .list-group.shadow-sm
+                    each quiz in quest.Quizzes
+                        a.list-group-item.list-group-item-action.d-flex.justify-content-between.align-items-center(href=`/quizzes/${quiz.id}`)
+                            div
+                                h5.mb-1 #{quiz.title}
+                            span.badge.bg-warning.text-dark #{quiz.xpReward} XP
+            else
+                .alert.alert-light.border Няма добавени тестове.
+
+        .col-md-6.mb-5
+            h3.mb-3.text-primary
+                i.fas.fa-book-reader.me-2
+                | Домашни работи
+            
+            if quest.Homework && quest.Homework.length > 0
+                .list-group.shadow-sm
+                    each hw in quest.Homework
+                        - const isExpired = new Date(hw.endDate) < new Date()
+                        
+                        a.list-group-item.list-group-item-action.d-flex.justify-content-between.align-items-center(
+                            href=`/users/homework/${hw.id}`
+                            class=isExpired ? 'list-group-item-light text-muted' : ''
+                        )
+                            div
+                                div.d-flex.align-items-center
+                                    if isExpired
+                                        i.fas.fa-lock.text-danger.me-2
+                                    else
+                                        i.fas.fa-pen-fancy.text-success.me-2
+                                    
+                                    h5.mb-1.fw-bold #{hw.title}
+                                
+                                small
+                                    i.far.fa-clock.me-1
+                                    | Краен срок: #{new Date(hw.endDate).toLocaleDateString('bg-BG')}
+                            
+                            div
+                                if isExpired
+                                    span.badge.bg-secondary Приключило
+                                else
+                                    i.fas.fa-chevron-right.text-primary
+            else
+                .alert.alert-light.border.text-muted Все още няма домашни.

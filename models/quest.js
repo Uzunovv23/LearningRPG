@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
       Quest.belongsToMany(models.Hero, { through: models.HeroQuest, foreignKey: 'questId' }); 
       Quest.hasMany(models.Score, { foreignKey: 'questId' });
       Quest.hasMany(models.ShopItem, { foreignKey: "questId" });
+      Quest.hasMany(models.Homework, { foreignKey: "questId" });
     }
   }
 
