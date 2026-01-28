@@ -8,6 +8,7 @@ const {
   Score,
   HeroBalance,
   Homework,
+  HomeworkMaterial, 
 } = require("../models");
 
 exports.index = async (req, res) => {
@@ -22,7 +23,7 @@ exports.index = async (req, res) => {
       quests: quests,
     });
   } catch (error) {
-    console.error("Error in index:", error);
+    console.error(error);
     res.status(500).send("Error loading quests.");
   }
 };
@@ -30,7 +31,6 @@ exports.index = async (req, res) => {
 exports.show = async (req, res) => {
   try {
     const questId = req.params.id;
-
     const { status, msg } = req.query;
 
     const quest = await Quest.findByPk(questId, {
@@ -41,6 +41,7 @@ exports.show = async (req, res) => {
         },
         {
           model: Homework,
+          include: [HomeworkMaterial],
         },
       ],
     });
@@ -59,22 +60,15 @@ exports.show = async (req, res) => {
       });
 
       if (hero) {
-        let heroQuest = await HeroQuest.findOne({
+        const [heroQuest, created] = await HeroQuest.findOrCreate({
           where: { heroId: hero.id, questId: quest.id },
+          defaults: { status: "started" },
         });
 
-        if (!heroQuest) {
-          [heroQuest] = await HeroQuest.findOrCreate({
-            where: { heroId: hero.id, questId: quest.id },
-            defaults: { status: "started" },
-          });
-        }
+        isEnrolled = true;
 
-        if (heroQuest) {
-          isEnrolled = true;
-          if (heroQuest.status === "completed") {
-            isCompleted = true;
-          }
+        if (heroQuest.status === "completed") {
+          isCompleted = true;
         }
       }
     }
@@ -88,7 +82,7 @@ exports.show = async (req, res) => {
       alertMessage: msg,
     });
   } catch (error) {
-    console.error("Error in show:", error);
+    console.error(error);
     res.status(500).send("Error loading quest.");
   }
 };
@@ -122,7 +116,7 @@ exports.showQuiz = async (req, res) => {
       quiz: quiz,
     });
   } catch (error) {
-    console.error("Error in showQuiz:", error);
+    console.error(error);
     res.status(500).send("Error loading quiz.");
   }
 };
@@ -236,7 +230,7 @@ exports.submitQuiz = async (req, res) => {
       isSuccess: isCurrentAttemptSuccess,
     });
   } catch (error) {
-    console.error("Error in submitQuiz:", error);
+    console.error(error);
     res.status(500).send("Error processing results.");
   }
 };
