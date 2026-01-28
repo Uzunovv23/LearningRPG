@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
       User.hasOne(models.Hero, { foreignKey: "userId" });
       User.hasMany(models.Score, { foreignKey: "userId" });
       User.hasMany(models.Purchase, { foreignKey: "userId" });
+      User.hasMany(models.HomeworkSubmission, { foreignKey: "userId" });
     }
   }
 
