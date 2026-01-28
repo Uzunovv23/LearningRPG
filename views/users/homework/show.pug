@@ -4,47 +4,60 @@ block content
   .container.mt-5
     .row.justify-content-center
       .col-md-8
-        .card.shadow-lg.border-0.mb-4
-          .card-header.bg-primary.text-white.p-4
-            .d-flex.justify-content-between.align-items-start
-                div
-                    h6.text-uppercase.text-warning.mb-2
-                        i.fas.fa-scroll.me-2
-                        | #{homework.Quest.title}
-                    h2.fw-bold.mb-0 #{homework.title}
-                
-                - const isExpired = new Date(homework.endDate) < new Date()
-                if isExpired
-                    span.badge.bg-danger Приключило
+        
+        if query && query.error
+            .alert.alert-danger #{query.error}
+        if query && query.success
+            .alert.alert-success #{query.success}
+
+        .card.shadow.mt-5.border-0
+            .card-header.bg-dark.text-white.p-3
+                h5.mb-0 
+                    i.fas.fa-upload.me-2
+                    | Твоето решение
+
+            .card-body.p-4
+                if submission
+                    .text-center.py-3
+                        i.fas.fa-check-circle.text-success.fa-4x.mb-3
+                        h3.text-success Предадено успешно!
+                        p.text-muted Ти изпрати решението си на #{new Date(submission.createdAt).toLocaleString('bg-BG')}
+                        
+                        .alert.alert-secondary.d-inline-block.mt-2
+                            i.far.fa-file.me-2
+                            | #{submission.fileName}
+                        
+                        if submission.submissionText
+                            p.mt-3.fst-italic " #{submission.submissionText} "
+
+                        if submission.grade
+                             hr
+                             h4.fw-bold Оценка: #{submission.grade}
+                             if submission.feedback
+                                p.text-primary Коментар от учителя: #{submission.feedback}
+                        else
+                             p.mt-2.text-warning 
+                                i.fas.fa-hourglass-half.me-1
+                                | Очаква проверка от учител.
+
                 else
-                    span.badge.bg-success Активно
+                    - const isExpired = new Date(homework.endDate) < new Date()
+                    
+                    if isExpired
+                        .alert.alert-danger.text-center
+                            i.fas.fa-lock.me-2
+                            | Срокът за предаване изтече! Вече не можеш да качваш файлове.
+                    else
+                        form(action=`/users/homework/${homework.id}/submit` method="POST" enctype="multipart/form-data")
+                            .mb-3
+                                label.form-label(for="solutionFile") Прикачи файл с решение
+                                input.form-control(type="file" name="solutionFile" required)
+                                .form-text Разрешени формати: PDF, Word, изображения, ZIP.
+                            
+                            .mb-3
+                                label.form-label(for="submissionText") Коментар (по желание)
+                                textarea.form-control(name="submissionText" rows="3" placeholder="Здравейте, изпращам домашното...")
 
-          .card-body.p-4
-            .row.mb-4
-                .col-md-6
-                    small.text-muted Начало:
-                    div.fw-bold #{new Date(homework.startDate).toLocaleString('bg-BG')}
-                .col-md-6.text-md-end
-                    small.text-muted Краен срок:
-                    div.fw-bold #{new Date(homework.endDate).toLocaleString('bg-BG')}
-
-            hr
-
-            h5.text-primary.mb-3 📝 Условие
-            .bg-light.p-4.rounded.mb-4.border
-                p.mb-0(style="white-space: pre-line;") #{homework.description}
-
-            h5.text-primary.mb-3 
-                i.fas.fa-paperclip.me-2
-                | Материали
-            
-            if homework.HomeworkMaterials && homework.HomeworkMaterials.length > 0
-                .list-group
-                    each file in homework.HomeworkMaterials
-                        a.list-group-item.list-group-item-action.d-flex.justify-content-between.align-items-center(href=`/users/download/material/${file.id}`)
-                            div
-                                i.far.fa-file-alt.me-2.text-muted
-                                | #{file.fileName}
-                            i.fas.fa-download.text-primary
-            else
-                p.text-muted Няма прикачени файлове.
+                            button.btn.btn-success.w-100.btn-lg(type="submit")
+                                i.fas.fa-paper-plane.me-2
+                                | Предай Домашното

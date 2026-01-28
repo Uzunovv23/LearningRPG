@@ -8,7 +8,8 @@ const {
   ShopItem,
   Quiz,
   Homework,
-  HomeworkMaterial
+  HomeworkMaterial,
+  HomeworkSubmission
 } = require("../models");
 
 exports.show = async (req, res) => {
@@ -96,11 +97,17 @@ exports.show = async (req, res) => {
 exports.getHomework = async (req, res) => {
   try {
     const homeworkId = req.params.id;
+    const userId = req.user.id; 
 
     const homework = await Homework.findByPk(homeworkId, {
       include: [
-        { model: Quest, attributes: ["title"] },
+        { model: Quest, attributes: ["title"] }, 
         { model: HomeworkMaterial },
+        { 
+            model: HomeworkSubmission, 
+            required: false, 
+            where: { userId: userId } 
+        } 
       ],
     });
 
@@ -108,12 +115,42 @@ exports.getHomework = async (req, res) => {
       return res.render("error", { message: "Домашното не е намерено." });
     }
 
+    const mySubmission = homework.HomeworkSubmissions[0] || null;
+
     res.render("users/homework/show", {
       title: homework.title,
       homework: homework,
+      submission: mySubmission, 
     });
   } catch (error) {
     console.error("Get Homework Error:", error);
     res.render("error", { message: "Грешка при зареждане на домашното." });
   }
+};
+
+exports.submitHomework = async (req, res) => {
+    try {
+        const homeworkId = req.params.id;
+        const userId = req.user.id;
+        const file = req.file; 
+        const { submissionText } = req.body;
+
+        if (!file) {
+            return res.redirect(`/users/homework/${homeworkId}?error=Моля+прикачете+файл!`);
+        }
+
+        await HomeworkSubmission.create({
+            userId: userId,
+            homeworkId: homeworkId,
+            fileName: file.originalname,
+            filePath: file.filename,
+            submissionText: submissionText
+        });
+
+        res.redirect(`/users/homework/${homeworkId}?success=Домашното+е+предадено+успешно!`);
+
+    } catch (error) {
+        console.error("Submit Homework Error:", error);
+        res.redirect(`/users/homework/${req.params.id}?error=Възникна+грешка.`);
+    }
 };
