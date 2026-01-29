@@ -1,0 +1,64 @@
+extends ../../layout
+
+block content
+  .container.mt-5
+    .d-flex.justify-content-between.align-items-center.mb-4
+        h2
+            i.fas.fa-book-reader.me-2
+            | Предавания: #{homework.title}
+        a.btn.btn-outline-secondary(href=`/users/homework/${homework.id}`) 
+            i.fas.fa-arrow-left.me-2
+            | Обратно към условието
+
+    if homework.HomeworkSubmissions.length === 0
+        .alert.alert-info.text-center
+            i.fas.fa-info-circle.me-2
+            | Все още няма предадени решения от ученици.
+    else
+        .table-responsive
+            table.table.table-hover.table-bordered.shadow-sm.bg-white
+                thead.table-dark
+                    tr
+                        th #
+                        th Ученик (Герой)
+                        th Дата
+                        th Коментар
+                        th Файлове
+                        th Оценка
+                        th Действия
+                tbody
+                    each sub, index in homework.HomeworkSubmissions
+                        tr
+                            td #{index + 1}
+                            td 
+                                div.fw-bold #{sub.User.username}
+                                if sub.User.Hero
+                                    small.text-muted 
+                                        i.fas.fa-user-shield.me-1
+                                        | #{sub.User.Hero.name}
+                            td 
+                                | #{new Date(sub.updatedAt).toLocaleString('bg-BG')}
+                            td 
+                                if sub.submissionText
+                                    i.text-muted "#{sub.submissionText}"
+                                else
+                                    span.text-muted -
+                            td
+                                if sub.SubmissionFiles && sub.SubmissionFiles.length > 0
+                                    ul.list-unstyled.mb-0
+                                        each file in sub.SubmissionFiles
+                                            li.mb-1
+                                                a.text-decoration-none(href=`/users/homework/file/${file.id}/download`)
+                                                    i.far.fa-file.me-1
+                                                    | #{file.fileName}
+                                else
+                                    span.text-muted Няма файлове
+                            td
+                                if sub.grade
+                                    span.badge.bg-success.fs-6 #{sub.grade}
+                                else
+                                    span.badge.bg-warning.text-dark Неоценен
+                            td
+                                button.btn.btn-primary.btn-sm
+                                    i.fas.fa-check-double.me-1
+                                    | Оцени
