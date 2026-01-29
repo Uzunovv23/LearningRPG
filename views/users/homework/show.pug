@@ -20,11 +20,17 @@ block content
                     | #{homework.Quest.title}
                 h2.fw-bold.mb-0 #{homework.title}
               
-              - const isExpired = new Date(homework.endDate) < new Date()
-              if isExpired
-                span.badge.bg-danger Приключило
-              else
-                span.badge.bg-success Активно
+              div.d-flex.flex-column.align-items-end
+                if currentUser && currentUser.role === 'admin'
+                  a.btn.btn-warning.btn-sm.mb-2.fw-bold.shadow-sm(href=`/admin/homework/${homework.id}/submissions`)
+                    i.fas.fa-users-cog.me-2
+                    | Виж всички предавания
+
+                - const isExpired = new Date(homework.endDate) < new Date()
+                if isExpired
+                  span.badge.bg-danger Приключило
+                else
+                  span.badge.bg-success Активно
 
           .card-body.p-4
             .row.mb-4

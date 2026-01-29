@@ -100,18 +100,18 @@ exports.show = async (req, res) => {
 exports.getHomework = async (req, res) => {
   try {
     const homeworkId = req.params.id;
-    const userId = req.user.id;
+    const userId = req.user.id; 
 
     const homework = await Homework.findByPk(homeworkId, {
       include: [
-        { model: Quest, attributes: ["title"] },
+        { model: Quest, attributes: ["title"] }, 
         { model: HomeworkMaterial },
-        {
-          model: HomeworkSubmission,
-          required: false,
-          where: { userId: userId },
-          include: [SubmissionFile],
-        },
+        { 
+            model: HomeworkSubmission, 
+            required: false, 
+            where: { userId: userId },
+            include: [SubmissionFile] 
+        } 
       ],
     });
 
@@ -126,6 +126,7 @@ exports.getHomework = async (req, res) => {
       homework: homework,
       submission: mySubmission,
       query: req.query,
+      currentUser: req.user 
     });
   } catch (error) {
     console.error("Get Homework Error:", error);
@@ -231,16 +232,24 @@ exports.downloadSubmissionFile = async (req, res) => {
   try {
     const fileId = req.params.fileId;
     const userId = req.user.id;
+    const userRole = req.user.role;
 
     const file = await SubmissionFile.findByPk(fileId, {
       include: {
         model: HomeworkSubmission,
-        where: { userId: userId },
+        include: [Homework],
       },
     });
 
     if (!file) {
-      return res.status(404).send("Файлът не е намерен или нямате достъп.");
+      return res.status(404).send("Файлът не е намерен.");
+    }
+
+    const isOwner = file.HomeworkSubmission.userId === userId;
+    const isAdmin = userRole === "admin";
+
+    if (!isOwner && !isAdmin) {
+      return res.status(403).send("Нямате право да сваляте този файл.");
     }
 
     const absolutePath = path.join(

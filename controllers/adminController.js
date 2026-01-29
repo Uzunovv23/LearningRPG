@@ -5,11 +5,14 @@ const {
   Answer,
   Score,
   User,
+  Hero,
   ShopItem,
   Purchase,
   HeroBalance,
   Homework,
   HomeworkMaterial,
+  HomeworkSubmission,
+  SubmissionFile,
   sequelize,
 } = require("../models");
 
@@ -490,11 +493,54 @@ exports.storeHomework = async (req, res) => {
 
     await t.commit();
 
-    res.redirect(`/quests/${questId}?status=success&msg=Домашното+е+публикувано+успешно!`);
-
+    res.redirect(
+      `/quests/${questId}?status=success&msg=Домашното+е+публикувано+успешно!`,
+    );
   } catch (error) {
     await t.rollback();
     console.error("Create Homework Error:", error);
     res.redirect("/admin/homework/create?status=error");
+  }
+};
+
+exports.viewHomeworkSubmissions = async (req, res) => {
+  try {
+    const homeworkId = req.params.id;
+
+    const homework = await Homework.findByPk(homeworkId, {
+      include: [
+        {
+          model: HomeworkSubmission,
+          include: [
+            {
+              model: User,
+              attributes: ["username", "email"],
+              include: [
+                {
+                  model: Hero,
+                  attributes: ["name"],
+                },
+              ],
+            },
+            {
+              model: SubmissionFile,
+            },
+          ],
+        },
+      ],
+      order: [[{ model: HomeworkSubmission }, "updatedAt", "DESC"]],
+    });
+
+    if (!homework) {
+      return res.status(404).send("Домашното не е намерено.");
+    }
+
+    res.render("admin/homework/submissions", {
+      title: `Предавания: ${homework.title}`,
+      homework: homework,
+    });
+  } catch (error) {
+    console.error("Admin View Submissions Error:", error);
+    res.status(500).send("Грешка при зареждане на предаванията.");
   }
 };
