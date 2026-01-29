@@ -20,8 +20,16 @@ router.get("/homework/:id", isLogged, userController.getHomework);
 router.post(
   "/homework/:id/submit",
   isLogged,
-  upload.single("solutionFile"),
+  upload.array("solutionFiles", 10),
   userController.submitHomework,
 );
+
+router.post(
+  "/homework/file/:fileId/delete",
+  isLogged,
+  userController.deleteSubmissionFile,
+);
+
+router.get("/homework/file/:fileId/download", isLogged, userController.downloadSubmissionFile);
 
 module.exports = router;

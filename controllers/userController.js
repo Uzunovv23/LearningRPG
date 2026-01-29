@@ -1,3 +1,5 @@
+const fs = require("fs");
+const path = require("path");
 const {
   Hero,
   User,
@@ -9,7 +11,8 @@ const {
   Quiz,
   Homework,
   HomeworkMaterial,
-  HomeworkSubmission
+  HomeworkSubmission,
+  SubmissionFile,
 } = require("../models");
 
 exports.show = async (req, res) => {
@@ -97,17 +100,18 @@ exports.show = async (req, res) => {
 exports.getHomework = async (req, res) => {
   try {
     const homeworkId = req.params.id;
-    const userId = req.user.id; 
+    const userId = req.user.id;
 
     const homework = await Homework.findByPk(homeworkId, {
       include: [
-        { model: Quest, attributes: ["title"] }, 
+        { model: Quest, attributes: ["title"] },
         { model: HomeworkMaterial },
-        { 
-            model: HomeworkSubmission, 
-            required: false, 
-            where: { userId: userId } 
-        } 
+        {
+          model: HomeworkSubmission,
+          required: false,
+          where: { userId: userId },
+          include: [SubmissionFile],
+        },
       ],
     });
 
@@ -120,7 +124,8 @@ exports.getHomework = async (req, res) => {
     res.render("users/homework/show", {
       title: homework.title,
       homework: homework,
-      submission: mySubmission, 
+      submission: mySubmission,
+      query: req.query,
     });
   } catch (error) {
     console.error("Get Homework Error:", error);
@@ -129,28 +134,131 @@ exports.getHomework = async (req, res) => {
 };
 
 exports.submitHomework = async (req, res) => {
-    try {
-        const homeworkId = req.params.id;
-        const userId = req.user.id;
-        const file = req.file; 
-        const { submissionText } = req.body;
+  try {
+    const homeworkId = req.params.id;
+    const userId = req.user.id;
+    const files = req.files;
+    const { submissionText } = req.body;
 
-        if (!file) {
-            return res.redirect(`/users/homework/${homeworkId}?error=Моля+прикачете+файл!`);
-        }
+    const homework = await Homework.findByPk(homeworkId);
+    if (!homework) return res.status(404).send("Няма такова домашно");
 
-        await HomeworkSubmission.create({
-            userId: userId,
-            homeworkId: homeworkId,
-            fileName: file.originalname,
-            filePath: file.filename,
-            submissionText: submissionText
-        });
-
-        res.redirect(`/users/homework/${homeworkId}?success=Домашното+е+предадено+успешно!`);
-
-    } catch (error) {
-        console.error("Submit Homework Error:", error);
-        res.redirect(`/users/homework/${req.params.id}?error=Възникна+грешка.`);
+    const isExpired = new Date(homework.endDate) < new Date();
+    if (isExpired) {
+      return res.redirect(
+        `/users/homework/${homeworkId}?error=Срокът+е+изтекъл!`,
+      );
     }
+
+    let [submission, created] = await HomeworkSubmission.findOrCreate({
+      where: {
+        userId: userId,
+        homeworkId: homeworkId,
+      },
+      defaults: { submissionText: "" },
+    });
+
+    if (submissionText !== undefined) {
+      submission.submissionText = submissionText;
+      await submission.save();
+    }
+
+    if (files && files.length > 0) {
+      const fileData = files.map((f) => ({
+        fileName: f.originalname,
+        filePath: f.filename,
+        mimeType: f.mimetype,
+        submissionId: submission.id,
+      }));
+
+      await SubmissionFile.bulkCreate(fileData);
+    }
+
+    res.redirect(
+      `/users/homework/${homeworkId}?success=Решението+е+запазено+успешно!`,
+    );
+  } catch (error) {
+    console.error("Submit Homework Error:", error);
+    res.redirect(`/users/homework/${req.params.id}?error=Възникна+грешка.`);
+  }
+};
+
+exports.deleteSubmissionFile = async (req, res) => {
+  try {
+    const fileId = req.params.fileId;
+    const userId = req.user.id;
+
+    const file = await SubmissionFile.findByPk(fileId, {
+      include: {
+        model: HomeworkSubmission,
+        where: { userId: userId },
+        include: [Homework],
+      },
+    });
+
+    if (!file) {
+      return res.redirect("back");
+    }
+
+    const isExpired =
+      new Date(file.HomeworkSubmission.Homework.endDate) < new Date();
+    if (isExpired) {
+      return res.redirect(
+        `/users/homework/${file.HomeworkSubmission.homeworkId}?error=Срокът+е+изтекъл!`,
+      );
+    }
+
+    const absolutePath = path.join(
+      __dirname,
+      "../private_uploads",
+      file.filePath,
+    );
+    if (fs.existsSync(absolutePath)) {
+      fs.unlinkSync(absolutePath);
+    }
+
+    const homeworkId = file.HomeworkSubmission.homeworkId;
+    await file.destroy();
+
+    res.redirect(`/users/homework/${homeworkId}?success=Файлът+е+изтрит.`);
+  } catch (error) {
+    console.error("Delete File Error:", error);
+    res.redirect("back");
+  }
+};
+
+exports.downloadSubmissionFile = async (req, res) => {
+  try {
+    const fileId = req.params.fileId;
+    const userId = req.user.id;
+
+    const file = await SubmissionFile.findByPk(fileId, {
+      include: {
+        model: HomeworkSubmission,
+        where: { userId: userId },
+      },
+    });
+
+    if (!file) {
+      return res.status(404).send("Файлът не е намерен или нямате достъп.");
+    }
+
+    const absolutePath = path.join(
+      __dirname,
+      "../private_uploads",
+      file.filePath,
+    );
+
+    res.download(absolutePath, file.fileName, (err) => {
+      if (err) {
+        console.error("File download error:", err);
+        if (!res.headersSent) {
+          res.status(404).send("Файлът липсва на сървъра.");
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Download Error:", error);
+    res.status(500).send("Грешка при сваляне.");
+  }
 };
