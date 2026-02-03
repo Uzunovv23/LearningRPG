@@ -35,5 +35,6 @@ router.post(
 );
 
 router.get("/homework/:id/submissions", adminController.viewHomeworkSubmissions);
+router.post("/submission/:id/grade", adminController.gradeHomeworkSubmission);
 
 module.exports = router;

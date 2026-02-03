@@ -544,3 +544,28 @@ exports.viewHomeworkSubmissions = async (req, res) => {
     res.status(500).send("Грешка при зареждане на предаванията.");
   }
 };
+
+exports.gradeHomeworkSubmission = async (req, res) => {
+  try {
+    const submissionId = req.params.id;
+    const { grade, feedback } = req.body;
+
+    const submission = await HomeworkSubmission.findByPk(submissionId);
+
+    if (!submission) {
+      return res.status(404).send("Предаването не е намерено.");
+    }
+
+    submission.grade = parseInt(grade);
+    submission.feedback = feedback || null;
+
+    await submission.save();
+
+    res.redirect(
+      `/admin/homework/${submission.homeworkId}/submissions?success=Оценката+е+запазена!`,
+    );
+  } catch (error) {
+    console.error("Grade Submission Error:", error);
+    res.status(500).send("Грешка при оценяване.");
+  }
+};
