@@ -49,29 +49,37 @@ block content
             if quest.Homework && quest.Homework.length > 0
                 .list-group.shadow-sm
                     each hw in quest.Homework
+                        - const mySub = hw.HomeworkSubmissions && hw.HomeworkSubmissions[0]
                         - const isExpired = new Date(hw.endDate) < new Date()
                         
-                        a.list-group-item.list-group-item-action.d-flex.justify-content-between.align-items-center(
-                            href=`/users/homework/${hw.id}`
-                            class=isExpired ? 'list-group-item-light text-muted' : ''
-                        )
+                        a.list-group-item.list-group-item-action.d-flex.justify-content-between.align-items-center(href=`/users/homework/${hw.id}`)
                             div
                                 div.d-flex.align-items-center
-                                    if isExpired
+                                    if mySub && mySub.grade
+                                        i.fas.fa-check-circle.text-success.me-2
+                                    else if mySub
+                                        i.fas.fa-paper-plane.text-info.me-2
+                                    else if isExpired
                                         i.fas.fa-lock.text-danger.me-2
                                     else
-                                        i.fas.fa-pen-fancy.text-success.me-2
+                                        i.fas.fa-pen-fancy.text-primary.me-2
                                     
                                     h5.mb-1.fw-bold #{hw.title}
                                 
-                                small
+                                small.text-muted
                                     i.far.fa-clock.me-1
                                     | Краен срок: #{new Date(hw.endDate).toLocaleDateString('bg-BG')}
                             
                             div
-                                if isExpired
+                                if mySub && mySub.grade
+                                    span.badge.bg-success
+                                        | Оценка: #{mySub.grade}
+                                else if mySub
+                                    span.badge.bg-warning.text-dark
+                                        | Неоценено
+                                else if isExpired
                                     span.badge.bg-secondary Приключило
                                 else
-                                    i.fas.fa-chevron-right.text-primary
+                                    span.badge.bg-primary Предай
             else
                 .alert.alert-light.border.text-muted Все още няма домашни.

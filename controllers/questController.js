@@ -8,7 +8,8 @@ const {
   Score,
   HeroBalance,
   Homework,
-  HomeworkMaterial, 
+  HomeworkMaterial,
+  HomeworkSubmission,
 } = require("../models");
 
 exports.index = async (req, res) => {
@@ -33,6 +34,9 @@ exports.show = async (req, res) => {
     const questId = req.params.id;
     const { status, msg } = req.query;
 
+    const currentUser = req.user || req.session.user;
+    const userId = currentUser ? currentUser.id : null;
+
     const quest = await Quest.findByPk(questId, {
       include: [
         {
@@ -41,16 +45,23 @@ exports.show = async (req, res) => {
         },
         {
           model: Homework,
-          include: [HomeworkMaterial],
+          include: [
+            { model: HomeworkMaterial },
+            {
+              model: HomeworkSubmission,
+              required: false,
+              where: { userId: userId },
+            },
+          ],
         },
       ],
+      order: [[{ model: Homework }, "endDate", "ASC"]],
     });
 
     if (!quest) {
       return res.status(404).render("error", { message: "Quest not found." });
     }
 
-    const currentUser = req.user || req.session.user;
     let isEnrolled = false;
     let isCompleted = false;
 
