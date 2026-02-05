@@ -1,0 +1,82 @@
+extends ../layout
+
+block content
+  .container.mt-5
+    .text-center.mb-5
+        h1.fw-bold.text-primary.display-4
+            i.fas.fa-dungeon.me-3
+            | Артефакти на Знанието
+        p.lead.text-muted.fs-4.mt-3
+            | Специални магически предмети, които печелиш чрез отлични оценки на 
+            strong.text-primary Домашни работи!
+
+    .card.border-0.shadow-sm.mb-5(style="background: linear-gradient(to right, #f8f9fa, #e9ecef);")
+        .card-body.p-5.text-center
+            h3.text-dark.mb-4 
+                i.fas.fa-scroll.me-2.text-primary
+                | Как да отключиш Артефакти?
+            
+            p.fs-5.mb-5 Когато учителят оцени твоето домашно, системата автоматично хвърля зарчето (RNG).
+            
+            .row.justify-content-center
+                .col-md-5.mb-4
+                    .card.border-0.shadow.h-100
+                        .card-body.p-4.border-start.border-5.border-success
+                            h2.text-success.fw-bold 
+                                i.fas.fa-star.me-2
+                                | Оценка 5
+                            p.mb-0.text-muted (Много добър)
+                            hr
+                            span.badge.bg-success.fs-6.p-2 
+                                i.fas.fa-gift.me-2
+                                | Шанс за 1 Артефакт
+
+                .col-md-5.mb-4
+                    .card.border-0.shadow.h-100
+                        .card-body.p-4.border-start.border-5.border-warning
+                            h2.text-warning.text-dark.fw-bold 
+                                i.fas.fa-trophy.me-2
+                                | Оценка 6
+                            p.mb-0.text-muted (Отличен)
+                            hr
+                            span.badge.bg-warning.text-dark.fs-6.p-2 
+                                i.fas.fa-gifts.me-2
+                                | Шанс за 2 Артефакта!
+
+    h3.mb-4.border-bottom.pb-3.text-primary 
+        i.fas.fa-gem.me-2
+        | Възможни Награди
+    
+    if items.length === 0
+        .alert.alert-warning Няма намерени артефакти в базата.
+    else
+        .row
+            each item in items
+                .col-md-4.mb-4
+                    .card.h-100.shadow.border-0.item-card-hover(style="transition: transform 0.3s;")
+                        - let headerClass = 'bg-secondary'
+                        - let iconColor = 'text-white'
+                        - let typeName = ''
+                        
+                        if item.type === 'quiz_help'
+                            - headerClass = 'bg-primary bg-gradient' 
+                            - typeName = 'Помощ за Тест'
+                        else if item.type === 'booster'
+                            - headerClass = 'bg-warning bg-gradient' 
+                            - iconColor = 'text-dark'
+                            - typeName = 'Усилвател (XP/Coins)'
+                        else if item.type === 'time_bender'
+                            - headerClass = 'bg-info bg-gradient'
+                            - iconColor = 'text-dark'
+                            - typeName = 'Контрол на Времето'
+
+                        .card-header.text-center.py-4(class=headerClass)
+                            i(class=`fas ${item.icon} fa-4x ${iconColor}` style="filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.3));")
+                        
+                        .card-body.text-center.p-4
+                            h4.card-title.fw-bold.mb-2 #{item.name}
+                            
+                            span.badge.rounded-pill.mb-3.px-3.py-2(class=`${item.type === 'booster' || item.type === 'time_bender' ? 'bg-light text-dark border' : 'bg-light text-primary border'}`) 
+                                | #{typeName}
+                            
+                            p.card-text.text-muted.mt-2 #{item.description}
