@@ -36,10 +36,51 @@ block content
                     p.text-muted.small.fst-italic Още #{1000 - (hero.xp % 1000)} XP до следващо ниво!
 
         .card.shadow-sm.mb-5.border-0
+            .card-header.bg-dark.text-white.p-3.border-bottom-0
+                h3.mb-0 
+                    i.fas.fa-hiking.me-2
+                    | Моята Раница
+            
+            .card-body.p-4.bg-light
+                if !inventory || inventory.length === 0
+                    .text-center.py-5.text-muted
+                        i.fas.fa-box-open.fa-4x.mb-3.text-secondary(style="opacity: 0.5")
+                        h4 Раницата е празна
+                        p.mb-0 Нямаш активни артефакти.
+                        p Изкарвай оценки 5 и 6 на домашните, за да спечелиш!
+                        a.btn.btn-outline-primary.mt-3(href="/items") 
+                            i.fas.fa-gem.me-2
+                            | Виж наградите
+                else
+                    .row
+                        each slot in inventory
+                            .col-md-4.col-lg-3.mb-4
+                                .card.h-100.shadow-sm.border-0
+                                    - const item = slot.DroppedItem
+                                    - let headerClass = 'bg-secondary'
+                                    if item.type === 'quiz_help'
+                                        - headerClass = 'bg-primary text-white'
+                                    else if item.type === 'booster'
+                                        - headerClass = 'bg-warning text-dark'
+                                    else if item.type === 'time_bender'
+                                        - headerClass = 'bg-info text-dark'
+
+                                    .card-header.text-center.py-3(class=headerClass)
+                                        i(class=`fas ${item.icon} fa-3x`)
+                                    
+                                    .card-body.text-center.p-3
+                                        h6.fw-bold.mb-1 #{item.name}
+                                        small.text-muted.d-block.mb-2 #{item.description}
+                                        
+                                        button.btn.btn-sm.btn-outline-dark.w-100(disabled title="Скоро!") 
+                                            i.fas.fa-hand-sparkles.me-1
+                                            | Използвай
+
+        .card.shadow-sm.mb-5.border-0
           .card-header.bg-white.border-bottom.py-3
             h4.mb-0.text-primary 
                 i.fas.fa-book-journal-whills.me-2
-                | Дневник на приключенията & Бележник
+                | Дневник на приключенията
           
           .card-body.p-4
             if journal.length === 0
