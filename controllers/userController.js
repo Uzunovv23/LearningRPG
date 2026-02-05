@@ -13,6 +13,8 @@ const {
   HomeworkMaterial,
   HomeworkSubmission,
   SubmissionFile,
+  Inventory,
+  DroppedItem,
 } = require("../models");
 
 exports.show = async (req, res) => {
@@ -56,6 +58,14 @@ exports.show = async (req, res) => {
       ],
     });
 
+    const inventory = await Inventory.findAll({
+      where: {
+        userId: userId,
+        isUsed: false,
+      },
+      include: [DroppedItem],
+    });
+
     const journal = heroQuests
       .filter((hq) => hq.Quest)
       .map((hq) => {
@@ -87,6 +97,7 @@ exports.show = async (req, res) => {
       title: "Моят Герой",
       hero: hero,
       journal: journal,
+      inventory: inventory,
     });
   } catch (error) {
     console.error("Hero Controller Error:", error);
@@ -100,18 +111,18 @@ exports.show = async (req, res) => {
 exports.getHomework = async (req, res) => {
   try {
     const homeworkId = req.params.id;
-    const userId = req.user.id; 
+    const userId = req.user.id;
 
     const homework = await Homework.findByPk(homeworkId, {
       include: [
-        { model: Quest, attributes: ["title"] }, 
+        { model: Quest, attributes: ["title"] },
         { model: HomeworkMaterial },
-        { 
-            model: HomeworkSubmission, 
-            required: false, 
-            where: { userId: userId },
-            include: [SubmissionFile] 
-        } 
+        {
+          model: HomeworkSubmission,
+          required: false,
+          where: { userId: userId },
+          include: [SubmissionFile],
+        },
       ],
     });
 
@@ -126,7 +137,7 @@ exports.getHomework = async (req, res) => {
       homework: homework,
       submission: mySubmission,
       query: req.query,
-      currentUser: req.user 
+      currentUser: req.user,
     });
   } catch (error) {
     console.error("Get Homework Error:", error);
