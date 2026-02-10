@@ -47,10 +47,27 @@ exports.showLoginForm = (req, res) => {
   res.render("login", { title: "Вход" });
 };
 
-exports.login = passport.authenticate("local", {
-  successRedirect: "/",
-  failureRedirect: "/login",
-});
+exports.login = (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+
+    if (!user) {
+      return res.render("login", {
+        title: "Вход",
+        error: "Грешен имейл или парола! Моля, опитайте отново.",
+      });
+    }
+
+    req.logIn(user, (err) => {
+      if (err) {
+        return next(err);
+      }
+      return res.redirect("/");
+    });
+  })(req, res, next);
+};
 
 exports.logout = (req, res, next) => {
   req.logout(function (err) {
