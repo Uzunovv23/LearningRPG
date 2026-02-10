@@ -4,18 +4,28 @@ block content
   .container.mt-5
     .row.justify-content-center
       .col-md-6
-        .card
-          .card-header.bg-success.text-white Вход в играта
-          .card-body
+        .card.shadow-lg
+          .card-header.bg-success.text-white.text-center
+            h3 Вход в играта
+          .card-body.p-4
+            
+            if error
+              .alert.alert-danger.alert-dismissible.fade.show(role="alert")
+                i.fas.fa-exclamation-circle.me-2
+                | #{error}
+                button.btn-close(type="button" data-bs-dismiss="alert" aria-label="Close")
+
             form(action="/login" method="POST")
               .mb-3
-                label.form-label Имейл
-                input.form-control(type="email" name="email" required)
+                label.form-label(for="email") Имейл
+                input.form-control(type="email" name="email" id="email" required)
               .mb-3
-                label.form-label Парола
-                input.form-control(type="password" name="password" required)
-              button.btn.btn-primary.w-100(type="submit") Влез
+                label.form-label(for="password") Парола
+                input.form-control(type="password" name="password" id="password" required)
+              
+              .d-grid
+                button.btn.btn-primary(type="submit") Влез
             
-            p.mt-3.text-center
-              | Нямаш герой? 
+          .card-footer.text-center
+            p.mb-0 Нямаш герой? 
               a(href="/register") Регистрирай се
