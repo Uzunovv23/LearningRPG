@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Inventory.belongsTo(models.User, { foreignKey: "userId" });
       Inventory.belongsTo(models.DroppedItem, { foreignKey: "itemId" });
+      Inventory.belongsTo(models.HomeworkSubmission, { foreignKey: "submissionId" });
     }
   }
 
@@ -19,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
+      submissionId: {
+        type: DataTypes.INTEGER,
+        allowNull: true, 
+      },
       isUsed: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
@@ -28,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
       sequelize,
       modelName: "Inventory",
       tableName: "Inventories",
-    },
+    }
   );
   return Inventory;
 };

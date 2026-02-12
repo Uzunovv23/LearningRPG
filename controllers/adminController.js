@@ -13,8 +13,48 @@ const {
   HomeworkMaterial,
   HomeworkSubmission,
   SubmissionFile,
+  Inventory,
+  DroppedItem,
   sequelize,
 } = require("../models");
+
+const giveRewards = async (userId, submissionId, grade, t) => {
+  let itemsCount = 0;
+
+  await Inventory.destroy({
+    where: {
+      submissionId: submissionId,
+      isUsed: false,
+    },
+    transaction: t,
+  });
+
+  if (grade === 5) itemsCount = 1;
+  if (grade === 6) itemsCount = 2;
+
+  if (itemsCount > 0) {
+    const randomItems = await DroppedItem.findAll({
+      order: sequelize.random(),
+      limit: itemsCount,
+      transaction: t,
+    });
+
+    for (const item of randomItems) {
+      await Inventory.create(
+        {
+          userId: userId,
+          itemId: item.id,
+          submissionId: submissionId,
+          isUsed: false,
+        },
+        { transaction: t },
+      );
+    }
+
+    return randomItems.length;
+  }
+  return 0;
+};
 
 exports.showCreateQuestForm = (req, res) => {
   res.render("admin/create_quest", { title: "Създаване на Куест" });
@@ -546,25 +586,48 @@ exports.viewHomeworkSubmissions = async (req, res) => {
 };
 
 exports.gradeHomeworkSubmission = async (req, res) => {
+  const t = await sequelize.transaction();
+
   try {
     const submissionId = req.params.id;
     const { grade, feedback } = req.body;
+    const gradeNum = parseInt(grade);
 
-    const submission = await HomeworkSubmission.findByPk(submissionId);
+    const submission = await HomeworkSubmission.findByPk(submissionId, {
+      transaction: t,
+    });
 
     if (!submission) {
+      await t.rollback();
       return res.status(404).send("Предаването не е намерено.");
     }
 
-    submission.grade = parseInt(grade);
+    submission.grade = gradeNum;
     submission.feedback = feedback || null;
+    await submission.save({ transaction: t });
 
-    await submission.save();
+    const rewardsCount = await giveRewards(
+      submission.userId,
+      submission.id,
+      gradeNum,
+      t,
+    );
+
+    let message = "Оценката е обновена!";
+    if (gradeNum >= 5) {
+      message += ` Наличните бонуси са актуализирани: ${rewardsCount} артефакт(а).`;
+    } else {
+      message +=
+        " Бонусите от това домашно бяха премахнати (ако не са използвани).";
+    }
+
+    await t.commit();
 
     res.redirect(
-      `/admin/homework/${submission.homeworkId}/submissions?success=Оценката+е+запазена!`,
+      `/admin/homework/${submission.homeworkId}/submissions?success=${encodeURIComponent(message)}`,
     );
   } catch (error) {
+    await t.rollback();
     console.error("Grade Submission Error:", error);
     res.status(500).send("Грешка при оценяване.");
   }
