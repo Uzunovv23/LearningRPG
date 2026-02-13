@@ -10,6 +10,9 @@ const {
   Homework,
   HomeworkMaterial,
   HomeworkSubmission,
+  Inventory,
+  DroppedItem,
+  sequelize,
 } = require("../models");
 
 exports.index = async (req, res) => {
@@ -101,6 +104,11 @@ exports.show = async (req, res) => {
 exports.showQuiz = async (req, res) => {
   try {
     const { id, quizId } = req.params;
+    const userId = req.user
+      ? req.user.id
+      : req.session.user
+        ? req.session.user.id
+        : null;
 
     const quiz = await Quiz.findOne({
       where: { id: quizId, questId: id },
@@ -121,10 +129,27 @@ exports.showQuiz = async (req, res) => {
       return res.status(404).send("Quiz not found.");
     }
 
+    let jokerCount = 0;
+    if (userId) {
+      jokerCount = await Inventory.count({
+        where: {
+          userId: userId,
+          isUsed: false,
+        },
+        include: [
+          {
+            model: DroppedItem,
+            where: { name: "Жокера" },
+          },
+        ],
+      });
+    }
+
     res.render("quests/quiz", {
       title: quiz.title,
       questId: id,
       quiz: quiz,
+      jokerCount: jokerCount,
     });
   } catch (error) {
     console.error(error);
@@ -243,5 +268,70 @@ exports.submitQuiz = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send("Error processing results.");
+  }
+};
+
+exports.useJoker = async (req, res) => {
+  try {
+    const userId = req.user
+      ? req.user.id
+      : req.session.user
+        ? req.session.user.id
+        : null;
+    const { questionId } = req.body;
+
+    if (!userId)
+      return res
+        .status(401)
+        .json({ success: false, message: "Не сте логнат." });
+
+    const jokerItem = await Inventory.findOne({
+      where: { userId: userId, isUsed: false },
+      include: [
+        {
+          model: DroppedItem,
+          where: { name: "Жокера" },
+        },
+      ],
+    });
+
+    if (!jokerItem) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Нямаш налични Жокери!" });
+    }
+
+    jokerItem.isUsed = true;
+    await jokerItem.save();
+
+    const question = await Question.findByPk(questionId, {
+      include: [Answer],
+    });
+
+    if (!question) return res.status(404).json({ success: false });
+
+    const correctAnswer = question.Answers.find((a) => a.isCorrect);
+    const wrongAnswers = question.Answers.filter((a) => !a.isCorrect);
+
+    const randomWrong =
+      wrongAnswers[Math.floor(Math.random() * wrongAnswers.length)];
+
+    const idsToKeep = [correctAnswer.id, randomWrong.id];
+
+    const remainingJokers = await Inventory.count({
+      where: { userId: userId, isUsed: false },
+      include: [{ model: DroppedItem, where: { name: "Жокера" } }],
+    });
+
+    return res.json({
+      success: true,
+      keepIds: idsToKeep,
+      remainingJokers: remainingJokers,
+    });
+  } catch (error) {
+    console.error("Joker Error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Грешка при използване на жокера." });
   }
 };

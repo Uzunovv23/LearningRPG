@@ -1,6 +1,8 @@
 extends ../layout
 
 block content
+  link(rel='stylesheet', href='/stylesheets/quiz-gameplay.css')
+
   .container.mt-5
     .row.justify-content-center
       .col-lg-8
@@ -10,36 +12,63 @@ block content
             i.fas.fa-arrow-left.me-2
             | Back to Quest Menu
         
-        .card.mb-4.shadow-sm.border-0
-          .card-header.bg-primary.text-white
-            h2.mb-0= quiz.title
+        .d-flex.justify-content-between.align-items-center.mb-4
+            h2.text-primary.mb-0= quiz.title
             
-          .card-body
-            form(action=`/quests/${questId}/quizzes/${quiz.id}/submit` method="POST")
-              
-              if quiz.Questions && quiz.Questions.length > 0
-                each question, qIndex in quiz.Questions
-                  .mb-4.p-3.border.rounded.bg-light
-                    h5.mb-3
-                      span.badge.bg-secondary.me-2 #{question.points} pts
-                      | #{question.text}
+            if jokerCount > 0
+                span.badge.bg-indigo.fs-5.shadow-sm#globalJokerCount(style="background-color: #6610f2;")
+                    i.fas.fa-dice-d20.me-2
+                    | Жокери: #{jokerCount}
+            else
+                span.badge.bg-secondary.fs-5#globalJokerCount
+                    i.fas.fa-dice-d20.me-2
+                    | Жокери: 0
+
+        form(action=`/quests/${questId}/quizzes/${quiz.id}/submit` method="POST")
+          
+          if quiz.Questions && quiz.Questions.length > 0
+            each question, qIndex in quiz.Questions
+              .card.mb-4.shadow-sm.border-0(id=`question-card-${question.id}`)
+                .card-header.bg-light.d-flex.justify-content-between.align-items-center.p-3
+                    div
+                        span.badge.bg-primary.me-2 #{question.points} pts
+                        span.fw-bold Въпрос #{qIndex + 1}
                     
+                    if jokerCount > 0
+                        button.btn.btn-sm.btn-warning.btn-joker.fw-bold(
+                            type="button" 
+                            data-question-id=question.id
+                            title="Премахва 50% от грешните отговори"
+                        )
+                            i.fas.fa-magic.me-1
+                            | 50/50
+                    else
+                        button.btn.btn-sm.btn-secondary.btn-joker(type="button" disabled)
+                            i.fas.fa-magic.me-1
+                            | 50/50
+
+                .card-body.p-4
+                    h5.mb-4 #{question.text}
+                
                     .row
                       each answer in question.Answers
-                        .col-md-6.mb-2
-                          .form-check.p-3.border.rounded.bg-white
-                            input.form-check-input(
+                        .col-md-6.mb-3(id=`answer-container-${answer.id}`)
+                          .form-check.p-3.rounded.bg-white.h-100.d-flex.align-items-center.answer-box
+                            input.form-check-input.me-3(
                               type="radio" 
                               name=`answers[${question.id}]` 
                               value=answer.id 
                               id=`ans_${answer.id}`
+                              style="transform: scale(1.2);"
                               required
                             )
-                            label.form-check-label.w-100(for=`ans_${answer.id}`)
+                            label.form-check-label.w-100.cursor-pointer(for=`ans_${answer.id}`)
                               = answer.text
 
-                button.btn.btn-success.btn-lg.w-100.mb-3(type="submit") 
-                  i.fas.fa-check-circle.me-2
-                  | Submit Answers
-              else
-                p.text-center.text-muted No questions in this quiz.
+            button.btn.btn-success.btn-lg.w-100.mb-5.py-3.shadow(type="submit") 
+              i.fas.fa-check-circle.me-2
+              | Предай теста
+          else
+            .alert.alert-warning.text-center Няма въпроси в този тест.
+
+  script(src='/javascripts/quiz-joker.js')
