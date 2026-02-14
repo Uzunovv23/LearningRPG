@@ -130,17 +130,18 @@ exports.showQuiz = async (req, res) => {
     }
 
     let jokerCount = 0;
+    let elixirCount = 0;
+
     if (userId) {
       jokerCount = await Inventory.count({
-        where: {
-          userId: userId,
-          isUsed: false,
-        },
+        where: { userId: userId, isUsed: false },
+        include: [{ model: DroppedItem, where: { name: "Жокера" } }],
+      });
+
+      elixirCount = await Inventory.count({
+        where: { userId: userId, isUsed: false },
         include: [
-          {
-            model: DroppedItem,
-            where: { name: "Жокера" },
-          },
+          { model: DroppedItem, where: { name: "Еликсир на паметта" } },
         ],
       });
     }
@@ -150,6 +151,7 @@ exports.showQuiz = async (req, res) => {
       questId: id,
       quiz: quiz,
       jokerCount: jokerCount,
+      elixirCount: elixirCount,
     });
   } catch (error) {
     console.error(error);
@@ -287,12 +289,7 @@ exports.useJoker = async (req, res) => {
 
     const jokerItem = await Inventory.findOne({
       where: { userId: userId, isUsed: false },
-      include: [
-        {
-          model: DroppedItem,
-          where: { name: "Жокера" },
-        },
-      ],
+      include: [{ model: DroppedItem, where: { name: "Жокера" } }],
     });
 
     if (!jokerItem) {
@@ -304,18 +301,13 @@ exports.useJoker = async (req, res) => {
     jokerItem.isUsed = true;
     await jokerItem.save();
 
-    const question = await Question.findByPk(questionId, {
-      include: [Answer],
-    });
-
+    const question = await Question.findByPk(questionId, { include: [Answer] });
     if (!question) return res.status(404).json({ success: false });
 
     const correctAnswer = question.Answers.find((a) => a.isCorrect);
     const wrongAnswers = question.Answers.filter((a) => !a.isCorrect);
-
     const randomWrong =
       wrongAnswers[Math.floor(Math.random() * wrongAnswers.length)];
-
     const idsToKeep = [correctAnswer.id, randomWrong.id];
 
     const remainingJokers = await Inventory.count({
@@ -333,5 +325,62 @@ exports.useJoker = async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Грешка при използване на жокера." });
+  }
+};
+
+exports.useElixir = async (req, res) => {
+  try {
+    const userId = req.user
+      ? req.user.id
+      : req.session.user
+        ? req.session.user.id
+        : null;
+    const { questionId } = req.body;
+
+    if (!userId)
+      return res
+        .status(401)
+        .json({ success: false, message: "Не сте логнат." });
+
+    const elixirItem = await Inventory.findOne({
+      where: { userId: userId, isUsed: false },
+      include: [{ model: DroppedItem, where: { name: "Еликсир на паметта" } }],
+    });
+
+    if (!elixirItem) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Нямаш наличен Еликсир на паметта!" });
+    }
+
+    elixirItem.isUsed = true;
+    await elixirItem.save();
+
+    const question = await Question.findByPk(questionId, { include: [Answer] });
+    if (!question) return res.status(404).json({ success: false });
+
+    const correctAnswer = question.Answers.find((a) => a.isCorrect);
+
+    if (!correctAnswer)
+      return res.status(500).json({
+        success: false,
+        message: "Грешка с въпроса (няма верен отговор).",
+      });
+
+    const remainingElixirs = await Inventory.count({
+      where: { userId: userId, isUsed: false },
+      include: [{ model: DroppedItem, where: { name: "Еликсир на паметта" } }],
+    });
+
+    return res.json({
+      success: true,
+      correctAnswerId: correctAnswer.id,
+      remainingElixirs: remainingElixirs,
+    });
+  } catch (error) {
+    console.error("Elixir Error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Грешка при използване на еликсира." });
   }
 };

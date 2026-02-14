@@ -12,6 +12,7 @@ router.get("/:id/quizzes/:quizId", questController.showQuiz);
 
 router.post("/:id/quizzes/:quizId/submit", questController.submitQuiz);
 
-router.post('/use-joker', questController.useJoker);
+router.post("/use-joker", questController.useJoker);
+router.post("/use-elixir", questController.useElixir);
 
 module.exports = router;
