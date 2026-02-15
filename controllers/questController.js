@@ -115,22 +115,16 @@ exports.showQuiz = async (req, res) => {
       include: [
         {
           model: Question,
-          include: [
-            {
-              model: Answer,
-              attributes: ["id", "text"],
-            },
-          ],
+          include: [{ model: Answer, attributes: ["id", "text"] }],
         },
       ],
     });
 
-    if (!quiz) {
-      return res.status(404).send("Quiz not found.");
-    }
+    if (!quiz) return res.status(404).send("Quiz not found.");
 
     let jokerCount = 0;
     let elixirCount = 0;
+    let scrollCount = 0;
 
     if (userId) {
       jokerCount = await Inventory.count({
@@ -144,6 +138,13 @@ exports.showQuiz = async (req, res) => {
           { model: DroppedItem, where: { name: "Еликсир на паметта" } },
         ],
       });
+
+      scrollCount = await Inventory.count({
+        where: { userId: userId, isUsed: false },
+        include: [
+          { model: DroppedItem, where: { name: "Свитък на Мъдростта" } },
+        ],
+      });
     }
 
     res.render("quests/quiz", {
@@ -152,6 +153,7 @@ exports.showQuiz = async (req, res) => {
       quiz: quiz,
       jokerCount: jokerCount,
       elixirCount: elixirCount,
+      scrollCount: scrollCount,
     });
   } catch (error) {
     console.error(error);
@@ -165,14 +167,14 @@ exports.submitQuiz = async (req, res) => {
     const userId = req.user ? req.user.id : req.session.user.id;
     const userAnswers = req.body;
 
+    const useScroll = req.body.useScroll === "on";
+
     const quiz = await Quiz.findOne({
       where: { id: quizId, questId: id },
       include: [{ model: Question, include: [Answer] }],
     });
 
-    if (!quiz) {
-      return res.status(404).send("Quiz not found.");
-    }
+    if (!quiz) return res.status(404).send("Quiz not found.");
 
     let totalPoints = 0;
     let maxPoints = 0;
@@ -181,7 +183,6 @@ exports.submitQuiz = async (req, res) => {
     quiz.Questions.forEach((question) => {
       const qPoints = Number(question.points) || 10;
       maxPoints += qPoints;
-
       const submittedAnswerId = userAnswers[`answers[${question.id}]`];
 
       if (submittedAnswerId) {
@@ -200,33 +201,45 @@ exports.submitQuiz = async (req, res) => {
     const isCurrentAttemptSuccess = scorePercentage >= PASS_THRESHOLD;
 
     const alreadyPassed = await Score.findOne({
-      where: {
-        userId: userId,
-        quizId: quizId,
-        isPassed: true,
-      },
+      where: { userId: userId, quizId: quizId, isPassed: true },
     });
 
     let xpAwarded = 0;
     let coinsAwarded = 0;
     let message = "";
+    let scrollUsed = false;
 
     if (isCurrentAttemptSuccess) {
       if (!alreadyPassed) {
         const hero = await Hero.findOne({ where: { userId: userId } });
 
         if (hero) {
-          const rewardXP = quiz.xpReward || 50;
+          let rewardXP = quiz.xpReward || 50;
+          let rewardCoins = totalPoints;
+
+          if (useScroll) {
+            const scrollItem = await Inventory.findOne({
+              where: { userId: userId, isUsed: false },
+              include: [
+                { model: DroppedItem, where: { name: "Свитък на Мъдростта" } },
+              ],
+            });
+
+            if (scrollItem) {
+              rewardXP *= 2;
+              rewardCoins *= 2;
+
+              scrollItem.isUsed = true;
+              await scrollItem.save();
+              scrollUsed = true;
+            }
+          }
+
           hero.xp += rewardXP;
           await hero.save();
 
-          const rewardCoins = totalPoints;
-
           const [balance] = await HeroBalance.findOrCreate({
-            where: {
-              heroId: hero.id,
-              questId: id,
-            },
+            where: { heroId: hero.id, questId: id },
             defaults: { amount: 0 },
           });
 
@@ -236,15 +249,17 @@ exports.submitQuiz = async (req, res) => {
           xpAwarded = rewardXP;
           coinsAwarded = rewardCoins;
 
-          message = `Поздравления! Мисията изпълнена (над 30%): +${rewardXP} XP и +${rewardCoins} KC!`;
+          message = `Поздравления! Мисията изпълнена: +${rewardXP} XP и +${rewardCoins} KC!`;
+          if (scrollUsed) {
+            message += " (Използван Свитък на Мъдростта: x2 Бонус!)";
+          }
         }
       } else {
         message =
           "Тестът е преминат успешно! (XP и KC вече са получени при предишен опит)";
       }
     } else {
-      message =
-        "Слаб резултат. Трябват ти поне 30% верни отговори (за Среден 3), за да получиш награда. Опитай пак!";
+      message = "Слаб резултат. Опитай пак! (Минимум 30% за преминаване)";
     }
 
     await Score.create({
@@ -266,6 +281,7 @@ exports.submitQuiz = async (req, res) => {
       coinsEarned: coinsAwarded,
       message: message,
       isSuccess: isCurrentAttemptSuccess,
+      scrollUsed: scrollUsed,
     });
   } catch (error) {
     console.error(error);
