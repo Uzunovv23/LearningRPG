@@ -125,6 +125,7 @@ exports.showQuiz = async (req, res) => {
     let jokerCount = 0;
     let elixirCount = 0;
     let scrollCount = 0;
+    let midasCount = 0;
 
     if (userId) {
       jokerCount = await Inventory.count({
@@ -145,6 +146,13 @@ exports.showQuiz = async (req, res) => {
           { model: DroppedItem, where: { name: "Свитък на Мъдростта" } },
         ],
       });
+
+      midasCount = await Inventory.count({
+        where: { userId: userId, isUsed: false },
+        include: [
+          { model: DroppedItem, where: { name: "Ръкавицата на Мидас" } },
+        ],
+      });
     }
 
     res.render("quests/quiz", {
@@ -154,6 +162,7 @@ exports.showQuiz = async (req, res) => {
       jokerCount: jokerCount,
       elixirCount: elixirCount,
       scrollCount: scrollCount,
+      midasCount: midasCount,
     });
   } catch (error) {
     console.error(error);
@@ -168,6 +177,7 @@ exports.submitQuiz = async (req, res) => {
     const userAnswers = req.body;
 
     const useScroll = req.body.useScroll === "on";
+    const useMidas = req.body.useMidas === "on";
 
     const quiz = await Quiz.findOne({
       where: { id: quizId, questId: id },
@@ -207,7 +217,9 @@ exports.submitQuiz = async (req, res) => {
     let xpAwarded = 0;
     let coinsAwarded = 0;
     let message = "";
+
     let scrollUsed = false;
+    let midasUsed = false;
 
     if (isCurrentAttemptSuccess) {
       if (!alreadyPassed) {
@@ -228,10 +240,23 @@ exports.submitQuiz = async (req, res) => {
             if (scrollItem) {
               rewardXP *= 2;
               rewardCoins *= 2;
-
               scrollItem.isUsed = true;
               await scrollItem.save();
               scrollUsed = true;
+            }
+          } else if (useMidas) {
+            const midasItem = await Inventory.findOne({
+              where: { userId: userId, isUsed: false },
+              include: [
+                { model: DroppedItem, where: { name: "Ръкавицата на Мидас" } },
+              ],
+            });
+
+            if (midasItem) {
+              rewardCoins *= 2;
+              midasItem.isUsed = true;
+              await midasItem.save();
+              midasUsed = true;
             }
           }
 
@@ -250,16 +275,16 @@ exports.submitQuiz = async (req, res) => {
           coinsAwarded = rewardCoins;
 
           message = `Поздравления! Мисията изпълнена: +${rewardXP} XP и +${rewardCoins} KC!`;
-          if (scrollUsed) {
-            message += " (Използван Свитък на Мъдростта: x2 Бонус!)";
-          }
+
+          if (scrollUsed) message += " (📜 Свитък активен!)";
+          if (midasUsed) message += " (🧤 Мидас активен!)";
         }
       } else {
         message =
           "Тестът е преминат успешно! (XP и KC вече са получени при предишен опит)";
       }
     } else {
-      message = "Слаб резултат. Опитай пак! (Минимум 30% за преминаване)";
+      message = "Слаб резултат. Опитай пак!";
     }
 
     await Score.create({
@@ -282,6 +307,7 @@ exports.submitQuiz = async (req, res) => {
       message: message,
       isSuccess: isCurrentAttemptSuccess,
       scrollUsed: scrollUsed,
+      midasUsed: midasUsed,
     });
   } catch (error) {
     console.error(error);

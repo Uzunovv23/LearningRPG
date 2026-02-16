@@ -31,6 +31,11 @@ block content
                         i.fas.fa-scroll.me-2
                         | Свитъци: #{scrollCount}
 
+                if midasCount > 0
+                    span.badge.fs-5.shadow-sm.text-white(style="background-color: #d4af37;")
+                        i.fas.fa-hand-holding-usd.me-2
+                        | Мидас: #{midasCount}
+
         form(action=`/quests/${questId}/quizzes/${quiz.id}/submit` method="POST")
           
           if quiz.Questions && quiz.Questions.length > 0
@@ -88,7 +93,7 @@ block content
                               = answer.text
 
             if scrollCount > 0
-                .card.mb-4.border-warning.shadow-sm(style="background-color: #fff3cd;")
+                .card.mb-3.border-warning.shadow-sm(style="background-color: #fff3cd;")
                     .card-body.d-flex.align-items-center.justify-content-between
                         div
                             h5.text-warning.fw-bold.mb-1 
@@ -99,7 +104,19 @@ block content
                         .form-check.form-switch.fs-4
                             input.form-check-input(type="checkbox" role="switch" id="useScrollSwitch" name="useScroll")
                             label.form-check-label.fs-6(for="useScrollSwitch") Използвай
-            else
+
+            if midasCount > 0
+                .card.mb-4.shadow-sm.text-white(style="background-color: #d4af37; border: 1px solid #b8962e;")
+                    .card-body.d-flex.align-items-center.justify-content-between
+                        div
+                            h5.fw-bold.mb-1 
+                                i.fas.fa-hand-holding-usd.me-2
+                                | Ръкавицата на Мидас
+                            p.mb-0.small(style="color: #fcfcfc;") Искаш ли двойно повече Монети (Coins)?
+                        
+                        .form-check.form-switch.fs-4
+                            input.form-check-input(type="checkbox" role="switch" id="useMidasSwitch" name="useMidas")
+                            label.form-check-label.fs-6(for="useMidasSwitch") Използвай
 
             button.btn.btn-success.btn-lg.w-100.mb-5.py-3.shadow(type="submit") 
               i.fas.fa-check-circle.me-2
@@ -108,4 +125,5 @@ block content
             .alert.alert-warning.text-center Няма въпроси в този тест.
 
   script(src='/javascripts/quiz-joker.js')
-  script(src='/javascripts/quiz-elixir.js')
+  script(src='/javascripts/quiz-elixir.js') 
+  script(src='/javascripts/quiz-bonuses.js')
