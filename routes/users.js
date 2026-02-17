@@ -32,4 +32,6 @@ router.post(
 
 router.get("/homework/file/:fileId/download", isLogged, userController.downloadSubmissionFile);
 
+router.post("/homework/use-chrono", isLogged, userController.useChronoGlass);
+
 module.exports = router;

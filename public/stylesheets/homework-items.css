@@ -1,0 +1,51 @@
+.btn-chrono {
+    transition: all 0.3s ease;
+    border-width: 2px;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(23, 162, 184, 0.2);
+}
+
+.btn-chrono:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(23, 162, 184, 0.4);
+    background-color: #17a2b8 !important;
+    color: white !important;
+    cursor: pointer;
+}
+
+.btn-chrono:active {
+    transform: translateY(0);
+}
+
+.badge-late-pass {
+    background-color: #ffc107;
+    color: #212529;
+    border: 1px dashed #d39e00;
+    animation: pulse-ticket 2s infinite;
+}
+
+@keyframes pulse-ticket {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.badge-extension {
+    background-color: #e0f7fa; 
+    color: #006064;
+    border: 1px solid #4dd0e1;
+}
+
+.hw-status-active {
+    border-left: 4px solid #0d6efd;
+}
+
+.hw-status-expired {
+    border-left: 4px solid #dc3545;
+    background-color: #fff5f5;
+}
+
+.hw-status-submitted {
+    border-left: 4px solid #198754;
+    background-color: #f8fff9;
+}

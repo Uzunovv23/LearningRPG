@@ -132,12 +132,31 @@ exports.getHomework = async (req, res) => {
 
     const mySubmission = homework.HomeworkSubmissions[0] || null;
 
+    let chronoCount = 0;
+    let latePassCount = 0;
+
+    if (userId) {
+      chronoCount = await Inventory.count({
+        where: { userId: userId, isUsed: false },
+        include: [{ model: DroppedItem, where: { name: "Пясъчен часовник" } }],
+      });
+
+      latePassCount = await Inventory.count({
+        where: { userId: userId, isUsed: false },
+        include: [
+          { model: DroppedItem, where: { name: "Билет за Закъснение" } },
+        ],
+      });
+    }
+
     res.render("users/homework/show", {
       title: homework.title,
       homework: homework,
       submission: mySubmission,
       query: req.query,
       currentUser: req.user,
+      chronoCount: chronoCount,
+      latePassCount: latePassCount,
     });
   } catch (error) {
     console.error("Get Homework Error:", error);
@@ -155,25 +174,58 @@ exports.submitHomework = async (req, res) => {
     const homework = await Homework.findByPk(homeworkId);
     if (!homework) return res.status(404).send("Няма такова домашно");
 
-    const isExpired = new Date(homework.endDate) < new Date();
-    if (isExpired) {
-      return res.redirect(
-        `/users/homework/${homeworkId}?error=Срокът+е+изтекъл!`,
-      );
-    }
-
     let [submission, created] = await HomeworkSubmission.findOrCreate({
       where: {
         userId: userId,
         homeworkId: homeworkId,
       },
-      defaults: { submissionText: "" },
+      defaults: {
+        submissionText: "",
+        extensionHours: 0,
+        usedLatePass: false,
+        status: "pending",
+      },
     });
+
+    const effectiveDeadline = new Date(homework.endDate);
+    if (submission.extensionHours) {
+      effectiveDeadline.setHours(
+        effectiveDeadline.getHours() + submission.extensionHours,
+      );
+    }
+
+    const now = new Date();
+    let isExpired = now > effectiveDeadline;
+    let usedLatePassNow = false;
+
+    if (isExpired) {
+      const latePassItem = await Inventory.findOne({
+        where: { userId: userId, isUsed: false },
+        include: [
+          { model: DroppedItem, where: { name: "Билет за Закъснение" } },
+        ],
+      });
+
+      if (latePassItem) {
+        latePassItem.isUsed = true;
+        await latePassItem.save();
+
+        usedLatePassNow = true;
+        isExpired = false;
+        submission.usedLatePass = true;
+      } else {
+        return res.redirect(
+          `/users/homework/${homeworkId}?error=Срокът+е+изтекъл+и+нямате+Билет+за+Закъснение!`,
+        );
+      }
+    }
 
     if (submissionText !== undefined) {
       submission.submissionText = submissionText;
-      await submission.save();
     }
+
+    submission.status = "submitted";
+    await submission.save();
 
     if (files && files.length > 0) {
       const fileData = files.map((f) => ({
@@ -186,9 +238,10 @@ exports.submitHomework = async (req, res) => {
       await SubmissionFile.bulkCreate(fileData);
     }
 
-    res.redirect(
-      `/users/homework/${homeworkId}?success=Решението+е+запазено+успешно!`,
-    );
+    let msg = "Решението+е+запазено+успешно!";
+    if (usedLatePassNow) msg += "+(Използван+Билет+за+Закъснение!)";
+
+    res.redirect(`/users/homework/${homeworkId}?success=${msg}`);
   } catch (error) {
     console.error("Submit Homework Error:", error);
     res.redirect(`/users/homework/${req.params.id}?error=Възникна+грешка.`);
@@ -212,11 +265,19 @@ exports.deleteSubmissionFile = async (req, res) => {
       return res.redirect("back");
     }
 
-    const isExpired =
-      new Date(file.HomeworkSubmission.Homework.endDate) < new Date();
+    const submission = file.HomeworkSubmission;
+    const effectiveDeadline = new Date(submission.Homework.endDate);
+    if (submission.extensionHours) {
+      effectiveDeadline.setHours(
+        effectiveDeadline.getHours() + submission.extensionHours,
+      );
+    }
+
+    const isExpired = effectiveDeadline < new Date();
+
     if (isExpired) {
       return res.redirect(
-        `/users/homework/${file.HomeworkSubmission.homeworkId}?error=Срокът+е+изтекъл!`,
+        `/users/homework/${submission.homeworkId}?error=Срокът+е+изтекъл!`,
       );
     }
 
@@ -229,7 +290,7 @@ exports.deleteSubmissionFile = async (req, res) => {
       fs.unlinkSync(absolutePath);
     }
 
-    const homeworkId = file.HomeworkSubmission.homeworkId;
+    const homeworkId = submission.homeworkId;
     await file.destroy();
 
     res.redirect(`/users/homework/${homeworkId}?success=Файлът+е+изтрит.`);
@@ -280,5 +341,69 @@ exports.downloadSubmissionFile = async (req, res) => {
   } catch (error) {
     console.error("Download Error:", error);
     res.status(500).send("Грешка при сваляне.");
+  }
+};
+
+exports.useChronoGlass = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { homeworkId } = req.body;
+
+    const chronoItem = await Inventory.findOne({
+      where: { userId: userId, isUsed: false },
+      include: [{ model: DroppedItem, where: { name: "Пясъчен часовник" } }],
+    });
+
+    if (!chronoItem) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Нямаш Пясъчен часовник!" });
+    }
+
+    const homework = await Homework.findByPk(homeworkId);
+    if (!homework)
+      return res
+        .status(404)
+        .json({ success: false, message: "Домашното не е намерено." });
+
+    let [submission, created] = await HomeworkSubmission.findOrCreate({
+      where: { userId: userId, homeworkId: homeworkId },
+      defaults: { status: "pending", extensionHours: 0 },
+    });
+
+    const currentDeadline = new Date(homework.endDate);
+    currentDeadline.setHours(
+      currentDeadline.getHours() + (submission.extensionHours || 0),
+    );
+
+    if (new Date() > currentDeadline) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Срокът вече е изтекъл! Пясъчният часовник не действа назад във времето.",
+      });
+    }
+
+    submission.extensionHours = (submission.extensionHours || 0) + 24;
+    await submission.save();
+
+    chronoItem.isUsed = true;
+    await chronoItem.save();
+
+    const remaining = await Inventory.count({
+      where: { userId: userId, isUsed: false },
+      include: [{ model: DroppedItem, where: { name: "Пясъчен часовник" } }],
+    });
+
+    return res.json({
+      success: true,
+      message: "Срокът е удължен с 24 часа!",
+      remaining: remaining,
+    });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ success: false, message: "Грешка при използване на часовника." });
   }
 };

@@ -1,6 +1,8 @@
 extends ../layout
 
 block content
+  link(rel='stylesheet', href='/stylesheets/homework-items.css')
+
   .container.mt-5
     
     if alertMessage
@@ -50,36 +52,64 @@ block content
                 .list-group.shadow-sm
                     each hw in quest.Homework
                         - const mySub = hw.HomeworkSubmissions && hw.HomeworkSubmissions[0]
-                        - const isExpired = new Date(hw.endDate) < new Date()
                         
-                        a.list-group-item.list-group-item-action.d-flex.justify-content-between.align-items-center(href=`/users/homework/${hw.id}`)
-                            div
-                                div.d-flex.align-items-center
-                                    if mySub && mySub.grade
-                                        i.fas.fa-check-circle.text-success.me-2
-                                    else if mySub
-                                        i.fas.fa-paper-plane.text-info.me-2
-                                    else if isExpired
-                                        i.fas.fa-lock.text-danger.me-2
-                                    else
-                                        i.fas.fa-pen-fancy.text-primary.me-2
+                        - const hasFiles = mySub && mySub.SubmissionFiles && mySub.SubmissionFiles.length > 0
+                        - const isGraded = mySub && (mySub.grade || mySub.status === 'graded')
+                        - const isSubmitted = mySub && (mySub.status === 'submitted' || hasFiles)
+                        
+                        - let extension = (mySub && mySub.extensionHours) ? mySub.extensionHours : 0
+                        - let originalDate = new Date(hw.endDate)
+                        - let effectiveDate = new Date(originalDate.getTime() + extension * 60 * 60 * 1000)
+                        - const isExpired = effectiveDate < new Date()
+
+                        .list-group-item.flex-column.align-items-start
+                            .d-flex.w-100.justify-content-between.mb-2
+                                h5.mb-1.fw-bold 
+                                    a.text-decoration-none.text-dark(href=`/users/homework/${hw.id}`) #{hw.title}
                                     
-                                    h5.mb-1.fw-bold #{hw.title}
-                                
-                                small.text-muted
-                                    i.far.fa-clock.me-1
-                                    | Краен срок: #{new Date(hw.endDate).toLocaleDateString('bg-BG')}
+                                    if extension > 0
+                                        span.badge.bg-info.text-dark.ms-2(title="Удължен срок") +#{extension}ч
+                                    if mySub && mySub.usedLatePass
+                                        span.badge.bg-warning.text-dark.ms-2(title="Ползван Билет") Билет
+
+                                small
+                                    if isGraded
+                                        span.badge.bg-success Оценка: #{mySub.grade}
+                                    else if isSubmitted
+                                        span.badge.bg-warning.text-dark Предадено
+                                    else if isExpired
+                                        span.badge.bg-danger Изтекъл срок
+                                    else
+                                        span.badge.bg-primary Активно
+
+                            p.mb-1
+                                i.far.fa-clock.me-1
+                                | Краен срок: #{effectiveDate.toLocaleString('bg-BG')}
                             
-                            div
-                                if mySub && mySub.grade
-                                    span.badge.bg-success
-                                        | Оценка: #{mySub.grade}
-                                else if mySub
-                                    span.badge.bg-warning.text-dark
-                                        | Неоценено
-                                else if isExpired
-                                    span.badge.bg-secondary Приключило
+                            if !isExpired && !isSubmitted && !isGraded
+                                if chronoCount > 0
+                                    button.btn.btn-sm.btn-outline-info.btn-chrono.mt-2(
+                                        data-homework-id=hw.id
+                                        title="Удължи с 24 часа"
+                                    ) 
+                                        i.fas.fa-hourglass-half.me-1
+                                        | Удължи (+24ч) (Имаш: #{chronoCount})
+
+                            - const isAdmin = (typeof user !== 'undefined' && user.role === 'admin') || (typeof currentUser !== 'undefined' && currentUser.role === 'admin')
+                            
+                            if isAdmin
+                                - const subCount = hw.HomeworkSubmissions ? hw.HomeworkSubmissions.length : 0
+                                
+                                if subCount > 0
+                                    a.btn.btn-sm.btn-dark.mt-2.ms-2(href=`/admin/homework/${hw.id}/submissions`)
+                                        i.fas.fa-gavel.me-1
+                                        | Оценяване на предадени домашни
                                 else
-                                    span.badge.bg-primary Предай
+                                    button.btn.btn-sm.btn-secondary.mt-2.ms-2(disabled)
+                                        i.fas.fa-ban.me-1
+                                        | Няма предадени домашни
+
             else
                 .alert.alert-light.border.text-muted Все още няма домашни.
+
+  script(src='/javascripts/homework-items.js')

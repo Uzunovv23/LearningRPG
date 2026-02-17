@@ -87,6 +87,14 @@ exports.show = async (req, res) => {
       }
     }
 
+    let chronoCount = 0;
+    if (currentUser) {
+      chronoCount = await Inventory.count({
+        where: { userId: currentUser.id, isUsed: false },
+        include: [{ model: DroppedItem, where: { name: "Пясъчен часовник" } }],
+      });
+    }
+
     res.render("quests/show", {
       title: quest.title,
       quest: quest,
@@ -94,6 +102,7 @@ exports.show = async (req, res) => {
       isCompleted: isCompleted,
       alertType: status,
       alertMessage: msg,
+      chronoCount: chronoCount,
     });
   } catch (error) {
     console.error(error);

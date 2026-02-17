@@ -13,15 +13,15 @@ module.exports = (sequelize, DataTypes) => {
   HomeworkSubmission.init(
     {
       submissionText: {
-        type: DataTypes.TEXT, 
+        type: DataTypes.TEXT,
         allowNull: true,
-      },     
+      },
       grade: {
-        type: DataTypes.INTEGER, 
+        type: DataTypes.INTEGER,
         allowNull: true,
       },
       feedback: {
-        type: DataTypes.TEXT, 
+        type: DataTypes.TEXT,
         allowNull: true,
       },
       userId: {
@@ -32,6 +32,21 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
+      extensionHours: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+      usedLatePass: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      status: {
+        type: DataTypes.ENUM('pending', 'submitted', 'graded'),
+        allowNull: false,
+        defaultValue: 'pending', 
+      }
     },
     {
       sequelize,
