@@ -12,6 +12,7 @@ const {
   HomeworkSubmission,
   Inventory,
   DroppedItem,
+  User,
   sequelize,
 } = require("../models");
 
@@ -435,3 +436,4 @@ exports.useElixir = async (req, res) => {
       .json({ success: false, message: "Грешка при използване на еликсира." });
   }
 };
+

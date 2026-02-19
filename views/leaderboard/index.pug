@@ -1,0 +1,71 @@
+extends ../layout
+
+block content
+  .container.mt-5
+    .text-center.mb-5
+      h1.display-4.fw-bold.text-warning
+        i.fas.fa-trophy.me-3
+        | Зала на Славата
+      p.lead Виж кой води по знания в различните предмети!
+
+    .row.justify-content-center
+      .col-md-8
+        if quests && quests.length > 0
+          .card.shadow-sm.mb-4.border-0
+            .card-body.bg-light.rounded
+              form(action="/leaderboard" method="GET")
+                .row.align-items-center
+                  .col-auto
+                    label.col-form-label.fw-bold.fs-5(for="questId") Избери предмет:
+                  .col
+                    select.form-select.form-select-lg#questId(name="questId" onchange="this.form.submit()")
+                      each q in quests
+                        option(value=q.id selected=(selectedQuest && selectedQuest.id == q.id)) #{q.title}
+                  
+        else
+          .alert.alert-warning Няма активни куестове в момента.
+
+        if selectedQuest
+          h3.text-center.mb-4.text-primary
+            i.fas.fa-star.me-2
+            | Топ 10 в #{selectedQuest.title}
+
+          .card.shadow-lg.border-0.rounded-lg.mb-5
+            .card-body.p-0
+              if leaderboard && leaderboard.length > 0
+                table.table.table-hover.table-striped.mb-0.text-center.align-middle
+                  thead.table-dark
+                    tr
+                      th(scope="col" style="width: 15%") Ранг
+                      th(scope="col" style="width: 55%") Ученик
+                      th(scope="col" style="width: 30%") Точки (Куиз)
+                  tbody
+                    each entry, index in leaderboard
+                      - let rank = index + 1
+                      tr(class=rank <= 3 ? 'fw-bold' : '')
+                        td
+                          if rank === 1
+                            span.badge.bg-warning.text-dark.fs-5 🥇 1
+                          else if rank === 2
+                            span.badge.bg-secondary.fs-5 🥈 2
+                          else if rank === 3
+                            span.badge.bg-danger.fs-5(style="background-color: #cd7f32 !important;") 🥉 3
+                          else
+                            span.text-muted.fs-5 ##{rank}
+                        
+                        td.text-start
+                          .d-flex.align-items-center
+                            .avatar-placeholder.bg-primary.text-white.rounded-circle.me-3.d-flex.justify-content-center.align-items-center(style="width: 40px; height: 40px;")
+                              i.fas.fa-user
+                            
+                            span.fs-5 #{entry.user ? entry.user.username : 'Неизвестен'}
+                            
+                        td
+                          span.text-primary.fs-5.fw-bold
+                            i.fas.fa-star.me-2
+                            | #{entry.totalPoints}
+              else
+                .alert.alert-light.text-center.p-5.m-0
+                  i.fas.fa-ghost.fa-3x.text-muted.mb-3
+                  h3 Все още няма решени тестове за този предмет.
+                  p Бъди първият!
