@@ -14,6 +14,7 @@ var questsRouter = require('./routes/quests');
 var shopRouter = require('./routes/shop');
 var droppedItemsRouter = require('./routes/droppedItems');
 var leaderboardRouter = require('./routes/leaderboard');
+var arenaRouter = require('./routes/arena');
 
 var app = express();
 
@@ -72,6 +73,7 @@ app.use('/quests', questsRouter);
 app.use('/shop', shopRouter);
 app.use('/items', droppedItemsRouter);
 app.use('/leaderboard', leaderboardRouter);
+app.use('/arena', arenaRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

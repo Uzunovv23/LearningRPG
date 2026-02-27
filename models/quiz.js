@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
       Quiz.belongsTo(models.Quest, { foreignKey: 'questId', onDelete: 'CASCADE' });
       Quiz.hasMany(models.Question, { foreignKey: 'quizId', onDelete: 'CASCADE' });
       Quiz.hasMany(models.Score, { foreignKey: 'quizId' });
+      Quiz.belongsToMany(models.Duel, { through: models.DuelQuiz, foreignKey: 'quizId' });
     }
   }
   
