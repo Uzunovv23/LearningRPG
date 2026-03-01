@@ -1,0 +1,70 @@
+extends ../layout
+
+block content
+  .container.mt-5
+    .text-center.mb-5
+      h1.display-4.fw-bold.text-danger
+        i.fas.fa-crosshairs.me-3
+        | Избор на Противник
+      p.lead Намерихме следните герои, които са достойни за твоя залог!
+
+    .row
+      .col-lg-4.mb-4
+        .card.shadow-sm.border-0.bg-dark.text-white.rounded-lg.h-100
+          .card-body.p-4
+            h4.text-warning.border-bottom.border-secondary.pb-2.mb-4
+              i.fas.fa-scroll.me-2
+              | Детайли за битката
+            
+            .mb-4
+              h6.text-muted ТВОЯТ ЗАЛОГ:
+              .d-flex.align-items-center.bg-secondary.bg-opacity-25.p-3.rounded
+                i.fas.fa-gem.fa-2x.text-info.me-3
+                div
+                  strong.fs-5 #{wagerItem.DroppedItem.name}
+
+            div
+              h6.text-muted ИЗБРАНИ ТЕМИ:
+              ul.list-group.list-group-flush.rounded
+                each quiz in selectedQuizzes
+                  li.list-group-item.bg-secondary.bg-opacity-25.text-white.border-secondary.d-flex.justify-content-between.align-items-center
+                    span #{quiz.title}
+                    span.badge.bg-primary.rounded-pill #{quiz.Quest.title}
+            
+            .mt-5.text-center
+              a.btn.btn-outline-light.w-100(href="/arena")
+                i.fas.fa-arrow-left.me-2
+                | Промени настройките
+
+      .col-lg-8
+        if opponents.length === 0
+          .alert.alert-warning.p-5.text-center.shadow-sm.rounded-lg
+            i.fas.fa-ghost.fa-3x.mb-3.text-muted
+            h3 Няма намерени съперници!
+            p.lead Нито един друг герой все още не е преминал всички избрани тестове.
+            p Опитай да премахнеш някой от по-трудните тестове или предизвикай приятелите си да ги решат!
+            a.btn.btn-warning.mt-3.fw-bold(href="/arena") Върни се в Лобито
+        else
+          .row.g-3
+            each opponent in opponents
+              .col-md-6
+                .card.shadow-sm.border-danger.h-100.hover-scale(style="transition: transform 0.2s;")
+                  .card-body.text-center.p-4
+                    .avatar-placeholder.bg-danger.text-white.rounded-circle.mx-auto.mb-3.d-flex.justify-content-center.align-items-center(style="width: 80px; height: 80px; font-size: 2rem;")
+                      i.fas.fa-user-ninja
+                    h4.fw-bold #{opponent.User.username}
+                    p.text-muted
+                      span.badge.bg-success.fs-6
+                        i.fas.fa-level-up-alt.me-1
+                        | Лвл #{opponent.level}
+                    
+                    form(action="/arena/challenge" method="POST")
+                      input(type="hidden" name="opponentId" value=opponent.id)
+                      input(type="hidden" name="wagerId" value=wagerItem.id)
+                      
+                      each qId in rawQuizIds
+                        input(type="hidden" name="quizIds" value=qId)
+                      
+                      button.btn.btn-danger.w-100.fw-bold.mt-3(type="submit")
+                        i.fas.fa-gavel.me-2
+                        | Предизвикай!

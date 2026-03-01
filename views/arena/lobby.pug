@@ -1,0 +1,128 @@
+extends ../layout
+
+block content
+  link(rel="stylesheet", href="/stylesheets/arena.css")
+
+  .container.mt-5
+    .text-center.mb-5
+      h1.display-4.fw-bold.text-danger
+        i.fas.fa-khanda.me-3
+        | Бойна Арена
+      p.lead Предизвикай съученици на дуел, заложи артефакт и докажи знанията си!
+
+    if challenges && challenges.length > 0
+      .row.justify-content-center.mb-5
+        .col-lg-10
+          h3.text-danger.fw-bold.mb-3
+            i.fas.fa-exclamation-circle.me-2.pulse-animation
+            | Имаш #{challenges.length} ново предизвикателство!
+          
+          .row.g-4
+            each challenge in challenges
+              .col-md-6
+                .card.border-danger.shadow-lg.bg-dark.text-white.h-100
+                  .card-header.bg-danger.text-white.fw-bold
+                    i.fas.fa-user-shield.me-2
+                    | От: #{challenge.Initiator.User.username} (Лвл #{challenge.Initiator.level})
+                  
+                  .card-body.d-flex.flex-column
+                    .mb-3
+                      strong.text-warning 🎁 Залог на противника: 
+                      span.badge.bg-warning.text-dark.fs-6.ms-1 #{challenge.InitiatorWager.DroppedItem.name}
+                    
+                    .mb-4
+                      strong.text-info 📚 Теми на двубоя:
+                      ul.list-unstyled.mt-2.mb-0
+                        each quiz in challenge.Quizzes
+                          li.mb-1
+                            i.fas.fa-check.text-success.me-2
+                            | #{quiz.title} 
+                            small.text-muted (#{quiz.Quest.title})
+
+                    hr.border-secondary.mt-auto
+                    
+                    form.mb-2(action="/arena/accept" method="POST")
+                      input(type="hidden" name="duelId" value=challenge.id)
+                      .form-group.mb-3
+                        label.form-label.text-light.small Твоят залог (Задължителен):
+                        select.form-select.form-select-sm.border-danger(name="opponentWagerId" required)
+                          option(value="" disabled selected) -- Избери артефакт --
+                          if inventory && inventory.length > 0
+                            each item in inventory
+                              option(value=item.id) 📦 #{item.DroppedItem.name}
+                          else
+                            option(value="" disabled) Нямаш налични артефакти!
+                            
+                      if inventory && inventory.length > 0
+                        button.btn.btn-success.w-100.fw-bold(type="submit")
+                          i.fas.fa-check-circle.me-2
+                          | Приеми Дуела!
+                      else
+                        button.btn.btn-secondary.w-100.fw-bold(type="button" disabled)
+                          | Нямаш предмети за залог
+                    
+                    form(action="/arena/decline" method="POST")
+                      input(type="hidden" name="duelId" value=challenge.id)
+                      button.btn.btn-outline-light.btn-sm.w-100(type="submit" onclick="return confirm('Сигурен ли си, че искаш да избягаш от битката?');")
+                        i.fas.fa-times.me-2
+                        | Откажи
+
+    if quizzes.length === 0
+      .alert.alert-warning.text-center.p-4.shadow-sm
+        i.fas.fa-exclamation-triangle.fa-2x.mb-3.text-warning
+        h4 Нямаш успешно преминати тестове!
+        p.mb-0 Трябва да изкараш поне 30% на някой тест, за да отключиш Арената.
+        a.btn.btn-primary.mt-3(href="/quests") Към Мисиите
+
+    else if inventory.length === 0
+      .alert.alert-danger.text-center.p-4.shadow-sm
+        i.fas.fa-box-open.fa-2x.mb-3.text-danger
+        h4 Нямаш налични Артефакти за залагане!
+        p.mb-0 Арената изисква залог. Печели отлични оценки, за да намериш артефакти (Dropped Items).
+        a.btn.btn-primary.mt-3(href="/quests") Към Мисиите
+
+    else
+      .row.justify-content-center
+        .col-lg-8
+          .card.shadow-lg.border-0.rounded-lg.overflow-hidden
+            .card-header.bg-dark.text-white.text-center.py-3
+              h4.mb-0 
+                i.fas.fa-cogs.me-2
+                | Настройки на Дуела
+            
+            .card-body.p-4.p-md-5.bg-light
+              form#arenaForm(action="/arena/matchmake" method="GET")
+                
+                h5.text-primary.mb-3.fw-bold
+                  i.fas.fa-gem.me-2
+                  | 1. Избери Артефакт за залог
+                p.text-muted.small.mb-2 Ако загубиш дуела, този предмет ще бъде даден на опонента ти!
+                
+                .form-group.mb-5
+                  select.form-select.form-select-lg.border-primary.shadow-sm(name="wagerId" required)
+                    option(value="" disabled selected) -- Избери предмет от инвентара --
+                    each item in inventory
+                      option(value=item.id) 📦 #{item.DroppedItem.name}
+
+                hr.my-4.text-muted
+
+                h5.text-primary.mb-3.fw-bold
+                  i.fas.fa-book-open.me-2
+                  | 2. Избери Теми за двубоя
+                p.text-muted.small.mb-3 Маркирай тестовете, от които искаш да се изтеглят разбърканите въпроси. (Минимум 1)
+                
+                .row.g-3
+                  each quiz in quizzes
+                    .col-md-6
+                      .form-check.card.h-100.border-0.shadow-sm.p-3.hover-scale
+                        input.form-check-input.fs-4.me-3.mt-1(type="checkbox" name="quizIds" value=quiz.id id=`quiz_${quiz.id}`)
+                        label.form-check-label.w-100.stretched-link(for=`quiz_${quiz.id}` style="cursor: pointer;")
+                          strong.d-block.text-dark #{quiz.title}
+                          span.badge.bg-info.text-dark.mt-1 #{quiz.Quest.title}
+
+                .text-center.mt-5
+                  button.btn.btn-danger.btn-lg.px-5.py-3.shadow.fw-bold(type="submit" id="submitBtn")
+                    i.fas.fa-search.me-2
+                    | Намери Опонент
+
+  script(src="/javascripts/arena-lobby.js")

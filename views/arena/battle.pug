@@ -1,0 +1,66 @@
+extends ../layout
+
+block content
+  link(rel="stylesheet", href="/stylesheets/arena.css")
+
+  .container.mt-4.mb-5
+    .row.align-items-center.mb-5.bg-dark.text-white.rounded-lg.shadow-lg.p-4.border.border-danger
+      .col-md-5.text-center
+        .avatar-placeholder.bg-primary.text-white.rounded-circle.mx-auto.mb-2.d-flex.justify-content-center.align-items-center(style="width: 80px; height: 80px; font-size: 2rem;")
+          i.fas.fa-user-astronaut
+        h3.fw-bold.text-primary #{duel.Initiator.User.username}
+        p.mb-1 Лвл #{duel.Initiator.level}
+        .badge.bg-secondary.p-2.mt-2.border.border-primary
+          small.d-block.text-warning Залог:
+          strong 📦 #{duel.InitiatorWager.DroppedItem.name}
+
+      .col-md-2.text-center
+        h1.display-3.fw-bold.text-danger.pulse-animation VS
+        i.fas.fa-bolt.text-warning.fs-2
+
+      .col-md-5.text-center
+        .avatar-placeholder.bg-danger.text-white.rounded-circle.mx-auto.mb-2.d-flex.justify-content-center.align-items-center(style="width: 80px; height: 80px; font-size: 2rem;")
+          i.fas.fa-user-ninja
+        h3.fw-bold.text-danger #{duel.Opponent.User.username}
+        p.mb-1 Лвл #{duel.Opponent.level}
+        .badge.bg-secondary.p-2.mt-2.border.border-danger
+          small.d-block.text-warning Залог:
+          strong 📦 #{duel.OpponentWager.DroppedItem.name}
+
+    .row.justify-content-center
+      .col-lg-10
+        .card.shadow-lg.border-0.rounded-lg
+          .card-header.bg-danger.text-white.text-center.py-3
+            h4.mb-0 
+              i.fas.fa-brain.me-2
+              | Реши въпросите преди противника!
+          
+          .card-body.p-4.p-md-5.bg-light
+            form#battleForm(action="/arena/submit-battle" method="POST")
+              input(type="hidden" name="duelId" value=duel.id)
+
+              each question, index in questions
+                .card.mb-4.border-secondary.shadow-sm
+                  .card-header.bg-dark.text-white
+                    strong Въпрос #{index + 1}: 
+                    span #{question.text}
+                  
+                  .card-body
+                    .row.g-3
+                      each answer in question.Answers
+                        .col-md-6
+                          .form-check.border.rounded.p-3.h-100.bg-white.hover-scale
+                            input.form-check-input.fs-5.me-2(
+                              type="radio" 
+                              name=`q_${question.id}` 
+                              value=answer.id 
+                              id=`ans_${answer.id}` 
+                              required
+                            )
+                            label.form-check-label.w-100.stretched-link(for=`ans_${answer.id}` style="cursor: pointer;")
+                              | #{answer.text}
+
+              .text-center.mt-5
+                button.btn.btn-danger.btn-lg.px-5.py-3.shadow.fw-bold.w-100(type="submit" id="submitBattleBtn" onclick="return confirm('Готов ли си да предадеш отговорите?');")
+                  i.fas.fa-fist-raised.me-2
+                  | Нанеси Удар! (Предай Теста)
