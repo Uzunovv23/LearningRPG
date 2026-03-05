@@ -39,15 +39,12 @@ exports.getLobby = async (req, res) => {
     const availableQuizzes = Array.from(uniqueQuizzesMap.values());
 
     const inventoryItems = await Inventory.findAll({
-      where: { userId: userId, isLocked: false },
+      where: { userId: userId, isLocked: false, isUsed: false },
       include: [{ model: DroppedItem, required: true }],
     });
 
     const incomingChallenges = await Duel.findAll({
-      where: {
-        opponentId: currentHero.id,
-        status: "pending",
-      },
+      where: { opponentId: currentHero.id, status: "pending" },
       include: [
         {
           model: Hero,
@@ -59,11 +56,65 @@ exports.getLobby = async (req, res) => {
           as: "InitiatorWager",
           include: [{ model: DroppedItem }],
         },
+        { model: Quiz, include: [{ model: Quest }] },
+      ],
+    });
+
+    const activeBattles = await Duel.findAll({
+      where: {
+        [Op.or]: [
+          { initiatorId: currentHero.id },
+          { opponentId: currentHero.id },
+        ],
+        status: "active",
+      },
+      include: [
         {
-          model: Quiz,
-          include: [{ model: Quest }],
+          model: Hero,
+          as: "Initiator",
+          include: [{ model: User, attributes: ["username"] }],
+        },
+        {
+          model: Hero,
+          as: "Opponent",
+          include: [{ model: User, attributes: ["username"] }],
         },
       ],
+    });
+
+    const sentChallenges = await Duel.findAll({
+      where: { initiatorId: currentHero.id, status: "pending" },
+      include: [
+        {
+          model: Hero,
+          as: "Opponent",
+          include: [{ model: User, attributes: ["username"] }],
+        },
+      ],
+    });
+
+    const battleHistory = await Duel.findAll({
+      where: {
+        [Op.or]: [
+          { initiatorId: currentHero.id },
+          { opponentId: currentHero.id },
+        ],
+        status: "finished",
+      },
+      include: [
+        {
+          model: Hero,
+          as: "Initiator",
+          include: [{ model: User, attributes: ["username"] }],
+        },
+        {
+          model: Hero,
+          as: "Opponent",
+          include: [{ model: User, attributes: ["username"] }],
+        },
+      ],
+      order: [["updatedAt", "DESC"]],
+      limit: 5,
     });
 
     res.render("arena/lobby", {
@@ -72,6 +123,9 @@ exports.getLobby = async (req, res) => {
       quizzes: availableQuizzes,
       inventory: inventoryItems,
       challenges: incomingChallenges,
+      activeBattles: activeBattles,
+      sentChallenges: sentChallenges,
+      battleHistory: battleHistory,
     });
   } catch (error) {
     console.error("Arena Lobby Error:", error);
@@ -490,7 +544,7 @@ exports.postSubmitBattle = async (req, res) => {
         const winnerHero = await Hero.findByPk(winnerId, { transaction: t });
 
         await Inventory.update(
-          { userId: winnerHero.userId, isLocked: false },
+          { userId: winnerHero.userId, isLocked: false, isUsed: false },
           { where: { id: loserWagerId }, transaction: t },
         );
 

@@ -49,16 +49,18 @@ block content
                     .row.g-3
                       each answer in question.Answers
                         .col-md-6
-                          .form-check.border.rounded.p-3.h-100.bg-white.hover-scale
-                            input.form-check-input.fs-5.me-2(
+                          .form-check.border.rounded.p-0.h-100.bg-white.hover-scale
+                            - const uniqueId = `q_${question.id}_ans_${answer.id}`
+                            
+                            input.form-check-input.ms-3.mt-3.fs-5(
                               type="radio" 
                               name=`q_${question.id}` 
                               value=answer.id 
-                              id=`ans_${answer.id}` 
+                              id=uniqueId 
                               required
                             )
-                            label.form-check-label.w-100.stretched-link(for=`ans_${answer.id}` style="cursor: pointer;")
-                              | #{answer.text}
+                            label.form-check-label.d-block.w-100.p-3(for=uniqueId style="cursor: pointer;")
+                              span.ms-1 #{answer.text}
 
               .text-center.mt-5
                 button.btn.btn-danger.btn-lg.px-5.py-3.shadow.fw-bold.w-100(type="submit" id="submitBattleBtn" onclick="return confirm('Готов ли си да предадеш отговорите?');")

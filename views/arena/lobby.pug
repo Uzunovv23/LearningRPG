@@ -9,6 +9,36 @@ block content
         i.fas.fa-khanda.me-3
         | Бойна Арена
       p.lead Предизвикай съученици на дуел, заложи артефакт и докажи знанията си!
+    
+    if activeBattles && activeBattles.length > 0
+      .row.justify-content-center.mb-4
+        .col-lg-10
+          .card.border-warning.shadow-lg.bg-dark
+            .card-header.bg-warning.text-dark.fw-bold
+              i.fas.fa-fire.me-2.pulse-animation
+              | ⚔️ Имаш Активни Битки! Влез на бойното поле!
+            .card-body
+              .row.g-3
+                each battle in activeBattles
+                  .col-md-6
+                    .border.border-warning.rounded.p-3.text-center
+                      - const opponentName = battle.initiatorId === hero.id ? battle.Opponent.User.username : battle.Initiator.User.username
+                      h5.text-white Битка срещу: 
+                        span.text-warning #{opponentName}
+                      a.btn.btn-warning.fw-bold.mt-2.w-100(href=`/arena/battle/${battle.id}`)
+                        i.fas.fa-bolt.me-2
+                        | Към Бойното Поле!
+
+    if sentChallenges && sentChallenges.length > 0
+      .row.justify-content-center.mb-5
+        .col-lg-10
+          .alert.alert-secondary.border-secondary.shadow-sm
+            h5.text-dark.mb-3
+              i.fas.fa-paper-plane.me-2
+              | Изпратени предизвикателства:
+            ul.mb-0
+              each sent in sentChallenges
+                li Изчакваме <strong>#{sent.Opponent.User.username}</strong> да приеме или откаже битката.
 
     if challenges && challenges.length > 0
       .row.justify-content-center.mb-5
@@ -66,6 +96,35 @@ block content
                       button.btn.btn-outline-light.btn-sm.w-100(type="submit" onclick="return confirm('Сигурен ли си, че искаш да избягаш от битката?');")
                         i.fas.fa-times.me-2
                         | Откажи
+
+    if battleHistory && battleHistory.length > 0
+      .row.justify-content-center.mb-5
+        .col-lg-10
+          .card.shadow-sm.bg-dark.text-white.border-secondary
+            .card-header.bg-secondary.text-white.fw-bold
+              i.fas.fa-history.me-2
+              | Архив на битките
+            .card-body.p-0
+              ul.list-group.list-group-flush
+                each battle in battleHistory
+                  li.list-group-item.bg-dark.text-white.d-flex.justify-content-between.align-items-center.border-secondary.p-3
+                    div
+                      - const opponentName = battle.initiatorId === hero.id ? battle.Opponent.User.username : battle.Initiator.User.username
+                      
+                      if battle.winnerId === hero.id
+                        span.badge.bg-success.me-2 ПОБЕДА
+                      else if battle.winnerId === null
+                        span.badge.bg-secondary.me-2 РАВЕНСТВО
+                      else
+                        span.badge.bg-danger.me-2 ЗАГУБА
+                      
+                      span Срещу 
+                        strong.text-info #{opponentName}
+                      small.text-muted.ms-2 (Кликни за детайли)
+                    
+                    a.btn.btn-sm.btn-outline-light(href=`/arena/result/${battle.id}`)
+                      i.fas.fa-eye.me-1
+                      | Резултат
 
     if quizzes.length === 0
       .alert.alert-warning.text-center.p-4.shadow-sm
