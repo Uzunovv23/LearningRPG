@@ -1,0 +1,466 @@
+
+:root {
+  --rpg-gold:        #fbbf24;
+  --rpg-gold-dim:    #92650a;
+  --rpg-blue:        #3b82f6;
+  --rpg-green:       #22c55e;
+  --rpg-red:         #ef4444;
+  --rpg-panel:       #0d1220;
+  --rpg-panel-mid:   #111827;
+  --rpg-border:      #1e3a5f;
+  --rpg-text-muted:  #64748b;
+}
+
+
+.rpg-theme {
+  position: relative;
+  min-height: 100vh;
+  padding: 0 0 4rem;
+  overflow: hidden;
+}
+
+
+.rpg-theme::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.04) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(251, 191, 36, 0.04) 0%, transparent 40%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='52' viewBox='0 0 60 52'%3E%3Cpath d='M0 26 L15 0 L45 0 L60 26 L45 52 L15 52Z' fill='none' stroke='rgba(30,58,95,0.18)' stroke-width='1'/%3E%3C/svg%3E");
+  background-size: auto, auto, 60px 52px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+
+.rpg-theme::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.08) 3px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.rpg-container {
+  position: relative;
+  z-index: 1;
+}
+
+
+#rpg-particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+
+.quest-board-header {
+  padding: 3rem 1rem 2.5rem;
+  text-align: center;
+  position: relative;
+}
+
+.quest-board-header::before,
+.quest-board-header::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 1px;
+  width: 30%;
+  background: linear-gradient(90deg, transparent, var(--rpg-gold));
+}
+.quest-board-header::before { left: 0; }
+.quest-board-header::after  { right: 0; background: linear-gradient(90deg, var(--rpg-gold), transparent); }
+
+.quest-board-eyebrow {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--rpg-gold);
+  opacity: 0.7;
+  margin-bottom: 0.5rem;
+}
+
+.quest-board-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin: 0 0 0.75rem;
+  text-shadow: 0 0 30px rgba(251, 191, 36, 0.25), 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.quest-board-title span {
+  color: var(--rpg-gold);
+}
+
+.quest-board-subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem;
+  color: rgba(255,255,255,0.5);
+  font-style: italic;
+  margin: 0;
+}
+
+.quest-board-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1.5rem auto 0;
+  max-width: 400px;
+}
+
+.quest-board-divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.5));
+}
+.quest-board-divider-line:last-child {
+  background: linear-gradient(90deg, rgba(251, 191, 36, 0.5), transparent);
+}
+
+.quest-board-divider-icon {
+  color: var(--rpg-gold);
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+
+.quest-count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: 999px;
+  padding: 0.35rem 1.2rem;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(251, 191, 36, 0.7);
+  margin-top: 1.25rem;
+}
+
+
+.rpg-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px dashed rgba(59, 130, 246, 0.4);
+  border-radius: 8px;
+  color: #93c5fd;
+  padding: 1.25rem 1.5rem;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem;
+}
+
+
+.quest-card {
+  background: linear-gradient(160deg, #0d1525 0%, #080d18 100%);
+  border: 1px solid rgba(30, 58, 95, 0.7) !important;
+  border-radius: 12px;
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(.22,.68,0,1.2), box-shadow 0.35s ease;
+
+ 
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.quest-card.card-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s ease, transform 0.5s ease,
+              box-shadow 0.35s ease;
+}
+
+
+.quest-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--rpg-gold) 50%, transparent 100%);
+  opacity: 0.6;
+  border-radius: 12px 12px 0 0;
+  transition: opacity 0.3s ease;
+}
+
+
+.quest-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(251,191,36,0.06) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.quest-card:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 20px 50px rgba(0,0,0,0.7),
+    0 0 0 1px rgba(251, 191, 36, 0.2),
+    inset 0 1px 0 rgba(255,255,255,0.07);
+}
+.quest-card:hover::after { opacity: 1; }
+.quest-card:hover::before { opacity: 1; }
+
+
+.quest-completed {
+  border-color: rgba(34, 197, 94, 0.3) !important;
+}
+.quest-completed::before {
+  background: linear-gradient(90deg, transparent 0%, var(--rpg-green) 50%, transparent 100%);
+}
+.quest-completed::after {
+  background: radial-gradient(ellipse at 50% 0%, rgba(34,197,94,0.06) 0%, transparent 70%);
+}
+.quest-completed:hover {
+  box-shadow:
+    0 20px 50px rgba(0,0,0,0.7),
+    0 0 0 1px rgba(34, 197, 94, 0.25);
+}
+
+
+.rpg-card-header {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border-bottom: 1px solid rgba(30, 58, 95, 0.6) !important;
+  padding: 1rem 1.25rem;
+  border-radius: 12px 12px 0 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.quest-title-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  letter-spacing: 0.5px;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2; 
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+}
+
+.quest-completed .quest-title-text { color: #86efac; }
+
+
+.rpg-badge-xp {
+  flex-shrink: 0;
+  background: rgba(251, 191, 36, 0.1);
+  color: var(--rpg-gold);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  border-radius: 6px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 0.3em 0.7em;
+  white-space: nowrap;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.15);
+  animation: xp-pulse 3s ease-in-out infinite;
+}
+.quest-completed .rpg-badge-xp {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--rpg-green);
+  border-color: rgba(34, 197, 94, 0.35);
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.15);
+  animation: none;
+}
+
+@keyframes xp-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(251, 191, 36, 0.15); }
+  50%       { box-shadow: 0 0 18px rgba(251, 191, 36, 0.4); }
+}
+
+
+.quest-card .card-body {
+  padding: 1.25rem;
+}
+
+.quest-description {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.88rem;
+  color: #94a3b8;
+  line-height: 1.65;
+  margin: 0;
+}
+
+
+.quest-status-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 6px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.quest-status-strip.status-active {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+}
+
+.quest-status-strip.status-completed {
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px dashed rgba(34, 197, 94, 0.4);
+  color: #86efac;
+}
+
+
+.quest-card .card-footer {
+  background: transparent !important;
+  border-top: 1px solid rgba(30, 58, 95, 0.5) !important;
+  padding: 1rem 1.25rem;
+}
+
+
+.rpg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: 6px;
+  padding: 0.55rem 1rem;
+  transition: all 0.25s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.rpg-btn i { font-size: 0.85em; }
+
+.rpg-btn-primary {
+  background: rgba(59, 130, 246, 0.12);
+  color: #93c5fd;
+  border-color: rgba(59, 130, 246, 0.45);
+}
+.rpg-btn-primary:hover {
+  background: var(--rpg-blue);
+  color: #fff;
+  border-color: var(--rpg-blue);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.45), 0 4px 12px rgba(0,0,0,0.3);
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+.rpg-btn-edit {
+  background: transparent;
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.3);
+}
+.rpg-btn-edit:hover {
+  background: rgba(148, 163, 184, 0.1);
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.6);
+}
+
+.rpg-btn-success {
+  background: rgba(34, 197, 94, 0.08);
+  color: var(--rpg-green);
+  border-color: rgba(34, 197, 94, 0.35);
+}
+.rpg-btn-success:hover {
+  background: var(--rpg-green);
+  color: #fff;
+  border-color: var(--rpg-green);
+  box-shadow: 0 0 18px rgba(34, 197, 94, 0.4);
+}
+
+.rpg-btn-delete {
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--rpg-red);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+.rpg-btn-delete:hover {
+  background: var(--rpg-red);
+  color: #fff;
+  border-color: var(--rpg-red);
+  box-shadow: 0 0 18px rgba(239, 68, 68, 0.4);
+}
+
+.rpg-btn-disabled {
+  background: rgba(0, 0, 0, 0.35);
+  color: #475569;
+  border-color: rgba(30, 58, 95, 0.4);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+
+.admin-section {
+  margin-top: 0.75rem;
+}
+
+.rpg-divider {
+  border-color: rgba(251, 191, 36, 0.12);
+  opacity: 1;
+  margin: 0.85rem 0;
+}
+
+.admin-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(251, 191, 36, 0.4);
+  text-align: center;
+  margin-bottom: 0.6rem;
+}
+
+
+.rpg-theme .text-muted {
+  color: #64748b !important;
+  font-style: italic;
+}
+
+
+@media (max-width: 576px) {
+  .quest-board-header::before,
+  .quest-board-header::after { display: none; }
+  .quest-board-title { letter-spacing: 1px; }
+}

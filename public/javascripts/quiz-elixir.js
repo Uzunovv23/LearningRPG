@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const elixirButtons = document.querySelectorAll(".btn-elixir");
+  const elixirButtons = document.querySelectorAll(".rpg-action-elixir");
 
   elixirButtons.forEach((btn) => {
     btn.addEventListener("click", async function () {
@@ -7,83 +7,77 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const questionId = this.getAttribute("data-question-id");
       const btnElement = this;
-      const originalText = btnElement.innerHTML;
+      const originalHTML = btnElement.innerHTML;
 
       btnElement.disabled = true;
-      btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+      btnElement.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i><span>...</span>';
 
       try {
         const response = await fetch("/quests/use-elixir", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ questionId: questionId }),
+          body: JSON.stringify({ questionId }),
         });
 
         const data = await response.json();
 
         if (data.success) {
           const correctInput = document.querySelector(
-            `#question-card-${questionId} input[value="${data.correctAnswerId}"]`,
+            `#question-card-${questionId} .rpg-answer-input[value="${data.correctAnswerId}"]`,
           );
 
           if (correctInput) {
-            const box = correctInput.closest(".answer-box");
-
-            if (box) {
-              box.classList.add("answer-revealed");
-
-              box.classList.remove("bg-white");
-
-              correctInput.checked = true;
-              correctInput.disabled = false;
-            } else {
-              console.error("Не намерих .answer-box елемента!");
-            }
+            const wrapper = correctInput.closest(".rpg-answer-wrap");
+            if (wrapper) wrapper.classList.add("answer-revealed");
+            correctInput.checked = true;
+            correctInput.disabled = false;
 
             const allInputs = document.querySelectorAll(
-              `#question-card-${questionId} input[name^="answers"]`,
+              `#question-card-${questionId} .rpg-answer-input`,
             );
             allInputs.forEach((input) => {
               if (input.value != data.correctAnswerId) {
                 input.disabled = true;
-                const parentBox = input.closest(".answer-box");
-                if (parentBox) parentBox.style.opacity = "0.5";
+                const wrap = input.closest(".rpg-answer-wrap");
+                if (wrap) wrap.classList.add("answer-eliminated");
               }
             });
-          } else {
-            console.error(
-              `Не намерих input с value=${data.correctAnswerId} в карта #question-card-${questionId}`,
-            );
-            alert("Грешка: Не можах да намеря верния отговор в HTML-а.");
           }
 
-          const badge = document.getElementById("globalElixirCount");
-          if (badge) {
-            badge.innerHTML = `<i class="fas fa-flask me-2"></i> Еликсири: ${data.remainingElixirs}`;
+          const slot = document.getElementById("globalElixirCount");
+          if (slot) {
+            const countEl = slot.querySelector(".rpg-item-count");
+            if (countEl) countEl.textContent = data.remainingElixirs;
             if (data.remainingElixirs === 0) {
-              badge.style.backgroundColor = "#6c757d";
+              slot.classList.remove("rpg-item-elixir");
+              slot.classList.add("rpg-item-empty");
             }
           }
 
-          btnElement.className = "btn btn-sm btn-secondary used";
-          btnElement.innerHTML = "Разкрит";
+          btnElement.className = "rpg-action-btn rpg-action-disabled used";
+          btnElement.innerHTML =
+            '<i class="fas fa-eye"></i><span>Разкрит</span>';
 
           if (data.remainingElixirs <= 0) {
-            document.querySelectorAll(".btn-elixir:not(.used)").forEach((b) => {
-              b.disabled = true;
-              b.title = "Нямаш повече еликсири";
-            });
+            document
+              .querySelectorAll(".rpg-action-elixir:not(.used)")
+              .forEach((b) => {
+                b.className = "rpg-action-btn rpg-action-disabled";
+                b.disabled = true;
+                b.title = "Нямаш повече еликсири";
+              });
           }
         } else {
           alert(data.message || "Грешка при използване на еликсира.");
           btnElement.disabled = false;
-          btnElement.innerHTML = originalText;
+          btnElement.innerHTML = originalHTML;
         }
       } catch (err) {
         console.error("Fetch Error:", err);
         alert("Възникна грешка със сървъра. Виж конзолата (F12).");
         btnElement.disabled = false;
-        btnElement.innerHTML = originalText;
+        btnElement.innerHTML = originalHTML;
       }
     });
   });

@@ -1,64 +1,111 @@
 extends ../layout
 
 block content
-  .container.mt-5
-    h1.text-center.mb-5.text-primary 🛡️ Избери своето приключение
+  link(rel='stylesheet', href='/stylesheets/quest-index.css')
 
-    if quests.length === 0
-      .alert.alert-info.text-center
-        | Все още няма налични мисии. Изчакай учителят да добави!
+  canvas#rpg-particles
 
-    .row
-      each quest in quests
-        .col-md-4.mb-4
-          div(class=`card h-100 shadow-sm quest-card ${quest.isCompleted ? 'border-success' : ''}`)
-            
-            div(class=`card-header text-white d-flex justify-content-between align-items-center ${quest.isCompleted ? 'bg-success' : 'bg-dark'}`)
-              span.fw-bold 
-                if quest.isCompleted
-                    i.fas.fa-lock.me-2
-                else
-                    i.fas.fa-book-open.me-2
-                | #{quest.title}
-              span.badge.bg-warning.text-dark #{quest.xpReward} XP
-            
-            .card-body
-              p.card-text= quest.description
-              if quest.isCompleted
-                .alert.alert-success.py-2.small.text-center.mb-0
-                    i.fas.fa-check-circle.me-1
-                    | Предметът е завършен! Оценките са налични в магазина.
-            
-            .card-footer.bg-white.border-top-0
+  .rpg-theme
+    .container-fluid.px-4.px-lg-5.rpg-container
+
+      
+      .quest-board-header
+        p.quest-board-eyebrow
+          i.fas.fa-compass.me-2
+          | Quest Board
+        h2.quest-board-title
+          | Избери своето&nbsp;
+          span приключение
+        p.quest-board-subtitle Всяка мисия е стъпка към величието
+        .quest-board-divider
+          span.quest-board-divider-line
+          span.quest-board-divider-icon
+            i.fas.fa-shield-alt
+          span.quest-board-divider-line
+        if quests.length > 0
+          div.text-center
+            span.quest-count-badge
+              i.fas.fa-scroll.me-1
+              | #{quests.length} #{quests.length === 1 ? 'мисия налична' : 'мисии налични'}
+
+      
+      if quests.length === 0
+        .row.justify-content-center.mb-5
+          .col-md-6
+            .rpg-alert
+              i.fas.fa-info-circle.fa-lg
+              span Все още няма налични мисии. Изчакай учителят да добави!
+
+      
+      .row.g-4
+        each quest in quests
+          .col-md-4
+            div(class=`card h-100 quest-card ${quest.isCompleted ? 'quest-completed' : ''}`)
+
               
-              a.btn.btn-primary.w-100.mb-2(href=`/quests/${quest.id}`) 
-                i.fas.fa-play-circle.me-2
-                | Влез в предмета
+              .rpg-card-header
+                span.quest-title-text(title=quest.title)
+                  if quest.isCompleted
+                    i.fas.fa-lock.me-2(style="color: var(--rpg-green); font-size:.85em;")
+                  else
+                    i.fas.fa-book-open.me-2(style="color: #60a5fa; font-size:.85em;")
+                  = quest.title
+                span.rpg-badge-xp #{quest.xpReward} XP
 
-              if currentUser && currentUser.role === 'admin'
-                hr.my-3
-                
-                if !quest.isCompleted
-                    .d-grid.gap-2
-                        a.btn.btn-outline-primary(href=`/admin/quests/${quest.id}/edit`)
-                            i.fas.fa-plus-circle.me-2
-                            | Добави Раздел (Quiz)
+              
+              .card-body.d-flex.flex-column
 
-                        form(action=`/admin/toggle-quest-completion/${quest.id}` method="POST" onsubmit="return confirm('СИГУРНИ ЛИ СТЕ? След приключване, предметът НЕ МОЖЕ да се отключва повече и оценките влизат в магазина!');")
-                            button.btn.btn-success.w-100(type="submit")
-                                i.fas.fa-flag-checkered.me-2
-                                | Приключи Срока (Финално)
+                p.quest-description= quest.description
 
+                if quest.isCompleted
+                  .quest-status-strip.status-completed.mt-auto
+                    i.fas.fa-check-circle
+                    span Предметът е завършен! Оценките са в магазина.
                 else
-                    .d-grid.gap-2
-                        button.btn.btn-dark.disabled.w-100(title="Предметът е приключен окончателно")
-                            i.fas.fa-lock.me-2
-                            | Предметът е финализиран
-                        
-                        .text-center.text-muted.small
-                            | Оценките са в магазина. Редакцията е забранена.
+                  .quest-status-strip.status-active.mt-auto
+                    i.fas.fa-clock
+                    span В ход
 
-                form.mt-2(action=`/admin/delete-quest/${quest.id}` method="POST" onsubmit="return confirm('ВНИМАНИЕ: Изтриване на целия предмет и всички данни?');")
-                      button.btn.btn-danger.btn-sm.w-100(type="submit")
-                        i.fas.fa-trash.me-2
+              
+              .card-footer
+
+                a.btn.rpg-btn.rpg-btn-primary.w-100.mb-2(href=`/quests/${quest.id}`)
+                  i.fas.fa-play-circle
+                  | Влез в предмета
+
+                
+                if currentUser && currentUser.role === 'admin'
+                  .admin-section
+
+                    hr.rpg-divider
+                    p.admin-label
+                      i.fas.fa-crown.me-1
+                      | Администратор
+
+                    if !quest.isCompleted
+                      .d-grid.gap-2
+                        a.btn.rpg-btn.rpg-btn-edit(href=`/admin/quests/${quest.id}/edit`)
+                          i.fas.fa-plus-circle
+                          | Добави Раздел (Quiz)
+
+                        form.finalize-quest-form(action=`/admin/toggle-quest-completion/${quest.id}` method="POST")
+                          button.btn.rpg-btn.rpg-btn-success.w-100(type="submit")
+                            i.fas.fa-flag-checkered
+                            | Приключи Срока (Финално)
+
+                    else
+                      .d-grid.gap-2
+                        button.btn.rpg-btn.rpg-btn-disabled.w-100(type="button" disabled title="Предметът е приключен окончателно")
+                          i.fas.fa-lock
+                          | Предметът е финализиран
+
+                        .text-center.text-muted.small.mt-1
+                          i.fas.fa-info-circle.me-1
+                          | Редакцията е забранена.
+
+                    form.delete-quest-form.mt-2(action=`/admin/delete-quest/${quest.id}` method="POST")
+                      button.btn.rpg-btn.rpg-btn-delete.w-100(type="submit")
+                        i.fas.fa-trash-alt
                         | Изтрий Куеста
+
+  script(src='/javascripts/quest-index.js')

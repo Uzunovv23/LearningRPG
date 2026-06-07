@@ -1,31 +1,81 @@
 extends layout
 
-block content
-  .container.mt-5
-    .row.justify-content-center
-      .col-md-6
-        .card.shadow-lg
-          .card-header.bg-success.text-white.text-center
-            h3 Вход в играта
-          .card-body.p-4
-            
-            if error
-              .alert.alert-danger.alert-dismissible.fade.show(role="alert")
-                i.fas.fa-exclamation-circle.me-2
-                | #{error}
-                button.btn-close(type="button" data-bs-dismiss="alert" aria-label="Close")
+block styles
+  link(rel='stylesheet', href='/stylesheets/login.css')
 
-            form(action="/login" method="POST")
-              .mb-3
-                label.form-label(for="email") Имейл
-                input.form-control(type="email" name="email" id="email" required)
-              .mb-3
-                label.form-label(for="password") Парола
-                input.form-control(type="password" name="password" id="password" required)
-              
-              .d-grid
-                button.btn.btn-primary(type="submit") Влез
-            
-          .card-footer.text-center
-            p.mb-0 Нямаш герой? 
-              a(href="/register") Регистрирай се
+block content
+  .login-container
+    .login-content
+      .login-card.rpg-panel
+        .login-header
+          .header-icon
+            i.fas.fa-sign-in-alt
+
+          .header-text
+            h1.login-title Вход в Играта
+            p.login-subtitle Продължи своето приключение
+
+        if error
+          .alert.alert-danger.alert-login
+            i.fas.fa-exclamation-circle.me-2
+            span= error
+
+        form(action="/login" method="POST" class="login-form" id="loginForm")
+          .form-group
+            .form-field
+              label.form-label.form-label-custom(for="email")
+                span.label-icon
+                  i.fas.fa-envelope
+                span Имейл
+              .input-wrapper
+                input#email.form-control.input-custom(
+                  type="email"
+                  name="email"
+                  placeholder="Твоят имейл адрес"
+                  required
+                )
+                .input-bottom
+                  .input-hint Правилен формат за имейл адрес
+
+          .form-group
+            .form-field
+              label.form-label.form-label-custom(for="password")
+                span.label-icon
+                  i.fas.fa-shield-alt
+                span Парола
+              .input-wrapper.password-input-wrapper
+                input#password.form-control.input-custom(
+                  type="password"
+                  name="password"
+                  placeholder="••••••••••"
+                  required
+                )
+                .show-password-toggle
+                  label.show-password-label(for="showPassword")
+                    i.fas.fa-eye#passwordEyeIcon
+                    input#showPassword(type="checkbox", class="show-password-checkbox")
+
+          button.btn.btn-login(type="submit")
+            i.fas.fa-fire.me-2
+            span Влез
+            .btn-glow
+
+        .login-footer
+          p.register-redirect
+            | Нямаш акаунт?
+            a.register-link(href="/register")
+              i.fas.fa-user-plus.me-1
+              | Регистрирай се тук
+
+      .login-decoration
+        .decoration-element.decoration-1
+          i.fas.fa-shield-alt
+        .decoration-element.decoration-2
+          i.fas.fa-wand-magic-sparkles
+        .decoration-element.decoration-3
+          i.fas.fa-crown
+        .decoration-element.decoration-4
+          i.fas.fa-dragon
+
+block scripts
+  script(src='/javascripts/login.js')

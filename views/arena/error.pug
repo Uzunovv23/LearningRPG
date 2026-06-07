@@ -1,0 +1,25 @@
+extends ../layout
+
+block content
+  link(rel="stylesheet", href="/stylesheets/arena-rpg.css")
+
+  .arena-embers(aria-hidden="true")
+    each _, i in [0,1,2,3,4,5,6,7,8,9]
+      .ember
+
+  .arena-theme
+    .container
+      .row.justify-content-center
+        .col-lg-6
+          .arena-card.arena-slide-in.mt-5
+            .arena-card-header.text-center.bg-danger.text-white
+              i.fas.fa-exclamation-triangle.me-2
+              | #{title || "Възникна Грешка"}
+            
+            .card-body.p-5.text-center
+              h4.text-light.mb-4 #{message}
+              
+              .mt-5
+                a.btn.arena-btn.arena-btn-outline.px-4(href="/arena")
+                  i.fas.fa-arrow-left.me-2
+                  | Обратно в Лобито

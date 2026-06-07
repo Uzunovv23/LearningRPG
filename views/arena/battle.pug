@@ -1,68 +1,89 @@
 extends ../layout
 
 block content
-  link(rel="stylesheet", href="/stylesheets/arena.css")
+  link(rel="stylesheet", href="/stylesheets/arena-rpg.css")
 
-  .container.mt-4.mb-5
-    .row.align-items-center.mb-5.bg-dark.text-white.rounded-lg.shadow-lg.p-4.border.border-danger
-      .col-md-5.text-center
-        .avatar-placeholder.bg-primary.text-white.rounded-circle.mx-auto.mb-2.d-flex.justify-content-center.align-items-center(style="width: 80px; height: 80px; font-size: 2rem;")
-          i.fas.fa-user-astronaut
-        h3.fw-bold.text-primary #{duel.Initiator.User.username}
-        p.mb-1 Лвл #{duel.Initiator.level}
-        .badge.bg-secondary.p-2.mt-2.border.border-primary
-          small.d-block.text-warning Залог:
-          strong 📦 #{duel.InitiatorWager.DroppedItem.name}
+  .arena-embers(aria-hidden="true")
+    each _, i in [0,1,2,3,4,5,6,7,8,9]
+      .ember
 
-      .col-md-2.text-center
-        h1.display-3.fw-bold.text-danger.pulse-animation VS
-        i.fas.fa-bolt.text-warning.fs-2
+  .arena-theme
+    .container.mb-5
 
-      .col-md-5.text-center
-        .avatar-placeholder.bg-danger.text-white.rounded-circle.mx-auto.mb-2.d-flex.justify-content-center.align-items-center(style="width: 80px; height: 80px; font-size: 2rem;")
-          i.fas.fa-user-ninja
-        h3.fw-bold.text-danger #{duel.Opponent.User.username}
-        p.mb-1 Лвл #{duel.Opponent.level}
-        .badge.bg-secondary.p-2.mt-2.border.border-danger
-          small.d-block.text-warning Залог:
-          strong 📦 #{duel.OpponentWager.DroppedItem.name}
+      
+      .arena-duel-board.p-4.mb-5
 
-    .row.justify-content-center
-      .col-lg-10
-        .card.shadow-lg.border-0.rounded-lg
-          .card-header.bg-danger.text-white.text-center.py-3
-            h4.mb-0 
+        .row.align-items-center.py-2
+
+          
+          .col-5.text-center
+            .arena-avatar-ring.mb-3
+              .arena-avatar
+                i.fas.fa-user-astronaut
+            h3.fw-bold.text-light.mb-1 #{duel.Initiator.User.username}
+            p.arena-section-label.mb-2 Лвл #{duel.Initiator.level}
+            .arena-wager-box.d-inline-flex.text-start.mt-1(style="max-width:200px;")
+              .wager-icon.small
+                i.fas.fa-gem
+              .wager-name.small 📦 #{duel.InitiatorWager.DroppedItem.name}
+
+          
+          .col-2.text-center
+            .arena-vs-wrap
+              .arena-vs-text VS
+              .arena-vs-swords
+                i.fas.fa-bolt
+
+          
+          .col-5.text-center
+            .arena-avatar-ring.enemy.mb-3
+              .arena-avatar.enemy
+                i.fas.fa-user-ninja
+            h3.fw-bold.text-light.mb-1 #{duel.Opponent.User.username}
+            p.arena-section-label.mb-2 Лвл #{duel.Opponent.level}
+            .arena-wager-box.d-inline-flex.text-start.mt-1(style="max-width:200px;")
+              .wager-icon.small
+                i.fas.fa-gem
+              .wager-name.small 📦 #{duel.OpponentWager.DroppedItem.name}
+
+      
+      .row.justify-content-center
+        .col-lg-10
+          .arena-card
+            .arena-card-header.text-center
               i.fas.fa-brain.me-2
               | Реши въпросите преди противника!
-          
-          .card-body.p-4.p-md-5.bg-light
-            form#battleForm(action="/arena/submit-battle" method="POST")
-              input(type="hidden" name="duelId" value=duel.id)
 
-              each question, index in questions
-                .card.mb-4.border-secondary.shadow-sm
-                  .card-header.bg-dark.text-white
-                    strong Въпрос #{index + 1}: 
-                    span #{question.text}
-                  
-                  .card-body
-                    .row.g-3
-                      each answer in question.Answers
-                        .col-md-6
-                          .form-check.border.rounded.p-0.h-100.bg-white.hover-scale
-                            - const uniqueId = `q_${question.id}_ans_${answer.id}`
-                            
-                            input.form-check-input.ms-3.mt-3.fs-5(
-                              type="radio" 
-                              name=`q_${question.id}` 
-                              value=answer.id 
-                              id=uniqueId 
-                              required
-                            )
-                            label.form-check-label.d-block.w-100.p-3(for=uniqueId style="cursor: pointer;")
-                              span.ms-1 #{answer.text}
+            .card-body.p-4.p-md-5
+              form#battleForm(action="/arena/submit-battle" method="POST")
+                input(type="hidden" name="duelId" value=duel.id)
 
-              .text-center.mt-5
-                button.btn.btn-danger.btn-lg.px-5.py-3.shadow.fw-bold.w-100(type="submit" id="submitBattleBtn" onclick="return confirm('Готов ли си да предадеш отговорите?');")
-                  i.fas.fa-fist-raised.me-2
-                  | Нанеси Удар! (Предай Теста)
+                each question, index in questions
+                  .arena-question-card.mb-4
+                    .arena-question-header
+                      span.arena-question-num Въпрос #{index + 1}&ensp;/&ensp;#{questions.length}
+                      p.text-light.mb-0.mt-1 #{question.text}
+
+                    .p-4
+                      .row.g-3
+                        each answer in question.Answers
+                          .col-md-6
+                            .arena-answer-box.h-100.d-flex.align-items-center.p-3
+                              - const uniqueId = `q_${question.id}_ans_${answer.id}`
+                              input.form-check-input.arena-form-check-input.me-3(
+                                type="radio"
+                                name=`q_${question.id}`
+                                value=answer.id
+                                id=uniqueId
+                                required
+                              )
+                              label.form-check-label.w-100(for=uniqueId style="cursor:pointer;")
+                                | #{answer.text}
+
+               
+                .text-center.mt-5
+                  button.btn.arena-btn.arena-btn-red.btn-lg.w-100.px-5.py-3(type="submit" id="submitBattleBtn")
+                    i.fas.fa-fist-raised.me-2
+                    | Нанеси Удар! (Предай Теста)
+
+  script(src="/javascripts/arena-battle.js")

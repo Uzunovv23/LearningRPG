@@ -1,5 +1,139 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  link(rel='stylesheet', href='/stylesheets/rpg_home.css')
+
+  .container.mt-4
+    .rpg-hero-section
+
+      .hero-emblem-wrap
+        i.fas.fa-dragon.hero-emblem
+
+      h1.hero-title= title
+      if currentUser
+        p.hero-subtitle Добре дошъл, #{currentUser.username}
+      else
+        p.hero-subtitle Добре дошъл
+
+      if currentUser
+        .lms-dashboard
+
+          a.dash-card(href='/quests')
+            .dash-icon-wrap
+              i.fas.fa-scroll.dash-icon
+            h3 Мисии
+            p.dash-card-desc Задачи и предизвикателства
+
+          a.dash-card.arena-card(href='/arena')
+            .dash-icon-wrap
+              i.fas.fa-khanda.dash-icon
+            h3 Арена
+            p.dash-card-desc Битки с другите герои
+
+          a.dash-card(href='/leaderboard')
+            .dash-icon-wrap
+              i.fas.fa-trophy.dash-icon
+            h3 Класация
+            p.dash-card-desc Топ герои в света
+
+          a.dash-card(href='/users/my-hero')
+            .dash-icon-wrap
+              i.fas.fa-user-shield.dash-icon
+            h3 Моят Герой
+            p.dash-card-desc Умения, екипировка и XP
+
+      else
+        .hero-divider
+          .hero-divider-line
+          i.fas.fa-hat-wizard.hero-divider-icon
+          .hero-divider-line
+
+        .hero-auth-wrap
+          a.btn.btn-rpg-outline.btn-lg(href='/login')
+            i.fas.fa-sign-in-alt.me-2
+            | Вход
+          a.btn.btn-rpg-solid.btn-lg(href='/register')
+            i.fas.fa-user-plus.me-2
+            | Регистрация
+
+      
+      .rpg-quotes-slider
+        .rpg-quotes-track#quotesTrack
+          .rpg-quote-slide
+            i.fas.fa-quote-left.quote-mark
+            p.quote-text Игрите са най-висшата форма на изследване.
+            p.quote-author — Албърт Айнщайн
+
+          .rpg-quote-slide
+            i.fas.fa-quote-left.quote-mark
+            p.quote-text Не се притеснявай, че не си успешен. Притеснявай се, че нямаш успех, защото не се опитваш достатъчно.
+            p.quote-author — Джеймс Гъд
+
+          .rpg-quote-slide
+            i.fas.fa-quote-left.quote-mark
+            p.quote-text Ученето чрез игра е начинът, по който децата са учили от началото на времето.
+            p.quote-author — Стюарт Браун
+
+          .rpg-quote-slide
+            i.fas.fa-quote-left.quote-mark
+            p.quote-text Видеоигрите насърчават наградата за упоритост и усилие — точно това, което трябва да научим децата.
+            p.quote-author — Джейн Макгонигал
+
+          .rpg-quote-slide
+            i.fas.fa-quote-left.quote-mark
+            p.quote-text Най-добрият учител не е този, който дава отговорите, а този, който чрез въпроси кара ученикът сам да ги открие.
+            p.quote-author — Сократ
+
+          .rpg-quote-slide
+            i.fas.fa-quote-left.quote-mark
+            p.quote-text Образованието е оръжието, с което можем да променим света.
+            p.quote-author — Нелсън Мандела
+
+          .rpg-quote-slide
+            i.fas.fa-quote-left.quote-mark
+            p.quote-text Когато забавлението и обучението се слеят, хората се учат най-добре.
+            p.quote-author — Ричард Бартъл
+
+        .rpg-quotes-dots#quotesDots
+
+    script.
+      (function() {
+        var track = document.getElementById('quotesTrack');
+        var dotsContainer = document.getElementById('quotesDots');
+        var slides = track.querySelectorAll('.rpg-quote-slide');
+        var current = 0;
+        var total = slides.length;
+        var interval;
+
+        for (var i = 0; i < total; i++) {
+          var dot = document.createElement('span');
+          dot.className = 'quote-dot' + (i === 0 ? ' active' : '');
+          dot.setAttribute('data-index', i);
+          dot.addEventListener('click', function() {
+            goTo(parseInt(this.getAttribute('data-index')));
+          });
+          dotsContainer.appendChild(dot);
+        }
+
+        function goTo(index) {
+          current = index;
+          track.style.transform = 'translateX(-' + (current * 100) + '%)';
+          var dots = dotsContainer.querySelectorAll('.quote-dot');
+          dots.forEach(function(d, i) {
+            d.classList.toggle('active', i === current);
+          });
+        }
+
+        function next() {
+          goTo((current + 1) % total);
+        }
+
+        function startAuto() {
+          interval = setInterval(next, 5000);
+        }
+
+        track.addEventListener('mouseenter', function() { clearInterval(interval); });
+        track.addEventListener('mouseleave', startAuto);
+
+        startAuto();
+      })();

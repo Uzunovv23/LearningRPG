@@ -65,6 +65,15 @@ exports.show = async (req, res) => {
       },
       include: [DroppedItem],
     });
+    const allDroppedItems = await DroppedItem.findAll();
+
+    const groupedInventory = allDroppedItems.map(item => {
+      const count = inventory.filter(inv => inv.DroppedItem && inv.DroppedItem.id === item.id).length;
+      return {
+        item: item,
+        count: count
+      };
+    });
 
     const journal = heroQuests
       .filter((hq) => hq.Quest)
@@ -93,11 +102,26 @@ exports.show = async (req, res) => {
         };
       });
 
+    const avatarIcons = [
+      "fa-user-graduate",
+      "fa-book-reader",
+      "fa-user-ninja",
+      "fa-user-astronaut",
+      "fa-user-secret",
+      "fa-mask",
+      "fa-khanda",
+      "fa-hat-wizard",
+      "fa-dragon",
+      "fa-crown",
+    ];
+
     res.render("users/my_hero", {
       title: "Моят Герой",
       hero: hero,
       journal: journal,
       inventory: inventory,
+      groupedInventory: groupedInventory,
+      avatarIcons: avatarIcons,
     });
   } catch (error) {
     console.error("Hero Controller Error:", error);
@@ -405,5 +429,78 @@ exports.useChronoGlass = async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Грешка при използване на часовника." });
+  }
+};
+
+exports.updateAvatar = async (req, res) => {
+  try {
+    const userId = req.user
+      ? req.user.id
+      : req.session.user
+        ? req.session.user.id
+        : null;
+    const { avatarIcon } = req.body;
+
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Не сте влезли в профила си." });
+    }
+
+    if (!avatarIcon) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Не е избрана иконка." });
+    }
+
+    const avatarIcons = [
+      "fa-user-graduate",
+      "fa-book-reader",
+      "fa-user-ninja",
+      "fa-user-astronaut",
+      "fa-user-secret",
+      "fa-mask",
+      "fa-khanda",
+      "fa-hat-wizard",
+      "fa-dragon",
+      "fa-crown",
+    ];
+
+    const requiredLevel = avatarIcons.indexOf(avatarIcon) + 1;
+    if (requiredLevel === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Невалидна иконка." });
+    }
+
+    const hero = await Hero.findOne({ where: { userId: userId } });
+    if (!hero) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Героят не е намерен." });
+    }
+
+    const currentLevel = Math.floor(hero.xp / 1000) + 1;
+
+    if (currentLevel < requiredLevel) {
+      return res.status(403).json({
+        success: false,
+        message: `Тази иконка се отключва на Ниво ${requiredLevel}. Вие сте Ниво ${currentLevel}.`,
+      });
+    }
+
+    hero.avatarIcon = avatarIcon;
+    await hero.save();
+
+    return res.json({
+      success: true,
+      message: "Аватарът е обновен успешно!",
+      icon: avatarIcon,
+    });
+  } catch (error) {
+    console.error("Update Avatar Error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Грешка при запазване на аватара." });
   }
 };

@@ -1,33 +1,38 @@
 extends ../layout
 
 block content
-  link(rel='stylesheet', href='/stylesheets/admin.css')
+  link(rel='stylesheet', href='/stylesheets/admin_create_quest.css')
 
-  .container.mt-5
-    h2.mb-4.text-primary Създаване на нов Куест
-    
-    .card.mb-4.shadow-sm
-      .card-header.bg-primary.text-white Основна информация
-      .card-body
-        .row
-          // Промяна: Вече е col-12 и няма input за общо XP
-          .col-12
-            .mb-3
-              label.form-label Заглавие на Куеста (напр. "Математика 1. клас")
-              input#questTitle.form-control(type="text")
-        
-        .mb-3
-          label.form-label Описание
-          textarea#questDesc.form-control(rows="3")
-
-    #quizzesContainer
-
-    .d-flex.justify-content-between.mb-5.pb-5
-      button.btn.btn-outline-dark.btn-lg#addQuizBtn(type="button") 
-        i.bi.bi-folder-plus 
-        |  + Добави Раздел (Quiz)
+  .rpg-theme
+    .container-fluid.px-4.px-lg-5.rpg-container
+      h2.mb-4 
+        i.fas.fa-scroll.me-2.text-rpg-gold
+        | Създаване на нов Куест
       
-      button.btn.btn-success.btn-lg#saveQuestBtn(type="button") 
-        | ЗАПАЗИ ВСИЧКО
+      .card.rpg-card.mb-4
+        .card-header.rpg-card-header 
+          i.fas.fa-info-circle.me-2
+          | Основна информация
+        .card-body
+          .row
+            .col-12
+              .mb-3
+                label.form-label.rpg-label Заглавие на Куеста (напр. "Математика 1. клас")
+                input#questTitle.form-control.rpg-input(type="text")
+          
+          .mb-3
+            label.form-label.rpg-label Описание
+            textarea#questDesc.form-control.rpg-input(rows="3")
 
-  script(src='/javascripts/admin_quest.js')
+      #quizzesContainer
+
+      .d-flex.justify-content-between.mb-5.pb-5.mt-4
+        button.btn.rpg-btn.rpg-btn-edit.btn-lg#addQuizBtn(type="button") 
+          i.fas.fa-folder-plus.me-2
+          | + Добави Раздел (Quiz)
+        
+        button.btn.rpg-btn.rpg-btn-role.btn-lg#saveQuestBtn(type="button") 
+          i.fas.fa-save.me-2
+          | ЗАПАЗИ ВСИЧКО
+
+  script(src='/javascripts/admin_create_quest.js')

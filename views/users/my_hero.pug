@@ -1,136 +1,213 @@
 extends ../layout
 
+block styles
+  link(rel='stylesheet', href='/stylesheets/my_hero.css')
+
 block content
-  .container.mt-5
+  - const currentLevel = Math.floor(hero.xp / 1000) + 1
+
+  .container.mt-5.mb-5
     .row.justify-content-center
       .col-md-10
-        .card.shadow-lg.border-0.mb-5.bg-dark.text-white
-          .card-body.text-center.p-5
-            .mb-4
-                i.fas.fa-user-astronaut.fa-6x.text-warning
-            
-            h1.display-4.fw-bold.mb-0 #{hero.name}
+        
+        .rpg-panel.p-5.text-center.mb-5.shadow-lg
+          .mb-3
+            .hero-avatar-wrapper
+              i.fas.fa-6x.text-rpg-gold(id="currentHeroAvatar" class=(hero.avatarIcon || 'fa-user-graduate'))
 
-            - const currentLevel = Math.floor(hero.xp / 1000) + 1
-            p.lead.text-warning Герой Ниво #{currentLevel}
+              button.btn.rounded-circle.position-absolute.bottom-0.end-0.shadow.avatar-edit-btn(
+                  data-bs-toggle="modal"
+                  data-bs-target="#avatarModal"
+                  title="Смени аватара"
+              )
+                i.fas.fa-pencil-alt
 
-            .row.justify-content-center.mt-4
-                .col-md-8
-                    - const levelProgress = (hero.xp % 1000) / 10
-                    
-                    h5.d-flex.justify-content-between.small
-                        span
-                            i.fas.fa-bolt.text-warning.me-2
-                            | Опит (XP)
-                        span #{hero.xp} XP Общо
-                    
-                    .progress.mb-2(style="height: 25px; background-color: rgba(255,255,255,0.2);")
-                        .progress-bar.bg-warning(
-                            role="progressbar" 
-                            style=`width: ${levelProgress}%`
-                            aria-valuenow=levelProgress 
-                            aria-valuemin="0" 
-                            aria-valuemax="100"
-                        ) #{levelProgress}%
-                    
-                    p.text-muted.small.fst-italic Още #{1000 - (hero.xp % 1000)} XP до следващо ниво!
+          h1.display-4.fw-bold.mb-1.text-white #{hero.User.username}
+          p.lead.text-rpg-gold.fw-bold
+            i.fas.fa-star.me-2
+            | Герой Ниво #{currentLevel}
 
+          .row.justify-content-center.mt-4
+            .col-md-8
+              - const levelProgress = (hero.xp % 1000) / 10
+              - const currentLevelXp = hero.xp % 1000
+              - const nextLevelXp = 1000 - currentLevelXp
+
+              .rpg-progress-container.mb-2
+                .rpg-progress-fill(
+                  role="progressbar"
+                  aria-valuenow=levelProgress
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                )
+
+              p.text-center.small.fw-bold.text-rpg-gold.mb-2
+                | #{Math.floor(currentLevelXp)} / 1000 XP
+
+              p.text-center.text-info.small.fst-italic
+                i.fas.fa-hourglass-half.me-1
+                | Още #{nextLevelXp} XP до следващо ниво!
+
+        
         .card.shadow-sm.mb-5.border-0
-            .card-header.bg-dark.text-white.p-3.border-bottom-0
-                h3.mb-0 
-                    i.fas.fa-hiking.me-2
-                    | Моята Раница
-            
-            .card-body.p-4.bg-light
-                if !inventory || inventory.length === 0
-                    .text-center.py-5.text-muted
-                        i.fas.fa-box-open.fa-4x.mb-3.text-secondary(style="opacity: 0.5")
-                        h4 Раницата е празна
-                        p.mb-0 Нямаш активни артефакти.
-                        p Изкарвай оценки 5 и 6 на домашните, за да спечелиш!
-                        a.btn.btn-outline-primary.mt-3(href="/items") 
-                            i.fas.fa-gem.me-2
-                            | Виж наградите
-                else
-                    .row
-                        each slot in inventory
-                            .col-md-4.col-lg-3.mb-4
-                                .card.h-100.shadow-sm.border-0
-                                    - const item = slot.DroppedItem
-                                    - let headerClass = 'bg-secondary'
-                                    if item.type === 'quiz_help'
-                                        - headerClass = 'bg-primary text-white'
-                                    else if item.type === 'booster'
-                                        - headerClass = 'bg-warning text-dark'
-                                    else if item.type === 'time_bender'
-                                        - headerClass = 'bg-info text-dark'
+          .card-header.text-white.p-3
+            h3.mb-0
+              i.fas.fa-hiking.text-rpg-gold.me-2
+              | Моята Раница
 
-                                    .card-header.text-center.py-3(class=headerClass)
-                                        i(class=`fas ${item.icon} fa-3x`)
-                                    
-                                    .card-body.text-center.p-3
-                                        h6.fw-bold.mb-1 #{item.name}
-                                        small.text-muted.d-block.mb-2 #{item.description}
-                                        
-                                        button.btn.btn-sm.btn-outline-dark.w-100(disabled title="Скоро!") 
-                                            i.fas.fa-hand-sparkles.me-1
-                                            | Използвай
+          .card-body.p-4
+            if !groupedInventory || groupedInventory.length === 0
+              .text-center.py-5.rpg-empty-state
+                i.fas.fa-box-open.fa-4x.mb-3
+                h4.text-white Все още няма налични предмети
+                p.text-muted Отиди в магазина или свършване на мисии за награди
+            else
+              .row
+                each slot in groupedInventory
+                  - const item = slot.item
+                  - const count = slot.count
+                  - const fadedClass = count === 0 ? 'item-faded' : ''
 
+                  .col-md-4.col-lg-3.mb-4
+                    .inventory-item-card.h-100.position-relative(class=fadedClass)
+                      - let iconColor = 'text-white'
+                      - let iconClass = item.icon || 'fa-box'
+
+                      if item.type === 'quiz_help'
+                        - iconColor = 'text-rpg-blue'
+                      else if item.type === 'booster'
+                        - iconColor = 'text-rpg-gold'
+                      else if item.type === 'time_bender'
+                        - iconColor = 'text-info'
+
+                      .inventory-icon-wrapper.text-center
+                        i.fas.fa-3x(class=`${iconClass} ${iconColor}`)
+
+                      .p-3.text-center.pb-5
+                        h6.fw-bold.text-white.mb-1 #{item.name}
+                        small.d-block.item-description #{item.description}
+
+                      
+                      if count > 0
+                        .item-quantity-badge x#{count}
+                      else
+                        .item-quantity-badge 0
+
+        
         .card.shadow-sm.mb-5.border-0
-          .card-header.bg-white.border-bottom.py-3
-            h4.mb-0.text-primary 
-                i.fas.fa-book-journal-whills.me-2
-                | Дневник на приключенията
-          
+          .card-header.text-white.p-3
+            h3.mb-0
+              i.fas.fa-book-journal-whills.text-rpg-gold.me-2
+              | Дневник на приключенията
+
           .card-body.p-4
             if journal.length === 0
-                .alert.alert-info.text-center
-                    i.fas.fa-info-circle.me-2
-                    | Все още не си започнал нито един предмет. Отиди в секция "Мисии"!
+              .alert.alert-info.bg-transparent.border-info.text-info.text-center
+                i.fas.fa-info-circle.me-2
+                | Все още не си започнал нито един предмет. Отиди в секция "Мисии"!
             else
-                .row
-                    each entry in journal
-                        .col-md-6.mb-4
-                            .card.h-100.shadow-sm.border-light
-                                .card-header.bg-light.d-flex.justify-content-between.align-items-center
-                                    h5.mb-0.fw-bold= entry.questTitle
-                                    if entry.status === 'completed' || entry.status === 'finished'
-                                        span.badge.bg-success Завършен
-                                    else
-                                        span.badge.bg-primary Активен
+              .row
+                each entry in journal
+                  .col-md-6.mb-4
+                    .journal-entry-card.h-100
+                      .card-header.d-flex.justify-content-center.align-items-center.py-3
+                        h5.mb-0.fw-bold.text-white= entry.questTitle                       
 
-                                .card-body
-                                    .row.text-center.mb-3
-                                        .col-6.border-end
-                                            h5.text-primary.fw-bold #{entry.xp}
-                                            small.text-muted Спечелени XP
-                                        .col-6
-                                            h5.text-warning.fw-bold #{entry.points}
-                                            small.text-muted Спечелени Точки
+                      .card-body
+                        .row.text-center.mb-3
+                          .col-6.border-end.border-secondary
+                            h1.display-4.text-rpg-blue.fw-bold.mb-0 #{entry.xp}
+                            div.stat-label
+                              i.fas.fa-bolt.me-1
+                              | XP
+                          .col-6
+                            h1.display-4.text-rpg-gold.fw-bold.mb-0 #{entry.points}
+                            div.stat-label
+                              i.fas.fa-coins.me-1
+                              | COINS
 
-                                    hr
+                        hr.rpg-divider
 
-                                    h6.text-muted.mb-3.small.text-uppercase.fw-bold
-                                        i.fas.fa-graduation-cap.me-2
-                                        | Купени оценки:
-                                    
-                                    if entry.grades.length > 0
-                                        .d-flex.flex-wrap.gap-2
-                                            each grade in entry.grades
-                                                - let badgeClass = 'bg-secondary'
-                                                if grade.title.includes('6') 
-                                                    - badgeClass = 'bg-success'
-                                                else if grade.title.includes('5')
-                                                    - badgeClass = 'bg-primary'
-                                                else if grade.title.includes('4')
-                                                    - badgeClass = 'bg-info text-dark'
-                                                else if grade.title.includes('3')
-                                                    - badgeClass = 'bg-warning text-dark'
-                                                
-                                                .badge.p-2(class=badgeClass title=grade.description style="font-size: 0.9rem;")
-                                                    if grade.icon
-                                                        i(class=`fas ${grade.icon} me-1`)
-                                                    | #{grade.title}
-                                    else
-                                        .text-center.py-2
-                                            span.badge.bg-light.text-muted.fw-normal Няма закупени оценки
+                        h6.mb-3.small.text-uppercase.fw-bold.grades-title
+                          i.fas.fa-graduation-cap.me-2
+                          | Закупени оценки:
+
+                        if entry.grades && entry.grades.length > 0
+                          .d-flex.flex-wrap.gap-2
+                            each grade in entry.grades
+                              - let tokenClass = ''
+                              - let gradeNum = ''
+                              - let gradeLetter = ''
+
+                              if grade.title.includes('6')
+                                - tokenClass = 'grade-token-6'
+                                - gradeNum = '6'
+                                - gradeLetter = 'А'
+                              else if grade.title.includes('5')
+                                - tokenClass = 'grade-token-5'
+                                - gradeNum = '5'
+                                - gradeLetter = 'В'
+                              else if grade.title.includes('4')
+                                - tokenClass = 'grade-token-4'
+                                - gradeNum = '4'
+                                - gradeLetter = 'С'
+                              else if grade.title.includes('3')
+                                - tokenClass = 'grade-token-3'
+                                - gradeNum = '3'
+                                - gradeLetter = 'D'
+
+                              .grade-token(class=tokenClass title=grade.title data-bs-toggle="tooltip" data-bs-placement="top")
+                                if grade.icon
+                                  i(class=`fas ${grade.icon}`)
+                                span #{gradeNum}
+                        else
+                          .text-center.py-2
+                            span.badge.empty-grades-badge.fw-normal Няма закупени оценки
+
+  
+  .modal.fade#avatarModal(tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true")
+    .modal-dialog.modal-dialog-centered.modal-lg
+      .modal-content.rpg-modal-content
+        .modal-header.rpg-modal-header
+          h5.modal-title.text-rpg-gold#avatarModalLabel
+            i.fas.fa-palette.me-2
+            | Избери своя аватар
+          button.btn-close(type="button" data-bs-dismiss="modal" aria-label="Затвори")
+        .modal-body.p-4
+          .row.g-4.justify-content-center
+            if avatarIcons && avatarIcons.length > 0
+              each icon, index in avatarIcons
+                - const requiredLevel = index + 1
+                - const isUnlocked = currentLevel >= requiredLevel
+                - const isActive = hero.avatarIcon === icon
+
+                .col-4.col-md-3.col-lg-2.text-center
+                  if isUnlocked
+                    button.btn.btn-outline-warning.avatar-btn.p-3.position-relative.w-100(
+                        type="button"
+                        data-icon=icon
+                        class=(isActive ? 'active border-3' : 'border-warning')
+                        title=`Ниво ${requiredLevel}`
+                    )
+                      i.fas.fa-2x(class=icon)
+                  else
+                    button.btn.btn-outline-secondary.p-3.position-relative.w-100(
+                        type="button"
+                        disabled
+                        title=`Отключва се на Ниво ${requiredLevel}`
+                        style="cursor: not-allowed;"
+                    )
+                      i.fas.fa-2x(class=icon)
+                      i.fas.fa-lock.position-absolute.top-0.start-100.translate-middle.text-danger(style="font-size: 1rem;")
+
+                  small.d-block.mt-2.locked-avatar-text
+                    | Ниво #{requiredLevel}
+
+block scripts
+  script(src='/javascripts/my_hero.js')
+  script.
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    });

@@ -3,127 +3,190 @@ extends ../layout
 block content
   link(rel='stylesheet', href='/stylesheets/quiz-gameplay.css')
 
-  .container.mt-5
-    .row.justify-content-center
-      .col-lg-8
-        
-        .mb-4
-          a.btn.btn-outline-secondary(href=`/quests/${questId}`) 
-            i.fas.fa-arrow-left.me-2
-            | Back to Quest Menu
-        
-        .d-flex.justify-content-between.align-items-center.mb-4.flex-wrap
-            h2.text-primary.mb-0= quiz.title
-            
-            .d-flex.gap-2.flex-wrap
-                if jokerCount > 0
-                    span.badge.bg-indigo.fs-5.shadow-sm#globalJokerCount(style="background-color: #6610f2;")
-                        i.fas.fa-dice-d20.me-2
-                        | Жокери: #{jokerCount}
-                
-                if elixirCount > 0
-                    span.badge.fs-5.shadow-sm#globalElixirCount(style="background-color: #e83e8c;")
-                        i.fas.fa-flask.me-2
-                        | Еликсири: #{elixirCount}
+  .rpg-theme
+    .rpg-bg-grid
+    .rpg-bg-glow-top
+    .rpg-bg-glow-bottom
 
-                if scrollCount > 0
-                    span.badge.fs-5.shadow-sm.bg-warning.text-dark
-                        i.fas.fa-scroll.me-2
-                        | Свитъци: #{scrollCount}
+    .container.rpg-container.col-lg-10
 
-                if midasCount > 0
-                    span.badge.fs-5.shadow-sm.text-white(style="background-color: #d4af37;")
-                        i.fas.fa-hand-holding-usd.me-2
-                        | Мидас: #{midasCount}
+      
+      .rpg-topbar.d-flex.justify-content-between.align-items-center.mb-5.flex-wrap.gap-3
+        a.rpg-back-btn(href=`/quests/${questId}`)
+          .rpg-back-btn-inner
+            i.fas.fa-chevron-left.me-2
+            | Отказ (Връщане към Мисията)
 
-        form(action=`/quests/${questId}/quizzes/${quiz.id}/submit` method="POST")
-          
-          if quiz.Questions && quiz.Questions.length > 0
-            each question, qIndex in quiz.Questions
-              .card.mb-4.shadow-sm.border-0(id=`question-card-${question.id}`)
-                .card-header.bg-light.d-flex.justify-content-between.align-items-center.p-3
-                    div
-                        span.badge.bg-primary.me-2 #{question.points} pts
-                        span.fw-bold Въпрос #{qIndex + 1}
-                    
-                    .d-flex.gap-2
-                        if jokerCount > 0
-                            button.btn.btn-sm.btn-warning.btn-joker.fw-bold(
-                                type="button" 
-                                data-question-id=question.id
-                                title="Премахва 50% от грешните отговори"
-                            )
-                                i.fas.fa-magic.me-1
-                                | Жокер
-                        else
-                            button.btn.btn-sm.btn-secondary.btn-joker(type="button" disabled)
-                                i.fas.fa-magic.me-1
-                                | Жокер
-
-                        if elixirCount > 0
-                            button.btn.btn-sm.text-white.btn-elixir.fw-bold(
-                                type="button" 
-                                data-question-id=question.id
-                                style="background-color: #e83e8c; border-color: #e83e8c;"
-                                title="Показва верния отговор"
-                            )
-                                i.fas.fa-flask.me-1
-                                | Еликсир
-                        else
-                            button.btn.btn-sm.btn-secondary.btn-elixir(type="button" disabled)
-                                i.fas.fa-flask.me-1
-                                | Еликсир
-
-                .card-body.p-4
-                    h5.mb-4 #{question.text}
-                
-                    .row
-                      each answer in question.Answers
-                        .col-md-6.mb-3(id=`answer-container-${answer.id}`)
-                          .form-check.p-3.rounded.bg-white.h-100.d-flex.align-items-center.answer-box
-                            input.form-check-input.me-3(
-                              type="radio" 
-                              name=`answers[${question.id}]` 
-                              value=answer.id 
-                              id=`ans_${answer.id}`
-                              style="transform: scale(1.2);"
-                              required
-                            )
-                            label.form-check-label.w-100.cursor-pointer(for=`ans_${answer.id}`)
-                              = answer.text
-
-            if scrollCount > 0
-                .card.mb-3.border-warning.shadow-sm(style="background-color: #fff3cd;")
-                    .card-body.d-flex.align-items-center.justify-content-between
-                        div
-                            h5.text-warning.fw-bold.mb-1 
-                                i.fas.fa-scroll.me-2
-                                | Свитък на Мъдростта
-                            p.mb-0.small.text-muted Искаш ли двойно XP и Coins за този тест?
-                        
-                        .form-check.form-switch.fs-4
-                            input.form-check-input(type="checkbox" role="switch" id="useScrollSwitch" name="useScroll")
-                            label.form-check-label.fs-6(for="useScrollSwitch") Използвай
-
-            if midasCount > 0
-                .card.mb-4.shadow-sm.text-white(style="background-color: #d4af37; border: 1px solid #b8962e;")
-                    .card-body.d-flex.align-items-center.justify-content-between
-                        div
-                            h5.fw-bold.mb-1 
-                                i.fas.fa-hand-holding-usd.me-2
-                                | Ръкавицата на Мидас
-                            p.mb-0.small(style="color: #fcfcfc;") Искаш ли двойно повече Монети (Coins)?
-                        
-                        .form-check.form-switch.fs-4
-                            input.form-check-input(type="checkbox" role="switch" id="useMidasSwitch" name="useMidas")
-                            label.form-check-label.fs-6(for="useMidasSwitch") Използвай
-
-            button.btn.btn-success.btn-lg.w-100.mb-5.py-3.shadow(type="submit") 
-              i.fas.fa-check-circle.me-2
-              | Предай теста
+        .rpg-inventory-bar.d-flex.gap-2.flex-wrap
+          if jokerCount > 0
+            .rpg-item-slot.rpg-item-joker(id='globalJokerCount' title='Жокер – премахва 50% от грешните отговори')
+              .rpg-item-icon
+                i.fas.fa-dice-d20
+              .rpg-item-label Жокери
+              .rpg-item-count #{jokerCount}
           else
-            .alert.alert-warning.text-center Няма въпроси в този тест.
+            .rpg-item-slot.rpg-item-empty(title='Нямаш жокери')
+              .rpg-item-icon
+                i.fas.fa-dice-d20
+              .rpg-item-label Жокери
+              .rpg-item-count 0
+
+          if elixirCount > 0
+            .rpg-item-slot.rpg-item-elixir(id='globalElixirCount' title='Еликсир – показва верния отговор')
+              .rpg-item-icon
+                i.fas.fa-flask
+              .rpg-item-label Еликсири
+              .rpg-item-count #{elixirCount}
+          else
+            .rpg-item-slot.rpg-item-empty(title='Нямаш еликсири')
+              .rpg-item-icon
+                i.fas.fa-flask
+              .rpg-item-label Еликсири
+              .rpg-item-count 0
+
+          if scrollCount > 0
+            .rpg-item-slot.rpg-item-scroll(title='Свитък – двойно XP и Coins')
+              .rpg-item-icon
+                i.fas.fa-scroll
+              .rpg-item-label Свитъци
+              .rpg-item-count #{scrollCount}
+
+          if midasCount > 0
+            .rpg-item-slot.rpg-item-midas(title='Мидас – двойно Coins')
+              .rpg-item-icon
+                i.fas.fa-hand-holding-usd
+              .rpg-item-label Мидас
+              .rpg-item-count #{midasCount}
+
+      
+      .rpg-quest-header.mb-5
+        .rpg-quest-header-deco
+          span.rpg-deco-line
+          i.fas.fa-dragon.rpg-deco-icon
+          span.rpg-deco-line
+        h1.rpg-quest-title= quiz.title
+        .rpg-quest-subtitle
+          i.fas.fa-scroll.me-2
+          | #{quiz.Questions ? quiz.Questions.length : 0} въпроса · Отговори внимателно
+
+      form(action=`/quests/${questId}/quizzes/${quiz.id}/submit` method="POST")
+
+        if quiz.Questions && quiz.Questions.length > 0
+          - const totalQ = quiz.Questions.length
+          - const answerLetters = ['А', 'Б', 'В', 'Г', 'Д', 'Е']
+
+          each question, qIndex in quiz.Questions
+            .rpg-question-card.mb-5(id=`question-card-${question.id}`)
+
+              
+              .rpg-card-glow
+
+              
+              .rpg-question-header
+                .rpg-question-number
+                  .rpg-qnum-inner
+                    span.rpg-qnum-label Въпрос
+                    span.rpg-qnum-value #{qIndex + 1}
+                    span.rpg-qnum-total / #{totalQ}
+                .rpg-xp-badge
+                  i.fas.fa-star.me-1
+                  | #{question.points} XP
+                .rpg-question-actions
+                  if jokerCount > 0
+                    button.rpg-action-btn.rpg-action-joker(
+                      type="button"
+                      data-question-id=question.id
+                      title="Премахва 50% от грешните отговори"
+                    )
+                      i.fas.fa-magic
+                      span Жокер
+                  else
+                    button.rpg-action-btn.rpg-action-disabled(type="button" disabled title="Нямаш жокери")
+                      i.fas.fa-magic
+                      span Жокер
+
+                  if elixirCount > 0
+                    button.rpg-action-btn.rpg-action-elixir(
+                      type="button"
+                      data-question-id=question.id
+                      title="Показва верния отговор"
+                    )
+                      i.fas.fa-flask
+                      span Еликсир
+                  else
+                    button.rpg-action-btn.rpg-action-disabled(type="button" disabled title="Нямаш еликсири")
+                      i.fas.fa-flask
+                      span Еликсир
+
+              
+              .rpg-question-body
+                .rpg-question-text-wrap
+                  .rpg-question-mark ?
+                  h4.rpg-question-text= question.text
+
+                
+                .rpg-answers-grid
+                  each answer, aIndex in question.Answers
+                    .rpg-answer-wrap(id=`answer-container-${answer.id}`)
+                      input.rpg-answer-input(
+                        type="radio"
+                        name=`answers[${question.id}]`
+                        value=answer.id
+                        id=`ans_${answer.id}`
+                        required
+                      )
+                      label.rpg-answer-label(for=`ans_${answer.id}`)
+                        .rpg-answer-letter= answerLetters[aIndex] || (aIndex + 1)
+                        .rpg-answer-text= answer.text
+                        .rpg-answer-indicator
+                          i.fas.fa-check
+
+          
+          if scrollCount > 0
+            .rpg-bonus-card.rpg-bonus-scroll.mb-4
+              .rpg-bonus-icon
+                i.fas.fa-scroll
+              .rpg-bonus-info
+                .rpg-bonus-name Свитък на Мъдростта
+                .rpg-bonus-desc Искаш ли двойно XP и Coins за този тест?
+              .rpg-bonus-toggle
+                input.rpg-toggle-input(type="checkbox" role="switch" id="useScrollSwitch" name="useScroll")
+                label.rpg-toggle-label(for="useScrollSwitch")
+                  span.rpg-toggle-knob
+
+          if midasCount > 0
+            .rpg-bonus-card.rpg-bonus-midas.mb-4
+              .rpg-bonus-icon
+                i.fas.fa-hand-holding-usd
+              .rpg-bonus-info
+                .rpg-bonus-name Ръкавицата на Мидас
+                .rpg-bonus-desc Искаш ли двойно повече Монети (Coins)?
+              .rpg-bonus-toggle
+                input.rpg-toggle-input(type="checkbox" role="switch" id="useMidasSwitch" name="useMidas")
+                label.rpg-toggle-label(for="useMidasSwitch")
+                  span.rpg-toggle-knob
+
+          
+          .rpg-submit-wrap.mb-5
+            .rpg-submit-deco-line
+            button.rpg-submit-btn(type="submit")
+              .rpg-submit-btn-bg
+              .rpg-submit-btn-content
+                i.fas.fa-flag-checkered.me-2
+                | ПРЕДАЙ ТЕСТА И ВЗЕМИ НАГРАДИТЕ
+              .rpg-submit-particles
+                span
+                span
+                span
+                span
+                span
+            .rpg-submit-deco-line
+
+        else
+          .rpg-empty-state
+            i.fas.fa-exclamation-triangle.me-3
+            | Няма въпроси в този тест.
 
   script(src='/javascripts/quiz-joker.js')
-  script(src='/javascripts/quiz-elixir.js') 
+  script(src='/javascripts/quiz-elixir.js')
   script(src='/javascripts/quiz-bonuses.js')

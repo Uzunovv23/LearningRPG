@@ -1,100 +1,170 @@
 extends ../layout
 
+block styles
+  link(rel="stylesheet", href="/stylesheets/leaderboard.css")
+
 block content
-  .container.mt-5
-    .text-center.mb-5
-      h1.display-4.fw-bold.text-warning
-        i.fas.fa-trophy.me-3
-        | Зала на Славата
-      p.lead Избери как искаш да се сравниш с останалите!
+  
+  .lb-particles
+    - for (var i = 0; i < 25; i++)
+      .lb-particle
 
-    .d-flex.justify-content-center.mb-5
-      .btn-group.shadow-sm(role="group")
-        a.btn.btn-lg(class=rankingType === 'level' ? 'btn-primary fw-bold' : 'btn-outline-primary' href="/leaderboard?type=level")
-          i.fas.fa-globe.me-2
-          | По Level (XP)
-        a.btn.btn-lg(class=rankingType === 'quest' ? 'btn-primary fw-bold' : 'btn-outline-primary' href="/leaderboard?type=quest")
-          i.fas.fa-book.me-2
-          | По Предмет
+  .lb-wrapper
+    
+    header.lb-header
+      .lb-header__halo
+      .lb-header__inner
+        h1.lb-title
+          span.lb-title__icon
+            i.fas.fa-trophy
+          span.lb-title__text Зала на Славата
+        p.lb-subtitle Сравни се с легендите на кралството!
 
-    .row.justify-content-center
-      .col-md-8
-        
-        if rankingType === 'quest'
-          if quests && quests.length > 0
-            .card.shadow-sm.mb-4.border-0
-              .card-body.bg-light.rounded
-                form(action="/leaderboard" method="GET")
-                  input(type="hidden" name="type" value="quest") 
-                  .row.align-items-center
-                    .col-auto
-                      label.col-form-label.fw-bold.fs-5(for="questId") Избери предмет:
-                    .col
-                      select.form-select.form-select-lg#questId(name="questId" onchange="this.form.submit()")
-                        each q in quests
-                          option(value=q.id selected=(selectedQuest && selectedQuest.id == q.id)) #{q.title}
-          else
-            .alert.alert-warning Няма активни куестове в момента.
+    
+    nav.lb-tabs
+      a.lb-tab(class=rankingType === 'level' ? 'lb-tab--active' : '' href="/leaderboard?type=level")
+        i.fas.fa-globe.lb-tab__icon
+        span По Level
+      a.lb-tab(class=rankingType === 'quest' ? 'lb-tab--active' : '' href="/leaderboard?type=quest")
+        i.fas.fa-scroll.lb-tab__icon
+        span По Предмет
 
-        if rankingType === 'level'
-          h3.text-center.mb-4.text-primary
-            i.fas.fa-medal.me-2
-            | Топ 10 Най-силни герои
-        else if rankingType === 'quest' && selectedQuest
-          h3.text-center.mb-4.text-primary
-            i.fas.fa-star.me-2
-            | Топ 10 в #{selectedQuest.title}
+    
+    if rankingType === 'quest'
+      if quests && quests.length > 0
+        .lb-filter
+          form.lb-filter__form(action="/leaderboard" method="GET")
+            input(type="hidden" name="type" value="quest")
+            label.lb-filter__label(for="questId")
+              i.fas.fa-book-open.me-2
+              | Избери предмет:
+            .lb-filter__select-wrap
+              select.lb-filter__select#questId(name="questId" onchange="this.form.submit()")
+                each q in quests
+                  option(value=q.id selected=(selectedQuest && selectedQuest.id == q.id)) #{q.title}
+              i.fas.fa-chevron-down.lb-filter__arrow
+      else
+        .lb-empty
+          i.fas.fa-ghost.lb-empty__icon
+          p.lb-empty__text Няма активни предмети в момента.
 
-        if (rankingType === 'level' && leaderboard.length > 0) || (rankingType === 'quest' && selectedQuest && leaderboard.length > 0)
-          .card.shadow-lg.border-0.rounded-lg.mb-5
-            .card-body.p-0
-              table.table.table-hover.table-striped.mb-0.text-center.align-middle
-                thead.table-dark
-                  tr
-                    th(scope="col" style="width: 15%") Ранг
-                    th(scope="col" style="width: 55%") Ученик
-                    th(scope="col" style="width: 30%") 
-                      if rankingType === 'level'
-                        | Ниво (XP)
-                      else
-                        | Точки (Куиз)
-                tbody
-                  each entry, index in leaderboard
-                    - let rank = index + 1
-                    tr(class=rank <= 3 ? 'fw-bold' : '')
-                      td
-                        if rank === 1
-                          span.badge.bg-warning.text-dark.fs-5 🥇 1
-                        else if rank === 2
-                          span.badge.bg-secondary.fs-5 🥈 2
-                        else if rank === 3
-                          span.badge.bg-danger.fs-5(style="background-color: #cd7f32 !important;") 🥉 3
-                        else
-                          span.text-muted.fs-5 ##{rank}
-                      
-                      td.text-start
-                        .d-flex.align-items-center
-                          .avatar-placeholder.bg-primary.text-white.rounded-circle.me-3.d-flex.justify-content-center.align-items-center(style="width: 40px; height: 40px;")
-                            i.fas.fa-user
-                          span.fs-5 #{entry.user ? entry.user.username : 'Неизвестен'}
-                          
-                      td
-                        if rankingType === 'level'
-                          span.text-success.fs-5.fw-bold
-                            i.fas.fa-level-up-alt.me-2
-                            | Лвл #{entry.level} 
-                            small.text-muted.ms-1 (#{entry.xp} XP)
-                        else
-                          span.text-primary.fs-5.fw-bold
-                            i.fas.fa-star.text-warning.me-2
-                            span #{entry.totalPoints}
-        else
-          if rankingType === 'quest' && selectedQuest
-            .alert.alert-light.text-center.p-5.m-0
-              i.fas.fa-ghost.fa-3x.text-muted.mb-3
-              h3 Все още няма решени тестове.
-              p Бъди първият!
-          else if rankingType === 'level'
-            .alert.alert-light.text-center.p-5.m-0
-              i.fas.fa-ghost.fa-3x.text-muted.mb-3
-              h3 Няма създадени герои все още.
+    
+    if rankingType === 'level'
+      .lb-section-title
+        .lb-section-title__line
+        span
+          i.fas.fa-medal.me-2
+          | Топ 10 Най-могъщи герои
+        .lb-section-title__line
+    else if rankingType === 'quest' && selectedQuest
+      .lb-section-title
+        .lb-section-title__line
+        span
+          i.fas.fa-star.me-2
+          | Топ 10 в #{selectedQuest.title}
+        .lb-section-title__line
+
+    
+    if (rankingType === 'level' && leaderboard.length > 0) || (rankingType === 'quest' && selectedQuest && leaderboard.length > 0)
+
+      
+      - const topEntry = leaderboard[0]
+      - const topVal = rankingType === 'level' ? (topEntry.xp || 1) : (topEntry.totalPoints || 1)
+
+      
+      if leaderboard.length >= 1
+        .lb-podium
+          
+          .lb-podium__slot.lb-podium__slot--2
+            if leaderboard.length >= 2
+              .lb-podium__card.lb-podium__card--silver
+                .lb-podium__avatar
+                  i.fas.fa-user
+                .lb-podium__name #{leaderboard[1].user ? leaderboard[1].user.username : 'Неизвестен'}
+                .lb-podium__stat
+                  if rankingType === 'level'
+                    span.lb-podium__val #{leaderboard[1].level}
+                    span.lb-podium__sub  Ниво
+                    br
+                    span.lb-podium__xp #{leaderboard[1].xp} XP
+                  else
+                    span.lb-podium__val #{leaderboard[1].totalPoints}
+                    span.lb-podium__sub  т.
+                .lb-podium__base.lb-podium__base--2
+                  span 🥈
+
+          
+          .lb-podium__slot.lb-podium__slot--1
+            .lb-podium__card.lb-podium__card--gold
+              .lb-podium__crown ♛
+              .lb-podium__avatar.lb-podium__avatar--lg
+                i.fas.fa-user
+              .lb-podium__name #{leaderboard[0].user ? leaderboard[0].user.username : 'Неизвестен'}
+              .lb-podium__stat
+                if rankingType === 'level'
+                  span.lb-podium__val #{leaderboard[0].level}
+                  span.lb-podium__sub  Ниво 
+                  br
+                  span.lb-podium__xp #{leaderboard[0].xp} XP
+                else
+                  span.lb-podium__val #{leaderboard[0].totalPoints}
+                  span.lb-podium__sub  т.
+              .lb-podium__base.lb-podium__base--1
+                span 🥇
+
+          
+          .lb-podium__slot.lb-podium__slot--3
+            if leaderboard.length >= 3
+              .lb-podium__card.lb-podium__card--bronze
+                .lb-podium__avatar
+                  i.fas.fa-user
+                .lb-podium__name #{leaderboard[2].user ? leaderboard[2].user.username : 'Неизвестен'}
+                .lb-podium__stat
+                  if rankingType === 'level'
+                    span.lb-podium__val #{leaderboard[2].level}
+                    span.lb-podium__sub  Ниво
+                    br
+                    span.lb-podium__xp #{leaderboard[2].xp} XP
+                  else
+                    span.lb-podium__val #{leaderboard[2].totalPoints}
+                    span.lb-podium__sub  т.
+                .lb-podium__base.lb-podium__base--3
+                  span 🥉
+
+      
+      - const rest = leaderboard.slice(Math.min(leaderboard.length, 3))
+      if rest.length > 0
+        .lb-ranks
+          each entry, idx in rest
+            - const rank = Math.min(leaderboard.length, 3) + idx + 1
+            - const statVal = rankingType === 'level' ? (entry.xp || 0) : (entry.totalPoints || 0)
+            - const pct = topVal > 0 ? Math.min(Math.round((statVal / topVal) * 100), 100) : 0
+            .lb-rank-row(data-index=idx)
+              .lb-rank-row__number ##{rank}
+              .lb-rank-row__avatar
+                i.fas.fa-user
+              .lb-rank-row__body
+                .lb-rank-row__name #{entry.user ? entry.user.username : 'Неизвестен'}
+                .lb-rank-row__bar-track
+                  .lb-rank-row__bar(data-pct=pct style="width: 0%")
+              .lb-rank-row__stat
+                if rankingType === 'level'
+                  .lb-rank-row__stat-main Ниво #{entry.level}
+                  .lb-rank-row__stat-sub #{entry.xp} XP
+                else
+                  .lb-rank-row__stat-main #{entry.totalPoints}
+                  .lb-rank-row__stat-sub т.
+
+    else
+      
+      .lb-empty.lb-empty--large
+        i.fas.fa-ghost.lb-empty__icon
+        if rankingType === 'quest' && selectedQuest
+          h3.lb-empty__title Все още няма решени тестове.
+          p.lb-empty__text Бъди първият герой в #{selectedQuest.title}!
+        else if rankingType === 'level'
+          h3.lb-empty__title Няма създадени герои все още.
+          p.lb-empty__text Твоята легенда тепърва предстои!
+
+block scripts
+  script(src="/javascripts/leaderboard.js")

@@ -3,13 +3,15 @@ html
   head
     title= title
     link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css')
-    link(rel='stylesheet', href='/stylesheets/style.css')
     link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css')
+    link(rel='stylesheet', href='/stylesheets/rpg_global.css')
 
-  body
-    nav.navbar.navbar-expand-lg.navbar-dark.bg-dark.mb-4
-      .container
-        a.navbar-brand(href='/') 
+    block styles
+
+  body.rpg-body
+    nav.navbar.navbar-expand-lg.rpg-navbar.mb-4
+      .container-fluid.px-4.px-lg-5
+        a.navbar-brand(href='/')
           i.fas.fa-dungeon.me-2
           | Learning RPG
 
@@ -18,56 +20,74 @@ html
 
         #navbarMain.collapse.navbar-collapse
           ul.navbar-nav.me-auto.mb-2.mb-lg-0
-            li.nav-item
-              a.nav-link(href='/') Начало
-            
             if currentUser
               li.nav-item
-                a.nav-link(href='/quests') ⚔️ Мисии
+                a.nav-link(href='/quests')
+                  i.fas.fa-scroll.me-1
+                  | Мисии
 
               li.nav-item
-                a.nav-link.text-danger.fw-bold(href='/arena') 
+                a.nav-link.text-danger.fw-bold.arena-link(href='/arena')
                   i.fas.fa-khanda.me-1
                   | Арена
 
               li.nav-item
-                a.nav-link(href='/leaderboard') 🏆 Класация
+                a.nav-link(href='/leaderboard')
+                  i.fas.fa-trophy.me-1
+                  | Класация
 
               li.nav-item
-                a.nav-link(href='/shop') 🛒 Магазин
+                a.nav-link(href='/shop')
+                  i.fas.fa-store.me-1
+                  | Магазин
 
               li.nav-item
-                a.nav-link(href='/items') 💎 Артефакти
+                a.nav-link(href='/items')
+                  i.fas.fa-gem.me-1
+                  | Артефакти
 
               li.nav-item
-                a.nav-link(href='/users/my-hero') 🧙‍♂️ Моят Герой
+                a.nav-link(href='/users/my-hero')
+                  i.fas.fa-user-shield.me-1
+                  | Моят Герой
 
               if currentUser.role === 'admin'
                 li.nav-item.dropdown
                   a.nav-link.dropdown-toggle(href='#', id='adminDropdown', role='button', data-bs-toggle='dropdown', aria-expanded='false')
-                    | 🛡️ Админ
+                    i.fas.fa-shield-alt.me-1
+                    | Админ
                   ul.dropdown-menu(aria-labelledby='adminDropdown')
                     li
-                      a.dropdown-item(href='/admin/create-quest') + Създай Куест
+                      a.dropdown-item(href='/admin/create-quest')
+                        i.fas.fa-plus.me-2
+                        | Създай Куест
                     li
-                      a.dropdown-item(href='/admin/homework/create') + Добави Домашно
+                      a.dropdown-item(href='/admin/homework/create')
+                        i.fas.fa-plus.me-2
+                        | Добави Домашно
                     li
                       hr.dropdown-divider
                     li
-                      a.dropdown-item(href='/admin/users') 👥 Потребители
+                      a.dropdown-item(href='/admin/users')
+                        i.fas.fa-users.me-2
+                        | Потребители
 
           .d-flex.align-items-center
             if currentUser
-              span.navbar-text.me-3.text-light
-                | Здравей, 
-                strong #{currentUser.username} 
+              span.navbar-text.me-3.text-light.text-nowrap
+                | Здравей,&nbsp;
+                strong.text-warning #{currentUser.username}
                 if currentUser.role === 'admin'
-                  span.badge.bg-danger.ms-1 Admin
-              a.btn.btn-outline-danger.btn-sm(href='/logout') Изход
+                  span.badge.bg-danger.ms-2 Admin
+              a.btn.btn-outline-danger.btn-sm.text-nowrap(href='/logout')
+                i.fas.fa-sign-out-alt.me-1
+                | Изход
             else
-              a.btn.btn-outline-primary.me-2(href='/login') Вход
-              a.btn.btn-primary(href='/register') Регистрация
+              a.btn.btn-rpg-outline.me-2.text-nowrap(href='/login') Вход
+              a.btn.btn-rpg-solid.text-nowrap(href='/register') Регистрация
 
     block content
 
     script(src='/bootstrap/js/bootstrap.bundle.min.js')
+
+    block scripts

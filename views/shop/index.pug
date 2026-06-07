@@ -1,8 +1,40 @@
 extends ../layout
 
+block styles
+  link(rel='stylesheet', href='/stylesheets/shop.css')
+
+
+mixin shopItemCard(item, balance)
+    .col-md-6.col-lg-3.mb-4
+        .card.h-100.shop-card
+            .card-body
+                if item.Quest
+                    span.shop-card-badge #{item.Quest.title}
+
+                .mb-3
+                    i(class=`fas ${item.icon} fa-4x shop-card-icon`)
+
+                h4.card-title.shop-card-title #{item.title}
+                p.card-text.shop-card-description #{item.description}
+
+                .shop-card-price
+                    | #{item.cost}
+                    span.shop-card-price-small &nbsp;KC
+
+            .card-footer
+                if balance >= item.cost
+                    form(action=`/shop/buy/${item.id}` method="POST")
+                        button.btn.btn-primary.btn-lg.w-100.btn-buy(type="submit")
+                            i.fas.fa-shopping-cart.me-2
+                            | Купи
+                else
+                    button.btn.btn-secondary.btn-lg.w-100(disabled)
+                        i.fas.fa-lock.me-2
+                        | Недостъпно
+
 block content
   .container.mt-5
-    
+
     if alertMessage
       div(class=`alert alert-${alertType} alert-dismissible fade show` role="alert")
         if alertType === 'success'
@@ -13,98 +45,78 @@ block content
         button.btn-close(type="button" data-bs-dismiss="alert" aria-label="Close")
 
     .text-center.mb-5
-      h1.display-4.text-warning.fw-bold 
+      h1.display-4.text-warning.fw-bold
         i.fas.fa-store.me-3
         | Магазин за Награди
-      p.lead.text-muted Избери предмет, за да видиш наличните награди и своя баланс.
+      
+      p.lead.text-light.opacity-75 Избери предмет, за да видиш наличните награди и своя баланс.
 
     if quests.length > 0
-        ul.nav.nav-pills.justify-content-center.mb-5#shopTabs(role="tablist")
-            li.nav-item(role="presentation")
-                button.nav-link.rounded-pill.px-4.me-2(
-                    class=(!activeQuestId ? 'active' : '')
-                    id="pills-intro-tab" 
-                    data-bs-toggle="pill" 
-                    data-bs-target="#pills-intro" 
-                    type="button" 
-                    role="tab"
-                ) ℹ️ Инфо
-
-            each quest in quests
+        .shop-tabs-wrapper.mb-5
+            ul.nav.nav-pills#shopTabs(role="tablist")
                 li.nav-item(role="presentation")
-                    button.nav-link.rounded-pill.px-4.me-2(
-                        class=(activeQuestId === quest.id ? 'active' : '')
-                        id=`pills-quest-${quest.id}-tab`
-                        data-bs-toggle="pill" 
-                        data-bs-target=`#pills-quest-${quest.id}`
-                        type="button" 
+                    button.nav-link.rounded-pill.px-4(
+                        class=(!activeQuestId ? 'active' : '')
+                        id="pills-intro-tab"
+                        data-bs-toggle="pill"
+                        data-bs-target="#pills-intro"
+                        type="button"
                         role="tab"
-                    ) #{quest.title}
-    
+                    ) ℹ️ Инфо
+
+                each quest in quests
+                    li.nav-item(role="presentation")
+                        button.nav-link.rounded-pill.px-4(
+                            class=(activeQuestId === quest.id ? 'active' : '')
+                            id=`pills-quest-${quest.id}-tab`
+                            data-bs-toggle="pill"
+                            data-bs-target=`#pills-quest-${quest.id}`
+                            type="button"
+                            role="tab"
+                        ) #{quest.title}
+
     .tab-content#shopTabsContent
-        
+
         .tab-pane.fade(
             class=(!activeQuestId ? 'show active' : '')
-            id="pills-intro" 
+            id="pills-intro"
             role="tabpanel"
         )
             .text-center.py-5
-                i.fas.fa-hand-pointer.fa-4x.text-secondary.mb-3
-                h3.text-muted Моля, изберете предмет от менюто горе.
-                p Тук ще можете да обмените точките, спечелени по съответния предмет, за оценки и бонуси.
+                i.fas.fa-hand-pointer.fa-4x.mb-4.intro-pointer-icon
+                
+                h3.text-light Моля, изберете предмет от менюто горе.
+                p.text-light.opacity-75 Тук ще можете да обмените точките, спечелени по съответния предмет, за оценки и бонуси.
 
         each quest in quests
             - const currentBalance = balances && balances[quest.id] ? balances[quest.id] : 0
 
             .tab-pane.fade(
                 class=(activeQuestId === quest.id ? 'show active' : '')
-                id=`pills-quest-${quest.id}` 
+                id=`pills-quest-${quest.id}`
                 role="tabpanel"
             )
-                
+
                 .text-center.mb-5
-                    .d-inline-block.bg-dark.text-warning.px-5.py-3.rounded-pill.shadow.position-relative
-                        .fs-4.fw-bold
+                    .balance-display
+                        .balance-label
                             i.fas.fa-coins.me-2
-                            | Баланс: #{currentBalance} KC
-                        
-                        .mt-2.badge.bg-secondary.text-white.fw-normal
+                            | Баланс
+                        .balance-amount #{currentBalance} KC
+                        .balance-hint
                             | Минимален брой оценки за оформяне: #{quest.requiredGradesCount || 3}
-                
+
                 .row
                     - const questItems = items.filter(i => i.questId === quest.id)
-                    
+
                     if questItems.length > 0
                         each item in questItems
                             +shopItemCard(item, currentBalance)
                     else
-                        .col-12.text-center
-                            .alert.alert-secondary За този предмет все още няма добавени оценки в магазина.
+                        .col-12
+                            .empty-state
+                                .empty-state-icon
+                                    i.fas.fa-inbox
+                                p.empty-state-text За този предмет все още няма добавени оценки в магазина.
 
-mixin shopItemCard(item, balance)
-    .col-md-6.col-lg-3.mb-4
-        .card.h-100.shadow.border-0.shop-card
-            .card-body.text-center.py-4
-                if item.Quest
-                    span.badge.bg-dark.mb-3 #{item.Quest.title}
-                
-                .mb-3
-                    i(class=`fas ${item.icon} fa-4x`)
-                
-                h4.card-title.fw-bold #{item.title}
-                p.card-text.text-muted.small.mb-4 #{item.description}
-                
-                h3.text-warning.fw-bold
-                    | #{item.cost} 
-                    small.fs-6.text-muted KC
-            
-            .card-footer.bg-white.border-0.pb-4.pt-0.text-center
-                if balance >= item.cost
-                    form(action=`/shop/buy/${item.id}` method="POST")
-                        button.btn.btn-primary.btn-lg.w-100.btn-buy(type="submit")
-                            i.fas.fa-shopping-cart.me-2
-                            | Купи
-                else
-                    button.btn.btn-secondary.btn-lg.w-100(disabled)
-                        i.fas.fa-lock.me-2
-                        | Недостъпно
+  script(src='/javascripts/shop.js')

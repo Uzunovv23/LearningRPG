@@ -14,6 +14,7 @@ router.get("/", function (req, res, next) {
 });
 
 router.get("/my-hero", isLogged, userController.show);
+router.post("/my-hero/avatar", isLogged, userController.updateAvatar);
 router.get("/download/material/:id", isLogged, fileController.downloadMaterial);
 router.get("/homework/:id", isLogged, userController.getHomework);
 

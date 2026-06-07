@@ -1,116 +1,114 @@
 extends ../../layout
 
 block content
-  .container.mt-5
-    .d-flex.justify-content-between.align-items-center.mb-4
-        h2
-            i.fas.fa-book-reader.me-2
-            | Предавания: #{homework.title}
-        a.btn.btn-outline-secondary(href=`/users/homework/${homework.id}`) 
-            i.fas.fa-arrow-left.me-2
-            | Обратно към условието
+  link(rel='stylesheet', href='/stylesheets/admin_submissions.css')
 
-    if query && query.success
-        .alert.alert-success #{query.success}
+  .rpg-theme
+    .container-fluid.px-4.px-lg-5.rpg-container
+      .d-flex.justify-content-between.align-items-center.mb-4
+          h2
+              i.fas.fa-book-reader.me-2.text-rpg-gold
+              | Предавания: #{homework.title}
+          a.btn.rpg-btn.rpg-btn-edit(href=`/users/homework/${homework.id}`) 
+              i.fas.fa-arrow-left.me-2
+              | Обратно към условието
 
-    if homework.HomeworkSubmissions.length === 0
-        .alert.alert-info.text-center
-            i.fas.fa-info-circle.me-2
-            | Все още няма предадени решения от ученици.
-    else
-        .table-responsive
-            table.table.table-hover.table-bordered.shadow-sm.bg-white
-                thead.table-dark
-                    tr
-                        th #
-                        th Ученик
-                        th Статус / Дата
-                        th Файлове
-                        th Оценка
-                        th Действия
-                tbody
-                    each sub, index in homework.HomeworkSubmissions
-                        tr
-                            td #{index + 1}
-                            td 
-                                div.fw-bold #{sub.User.username}
-                                if sub.User.Hero
-                                    small.text-muted 
-                                        i.fas.fa-user-shield.me-1
-                                        | #{sub.User.Hero.name}
-                            td 
-                                div #{new Date(sub.updatedAt).toLocaleString('bg-BG')}
-                                if sub.submissionText
-                                    small.text-muted.d-block.mt-1
-                                        i.fas.fa-comment-dots.me-1
-                                        | "#{sub.submissionText.substring(0, 30)}..."
-                            td
-                                if sub.SubmissionFiles && sub.SubmissionFiles.length > 0
-                                    ul.list-unstyled.mb-0
-                                        each file in sub.SubmissionFiles
-                                            li.mb-1
-                                                a.text-decoration-none(href=`/users/homework/file/${file.id}/download`)
-                                                    i.far.fa-file.me-1
-                                                    | #{file.fileName}
-                                else
-                                    span.text-muted -
-                            td
-                                if sub.grade
-                                    span.badge.bg-success.fs-6 #{sub.grade}
-                                else
-                                    span.badge.bg-secondary Неоценен
-                            td
-                                button.btn.btn-primary.btn-sm(
-                                    onclick=`openGradeModal('${sub.id}', '${sub.grade || ""}', '${sub.feedback || ""}')`
-                                )
-                                    i.fas.fa-check-double.me-1
-                                    | Оцени
+      if query && query.success
+          .rpg-alert.rpg-alert-success 
+            i.fas.fa-check-circle.me-2
+            | #{query.success}
 
-    #gradeModal.modal.fade(tabindex="-1" aria-hidden="true")
-        .modal-dialog
-            .modal-content
-                form#gradeForm(method="POST")
-                    .modal-header.bg-primary.text-white
-                        h5.modal-title Оценяване на домашно
-                        button.btn-close.btn-close-white(type="button" data-bs-dismiss="modal" aria-label="Close")
-                    
-                    .modal-body
-                        .mb-3
-                            label.form-label.fw-bold(for="gradeSelect") Оценка (2 - 6)
-                            select#gradeSelect.form-select(name="grade" required)
-                                option(value="" disabled selected) Избери оценка...
-                                option(value="2") Слаб (2)
-                                option(value="3") Среден (3)
-                                option(value="4") Добър (4)
-                                option(value="5") Много добър (5)
-                                option(value="6") Отличен (6)
-                        
-                        .mb-3
-                            label.form-label.fw-bold(for="feedbackText") Коментар (Обратна връзка)
-                            textarea#feedbackText.form-control(name="feedback" rows="3" placeholder="Браво! Справил си се отлично, но...")
+      - const validSubmissions = homework.HomeworkSubmissions ? homework.HomeworkSubmissions.filter(s => s.status === 'submitted' || s.status === 'graded' || (s.SubmissionFiles && s.SubmissionFiles.length > 0) || (s.submissionText && s.submissionText.trim() !== '')) : []
 
-                    .modal-footer
-                        button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Отказ
-                        button.btn.btn-success(type="submit")
-                            i.fas.fa-save.me-2
-                            | Запиши Оценката
+      if validSubmissions.length === 0
+          .rpg-alert.rpg-alert-info.justify-content-center
+              i.fas.fa-info-circle.me-2
+              | Все още няма предадени решения от ученици.
+      else
+          .card.rpg-card
+            .card-body
+              .table-responsive
+                  table.table.rpg-table.align-middle
+                      thead
+                          tr
+                              th #
+                              th Ученик
+                              th Статус / Дата
+                              th Файлове
+                              th Оценка
+                              th Действия
+                      tbody
+                          
+                          each sub, index in validSubmissions
+                              tr
+                                  td #{index + 1}
+                                  td 
+                                      div.fw-bold.text-light #{sub.User.username}
+                                      if sub.User.Hero
+                                          small.text-muted 
+                                              i.fas.fa-user-shield.me-1.text-info
+                                              | #{sub.User.Hero.name}
+                                  td 
+                                      div #{new Date(sub.updatedAt).toLocaleString('bg-BG')}
+                                      if sub.submissionText
+                                          small.text-muted.d-block.mt-1
+                                              i.fas.fa-comment-dots.me-1.text-warning
+                                              | "#{sub.submissionText.substring(0, 30)}..."
+                                  td
+                                      if sub.SubmissionFiles && sub.SubmissionFiles.length > 0
+                                          ul.list-unstyled.mb-0
+                                              each file in sub.SubmissionFiles
+                                                  li.mb-1
+                                                      a.text-info.text-decoration-none(href=`/users/homework/file/${file.id}/download`)
+                                                          i.far.fa-file-alt.me-1
+                                                          | #{file.fileName}
+                                      else
+                                          span.text-muted -
+                                  td
+                                      if sub.grade
+                                          span.badge.bg-success.rpg-badge Оценка: #{sub.grade}
+                                      else
+                                          span.badge.bg-secondary.rpg-badge Неоценен
+                                  td
+                                      
+                                      button.btn.rpg-btn.rpg-btn-role.grade-btn(
+                                          data-id=sub.id
+                                          data-grade=sub.grade || ""
+                                          data-feedback=sub.feedback || ""
+                                      )
+                                          i.fas.fa-check-double.me-1
+                                          | Оцени
 
-    script.
-        function openGradeModal(submissionId, currentGrade, currentFeedback) {
-            const form = document.getElementById('gradeForm');
-            form.action = `/admin/submission/${submissionId}/grade`;
+      
+      #gradeModal.modal.fade.rpg-modal(tabindex="-1" aria-hidden="true")
+          .modal-dialog.modal-dialog-centered
+              .modal-content
+                  form#gradeForm(method="POST")
+                      .modal-header
+                          h5.modal-title 
+                            i.fas.fa-gavel.me-2
+                            | Оценяване на домашно
+                          button.btn-close(type="button" data-bs-dismiss="modal" aria-label="Close")
+                      
+                      .modal-body
+                          .mb-3
+                              label.form-label.rpg-label(for="gradeSelect") Оценка (2 - 6)
+                              select#gradeSelect.form-select.rpg-input(name="grade" required)
+                                  option(value="" disabled selected style="color: #64748b;") Избери оценка...
+                                  option(value="2" style="background: #161d2e;") Слаб (2)
+                                  option(value="3" style="background: #161d2e;") Среден (3)
+                                  option(value="4" style="background: #161d2e;") Добър (4)
+                                  option(value="5" style="background: #161d2e;") Много добър (5)
+                                  option(value="6" style="background: #161d2e;") Отличен (6)
+                          
+                          .mb-3
+                              label.form-label.rpg-label(for="feedbackText") Коментар (Обратна връзка)
+                              textarea#feedbackText.form-control.rpg-input(name="feedback" rows="3" placeholder="Браво! Справил си се отлично, но...")
 
-            const select = document.getElementById('gradeSelect');
-            if (currentGrade) {
-                select.value = currentGrade;
-            } else {
-                select.value = ""; 
-            }
+                      .modal-footer
+                          button.btn.rpg-btn.rpg-btn-edit(type="button" data-bs-dismiss="modal") Отказ
+                          button.btn.rpg-btn.rpg-btn-role(type="submit")
+                              i.fas.fa-save.me-2
+                              | Запиши Оценката
 
-            const textarea = document.getElementById('feedbackText');
-            textarea.value = currentFeedback || "";
-
-            const modalElement = document.getElementById('gradeModal');
-            const modal = new bootstrap.Modal(modalElement);
-            modal.show();
-        }
+  script(src='/javascripts/admin_submissions.js')

@@ -37,4 +37,6 @@ router.post(
 router.get("/homework/:id/submissions", adminController.viewHomeworkSubmissions);
 router.post("/submission/:id/grade", adminController.gradeHomeworkSubmission);
 
+//router.get("/cheat/give-all-items", isLogged, adminController.giveCheatItems);
+
 module.exports = router;

@@ -390,12 +390,12 @@ exports.getBattle = async (req, res) => {
     const duelId = req.params.duelId;
 
     const currentHero = await Hero.findOne({ where: { userId: userId } });
+    if (!currentHero) {
+      return res.redirect("/users/my-hero");
+    }
 
     const duel = await Duel.findOne({
-      where: {
-        id: duelId,
-        status: "active",
-      },
+      where: { id: duelId },
       include: [
         {
           model: Hero,
@@ -421,20 +421,45 @@ exports.getBattle = async (req, res) => {
     });
 
     if (!duel) {
-      return res
-        .status(404)
-        .send("Дуелът не е намерен, вече е приключил или не е активен.");
+      return res.status(404).render("arena/error", {
+        title: "Ненамерен дуел",
+        message: "Дуелът, който се опитваш да заредиш, не съществува.",
+      });
+    }
+
+    if (duel.status !== "active") {
+      return res.status(400).render("arena/error", {
+        title: "Неактивна битка",
+        message: `Този дуел вече не е активен (Текущ статус: ${duel.status}).`,
+      });
+    }
+
+    const isInitiator = duel.initiatorId === currentHero.id;
+    const isOpponent = duel.opponentId === currentHero.id;
+
+    if (!isInitiator && !isOpponent) {
+      return res.status(403).render("arena/error", {
+        title: "Достъпът е отказан",
+        message: "Нямаш право да участваш в този дуел!",
+      });
     }
 
     if (
-      duel.initiatorId !== currentHero.id &&
-      duel.opponentId !== currentHero.id
+      (isInitiator && duel.initiatorFinished) ||
+      (isOpponent && duel.opponentFinished)
     ) {
-      return res.status(403).send("Нямаш право да участваш в този дуел!");
+      return res.redirect(`/arena/result/${duel.id}`);
+    }
+
+    if (!duel.questionIds) {
+      return res.status(400).render("arena/error", {
+        title: "Бъгната/Стара битка",
+        message:
+          "Тази битка няма генерирани въпроси в базата данни. Моля, върни се в лобито и създай ново предизвикателство.",
+      });
     }
 
     const questionIdsArray = duel.questionIds.split(",").map(Number);
-
     const questions = await Question.findAll({
       where: { id: questionIdsArray },
       include: [{ model: Answer }],
@@ -448,7 +473,10 @@ exports.getBattle = async (req, res) => {
     });
   } catch (error) {
     console.error("Battle Load Error:", error);
-    res.status(500).send("Грешка при зареждане на битката.");
+    res.status(500).render("arena/error", {
+      title: "Критична грешка",
+      message: `Възникна сървърна грешка: ${error.message}`,
+    });
   }
 };
 

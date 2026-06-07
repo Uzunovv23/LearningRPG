@@ -1,78 +1,130 @@
 extends ../layout
 
 block content
-  .container.mt-5
-    h2.text-primary.mb-4 👥 Потребители
+  link(rel='stylesheet', href='/stylesheets/admin_users.css')
 
-    .card.shadow-sm
-      .card-body
-        .table-responsive
-          table.table.table-hover.align-middle
-            thead.table-light
-              tr
-                th ID
-                th Потребител
-                th Email
-                th Роля
-                th Регистриран на
-                th Действия
-            tbody
-              each user in users
-                tr(id=`user-row-${user.id}`)
-                  td #{user.id}
-                  td.fw-bold #{user.username}
-                  td #{user.email}
-                  td
+  .container-fluid.px-4.px-lg-5.mt-4
+    .rpg-admin-header
+      .rpg-header-content
+        h1.rpg-admin-title
+          i.fas.fa-users.me-3
+          | Управление на потребители
+        p.rpg-header-subtitle Администриране и контрол на всички регистрирани потребители
+
+    .rpg-admin-card
+      .table-responsive
+        table.table.rpg-admin-table
+          thead
+            tr
+              th ID
+              th.col-username Потребител
+              th.col-email Email
+              th.col-role Роля
+              th.col-date Регистриран на
+              th.col-actions Действия
+          tbody
+            each user in users
+              tr(id=`user-row-${user.id}`)
+                td.cell-id
+                  code #{user.id}
+                td.cell-username
+                  strong #{user.username}
+                td.cell-email
+                  span #{user.email}
+                td.cell-role
+                  if user.role === 'admin'
+                    span.rpg-badge.rpg-badge-admin
+                      i.fas.fa-shield-alt.me-1
+                      | Админ
+                  else
+                    span.rpg-badge.rpg-badge-user
+                      i.fas.fa-user.me-1
+                      | Потребител
+                td.cell-date
+                  small #{new Date(user.createdAt).toLocaleDateString('bg-BG')}
+                td.cell-actions
+                  .action-buttons
+                    button.rpg-btn.rpg-btn-edit(
+                      type='button'
+                      data-bs-toggle='modal'
+                      data-bs-target='#editUserModal'
+                      data-id=user.id
+                      data-username=user.username
+                      data-email=user.email
+                      title='Редактирай потребител'
+                    )
+                      i.fas.fa-edit
+                      span.d-none.d-lg-inline.ms-1 Редакция
+
                     if user.role === 'admin'
-                      span.badge.bg-danger Админ
+                      if lastAdmin && lastAdmin.id === user.id
+                        button.rpg-btn.rpg-btn-revoke.rpg-btn-disabled(
+                          type='button'
+                          disabled
+                          title='Последният администратор не може да бъде премахнат'
+                        )
+                          i.fas.fa-lock.me-1
+                          span.d-none.d-lg-inline Защитен
+                      else
+                        button.rpg-btn.rpg-btn-revoke.role-btn(
+                          type='button'
+                          data-id=user.id
+                          data-new-role='user'
+                          title='Премахни администраторски достъп'
+                        )
+                          i.fas.fa-user.me-1
+                          span.d-none.d-lg-inline Премахни Admin
                     else
-                      span.badge.bg-info.text-dark Потребител
-                  td #{new Date(user.createdAt).toLocaleDateString('bg-BG')}
-                  td
-                    button.btn.btn-sm.btn-outline-primary.me-2(
-                        data-bs-toggle="modal" 
-                        data-bs-target="#editUserModal"
+                      button.rpg-btn.rpg-btn-promote.role-btn(
+                        type='button'
                         data-id=user.id
-                        data-username=user.username
-                        data-email=user.email
-                    ) 
-                      i.bi.bi-pencil
-                      |  Редакция
-
-                    if user.role === 'admin'
-                        button.btn.btn-sm.btn-outline-dark.me-2.role-btn(data-id=user.id data-new-role="user")
-                            i.bi.bi-person
-                            |  Направи User
-                    else
-                        button.btn.btn-sm.btn-outline-warning.me-2.role-btn(data-id=user.id data-new-role="admin")
-                            i.bi.bi-shield-lock
-                            |  Направи Admin
+                        data-new-role='admin'
+                        title='Направи администратор'
+                      )
+                        i.fas.fa-shield-alt.me-1
+                        span.d-none.d-lg-inline Направи Admin
 
                     if user.role !== 'admin'
-                        button.btn.btn-sm.btn-outline-danger.delete-user-btn(data-id=user.id)
-                          i.bi.bi-trash
-                          |  Изтрий
-                    else
-                        span.text-muted.small.ms-2
-                            i.bi.bi-shield-check 
-                            |  Защитен
+                      button.rpg-btn.rpg-btn-delete.delete-user-btn(
+                        type='button'
+                        data-id=user.id
+                        title='Изтрий потребител'
+                      )
+                        i.fas.fa-trash-alt
+                        span.d-none.d-lg-inline.ms-1 Изтрий
 
-    #editUserModal.modal.fade(tabindex="-1" aria-hidden="true")
-      .modal-dialog
-        form#editUserForm(method="POST" action="")
-          .modal-content
-            .modal-header
-              h5.modal-title Редакция на потребител
-              button.btn-close(type="button" data-bs-dismiss="modal" aria-label="Close")
+    #editUserModal.modal.fade.rpg-modal(tabindex='-1', aria-hidden='true')
+      .modal-dialog.modal-dialog-centered
+        .modal-content
+          .modal-header
+            h5.modal-title
+              i.fas.fa-user-edit.me-2.text-rpg-gold
+              | Редакция на потребител
+            button.btn-close.btn-close-light(type='button', data-bs-dismiss='modal', aria-label='Close')
+          form#editUserForm(method='POST')
             .modal-body
               .mb-3
-                label.form-label Потребителско име
-                input#modalUsername.form-control(type="text" name="username" required)
+                label.form-label За потребителско име
+                input#modalUsername.form-control(
+                  type='text'
+                  name='username'
+                  required
+                  placeholder='Въведи ново потребителско име'
+                )
               .mb-3
                 label.form-label Email адрес
-                input#modalEmail.form-control(type="email" name="email" required)
+                input#modalEmail.form-control(
+                  type='email'
+                  name='email'
+                  required
+                  placeholder='Въведи нов email адрес'
+                )
             .modal-footer
-              button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Отказ
-              button.btn.btn-primary(type="submit") Запази промените
+              button.rpg-btn.rpg-btn-cancel(type='button', data-bs-dismiss='modal')
+                i.fas.fa-times.me-1
+                | Отказ
+              button.rpg-btn.rpg-btn-save(type='submit')
+                i.fas.fa-check.me-1
+                | Запази промените
 
-  script(src="/javascripts/admin_users.js")
+  script(src='/javascripts/admin_users.js')

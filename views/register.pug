@@ -1,27 +1,136 @@
 extends layout
 
+block styles
+  link(rel='stylesheet', href='/stylesheets/register.css')
+
 block content
-  .container.mt-5
-    .row.justify-content-center
-      .col-md-6
-        .card
-          .card-header.bg-primary.text-white Регистрация
-          .card-body
-            if error
-              .alert.alert-danger= error
-            
-            form(action="/register" method="POST")
-              .mb-3
-                label.form-label Потребителско име
-                input.form-control(type="text" name="username" required)
-              .mb-3
-                label.form-label Имейл
-                input.form-control(type="email" name="email" required)
-              .mb-3
-                label.form-label Парола
-                input.form-control(type="password" name="password" required)
-              button.btn.btn-success.w-100(type="submit") Създай Герой
-            
-            p.mt-3.text-center
-              | Вече имаш акаунт? 
-              a(href="/login") Влез тук
+  .register-container
+    .register-content
+      .register-card.rpg-panel
+        .register-header
+          .header-icon
+            i.fas.fa-user-plus
+
+          .header-text
+            h1.register-title Създай Герой
+            p.register-subtitle Влизаш в света на Learning RPG
+
+        if error
+          .alert.alert-danger.alert-register
+            i.fas.fa-exclamation-circle.me-2
+            span= error
+
+        form(action="/register" method="POST" class="register-form" id="registerForm")
+          .form-group
+            .form-field
+              label.form-label.form-label-custom(for="username")
+                span.label-icon
+                  i.fas.fa-sword
+                span Потребителско име
+              .input-wrapper
+                input#username.form-control.input-custom(
+                  type="text"
+                  name="username"
+                  placeholder="Избери име за героя си"
+                  required
+                  minlength="6"
+                  maxlength="20"
+                )
+                .input-bottom
+                  .input-hint Минимум 6 символа
+
+          .form-group
+            .form-field
+              label.form-label.form-label-custom(for="email")
+                span.label-icon
+                  i.fas.fa-envelope
+                span Имейл
+              .input-wrapper
+                input#email.form-control.input-custom(
+                  type="email"
+                  name="email"
+                  placeholder="Твоят имейл адрес"
+                  required
+                )
+                .input-bottom
+                  .input-hint Трябва да съдържа @
+
+          .form-group
+            .form-field
+              label.form-label.form-label-custom(for="password")
+                span.label-icon
+                  i.fas.fa-shield-alt
+                span Парола
+              .input-wrapper.password-input-wrapper
+                input#password.form-control.input-custom(
+                  type="password"
+                  name="password"
+                  placeholder="••••••••••"
+                  required
+                )
+                .show-password-toggle
+                  label.show-password-label(for="showPassword")
+                    i.fas.fa-eye#passwordEyeIcon
+                    input#showPassword(type="checkbox", class="show-password-checkbox")
+
+              .password-strength-tooltip
+                .tooltip-header
+                  i.fas.fa-shield-alt
+                  span Изисквания за парола
+                .tooltip-requirements
+                  .requirement#reqLength
+                    i.fas.fa-circle.requirement-icon
+                    span Минимум 6 символа
+                  .requirement#reqLower
+                    i.fas.fa-circle.requirement-icon
+                    span Една малка буква
+                  .requirement#reqUpper
+                    i.fas.fa-circle.requirement-icon
+                    span Една главна буква
+                  .requirement#reqNumber
+                    i.fas.fa-circle.requirement-icon
+                    span Едно число
+                  .requirement#reqSpecial
+                    i.fas.fa-circle.requirement-icon
+                    span Един специален знак
+
+          .form-group
+            .form-field
+              label.form-label.form-label-custom(for="confirmPassword")
+                span.label-icon
+                  i.fas.fa-check-double
+                span Потвърди паролата
+              .input-wrapper
+                input#confirmPassword.form-control.input-custom(
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="••••••••••"
+                  required
+                )
+                .input-bottom
+                  .input-hint#passwordMatchHint Паролите трябва да съвпадат
+
+          button.btn.btn-register(type="submit")
+            i.fas.fa-fire.me-2
+            span Започни Приключението
+            .btn-glow
+
+        .register-footer
+          p.login-redirect
+            | Вече имаш акаунт?
+            a.login-link(href="/login")
+              i.fas.fa-sign-in-alt.me-1
+              | Влез тук
+
+      .register-decoration
+        .decoration-element.decoration-1
+          i.fas.fa-shield-alt
+        .decoration-element.decoration-2
+          i.fas.fa-wand-magic-sparkles
+        .decoration-element.decoration-3
+          i.fas.fa-crown
+        .decoration-element.decoration-4
+          i.fas.fa-dragon
+
+block scripts
+  script(src='/javascripts/register.js')

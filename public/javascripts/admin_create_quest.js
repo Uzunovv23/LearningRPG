@@ -7,32 +7,37 @@ document.addEventListener("DOMContentLoaded", function () {
     const quizId = quizCounter;
 
     const html = `
-        <div class="card mb-5 quiz-section border-dark shadow">
-            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Раздел #${quizId}</h5>
-                <button type="button" class="btn btn-danger btn-sm remove-btn">Изтрий раздел</button>
+        <div class="card mb-5 quiz-section rpg-card shadow">
+            <div class="card-header rpg-card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-book-open me-2"></i>Раздел #${quizId}</h5>
+                <button type="button" class="btn rpg-btn rpg-btn-delete btn-sm remove-btn">
+                    <i class="fas fa-trash-alt me-1"></i>Изтрий раздел
+                </button>
             </div>
-            <div class="card-body bg-light">
+            <div class="card-body">
                 
                 <div class="row">
                     <div class="col-md-8">
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Заглавие на раздела (напр. "Събиране"):</label>
-                            <input type="text" class="form-control quiz-title" placeholder="Име на теста...">
+                            <label class="form-label rpg-label">Заглавие на раздела (напр. "Събиране"):</label>
+                            <input type="text" class="form-control rpg-input quiz-title" placeholder="Име на теста...">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
-                            <label class="form-label fw-bold">XP Награда:</label>
-                            <input type="number" class="form-control quiz-xp" value="50" min="0">
+                            <label class="form-label rpg-label">XP Награда:</label>
+                            <div class="input-group">
+                                <span class="input-group-text rpg-input-group-text"><i class="fas fa-star text-warning"></i></span>
+                                <input type="number" class="form-control rpg-input quiz-xp" value="50" min="0">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="questions-container ms-3 border-start border-3 border-primary ps-3"></div>
+                <div class="questions-container"></div>
 
-                <button type="button" class="btn btn-outline-primary btn-sm mt-3 add-question-btn">
-                    + Добави Въпрос към този раздел
+                <button type="button" class="btn rpg-btn rpg-btn-edit btn-sm mt-3 add-question-btn">
+                    <i class="fas fa-plus me-1"></i> Добави Въпрос към този раздел
                 </button>
             </div>
         </div>`;
@@ -41,41 +46,49 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   quizzesContainer.addEventListener("click", function (e) {
-    if (e.target.classList.contains("remove-btn")) {
+    if (e.target.closest(".remove-btn")) {
       e.target.closest(".card").remove();
     }
 
-    if (e.target.classList.contains("add-question-btn")) {
-      const questionsContainer = e.target.previousElementSibling;
+    if (e.target.closest(".add-question-btn")) {
+      const btn = e.target.closest(".add-question-btn");
+      const questionsContainer = btn.previousElementSibling;
       const qIndex = Date.now();
 
       const questionHtml = `
-            <div class="card mb-3 question-card mt-3">
+            <div class="card mb-3 question-card rpg-card mt-3">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <label class="form-label fw-bold text-primary">Въпрос:</label>
-                        <button type="button" class="btn btn-outline-danger btn-sm remove-btn">X</button>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label rpg-label text-warning mb-0"><i class="fas fa-question-circle me-1"></i>Въпрос:</label>
+                        <button type="button" class="btn rpg-btn rpg-btn-delete btn-sm py-1 px-2 remove-btn" title="Изтрий въпроса">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-                    <input type="text" class="form-control mb-2 q-text" placeholder="Текст на въпроса...">
+                    <input type="text" class="form-control rpg-input mb-3 q-text" placeholder="Текст на въпроса...">
                     
-                    <div class="row g-2">
-                        <div class="col-md-3"><input type="number" class="form-control q-points" value="10" placeholder="Точки"></div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text rpg-input-group-text"><i class="fas fa-bullseye text-info"></i></span>
+                                <input type="number" class="form-control rpg-input q-points" value="10" placeholder="Точки">
+                            </div>
+                        </div>
                     </div>
 
-                    <label class="form-label mt-2 small text-muted">Отговори (маркирай верния):</label>
+                    <label class="form-label rpg-label mt-2 small"><i class="fas fa-check-circle me-1 text-success"></i>Отговори (маркирай верния):</label>
                     <div class="answers-box">
                         ${[0, 1, 2, 3]
                           .map(
                             (i) => `
-                            <div class="input-group mb-1">
-                                <div class="input-group-text">
-                                    <input class="form-check-input mt-0 q-correct" type="radio" name="correct_${qIndex}" value="${i}">
+                            <div class="input-group mb-2">
+                                <div class="input-group-text rpg-input-group-text">
+                                    <input class="form-check-input mt-0 rpg-radio q-correct" type="radio" name="correct_${qIndex}" value="${i}">
                                 </div>
-                                <input type="text" class="form-control q-answer" placeholder="Отговор ${
+                                <input type="text" class="form-control rpg-input q-answer" placeholder="Отговор ${
                                   i + 1
                                 }">
                             </div>
-                        `
+                        `,
                           )
                           .join("")}
                     </div>
@@ -97,10 +110,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
       document.querySelectorAll(".quiz-section").forEach((quizCard) => {
         const quizTitle = quizCard.querySelector(".quiz-title").value;
-        
+
         const xpInput = quizCard.querySelector(".quiz-xp");
-        const quizXP = xpInput ? (parseInt(xpInput.value) || 0) : 0;
-        
+        const quizXP = xpInput ? parseInt(xpInput.value) || 0 : 0;
+
         calculatedTotalXP += quizXP;
 
         const quizQuestions = [];
@@ -143,7 +156,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const data = {
         title: title,
         description: document.getElementById("questDesc").value,
-        xpReward: calculatedTotalXP, 
+        xpReward: calculatedTotalXP,
         quizzes: quizzesData,
       };
 

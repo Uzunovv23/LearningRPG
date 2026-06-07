@@ -1,115 +1,168 @@
 extends ../layout
 
 block content
-  link(rel='stylesheet', href='/stylesheets/homework-items.css')
+  link(rel='stylesheet', href='/stylesheets/quest-show.css')
 
-  .container.mt-5
+  .rpg-page
     
-    if alertMessage
-      div(class=`alert alert-${alertType === 'success' ? 'success' : 'danger'} alert-dismissible fade show` role="alert")
-        strong #{alertType === 'success' ? 'Успех!' : 'Грешка!'} 
-        |  #{alertMessage}
-        button.btn-close(type="button" data-bs-dismiss="alert" aria-label="Close")
+    .rpg-particles
+      each i in [1,2,3,4,5,6,7,8,9,10,11,12]
+        span.particle
 
-    .jumbotron.p-5.bg-dark.text-white.rounded.mb-5.shadow
-      .d-md-flex.justify-content-between.align-items-center
-        div
-            h1.display-4.fw-bold #{quest.title}
-            p.lead.mb-0 #{quest.description}
+    .container-fluid.px-4.px-lg-5.rpg-container
+
+      
+      if alertMessage
+        .rpg-alert(class=`rpg-alert-${alertType === 'success' ? 'success' : 'danger'}`)
+          .rpg-alert-icon
+            i.fas(class=`${alertType === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}`)
+          .rpg-alert-body
+            strong #{alertType === 'success' ? 'Успех!' : 'Грешка!'}
+            span  #{alertMessage}
+
+      
+      .rpg-hero.mb-5
+        .rpg-hero-bg
+        .rpg-hero-content
+          .rpg-hero-left
+            .rpg-hero-label Мисия
+            h1.rpg-hero-title #{quest.title}
+            p.rpg-hero-desc #{quest.description}
             if isCompleted
-                .badge.bg-success.mt-3.fs-6 Предметът е завършен
-        
-        div.mt-4.mt-md-0
+              .rpg-status-tag.rpg-status-completed
+                i.fas.fa-lock.me-2
+                | Предметът е завършен
+          .rpg-hero-right
             if !isEnrolled
-                form(action=`/quests/${quest.id}/enroll` method="POST")
-                    button.btn.btn-warning.btn-lg.fw-bold.px-5(type="submit") Запиши се
+              form(action=`/quests/${quest.id}/enroll` method="POST")
+                button.rpg-enroll-btn(type="submit")
+                  .rpg-btn-glow
+                  i.fas.fa-signature.me-2
+                  | Запиши се
             else
-                .text-end
-                    .badge.bg-primary.fs-6 Записан
+              .rpg-enrolled-badge
+                i.fas.fa-shield-check.me-2
+                | Записан
 
-    .row
-        .col-md-6.mb-5
-            h3.mb-3.text-secondary
-                i.fas.fa-tasks.me-2
-                | Тестове
-            
+      
+      .rpg-columns
+
+        
+        .rpg-column
+          .rpg-section-header
+            .rpg-section-icon.icon-blue
+              i.fas.fa-tasks
+            h3.rpg-section-title.title-blue Тестове
             if quest.Quizzes && quest.Quizzes.length > 0
-                .list-group.shadow-sm
-                    each quiz in quest.Quizzes
-                        a.list-group-item.list-group-item-action.d-flex.justify-content-between.align-items-center(href=`/quests/${quest.id}/quizzes/${quiz.id}`)
-                            div
-                                h5.mb-1 #{quiz.title}
-                            span.badge.bg-warning.text-dark #{quiz.xpReward} XP
-            else
-                .alert.alert-light.border Няма добавени тестове.
+              .rpg-section-count.count-blue #{quest.Quizzes.length}
 
-        .col-md-6.mb-5
-            h3.mb-3.text-primary
-                i.fas.fa-book-reader.me-2
-                | Домашни работи
-            
+          if quest.Quizzes && quest.Quizzes.length > 0
+            .rpg-cards-list
+              each quiz in quest.Quizzes
+                a.rpg-quest-card.rpg-quest-card-blue(href=`/quests/${quest.id}/quizzes/${quiz.id}`)
+                  .rpg-card-accent
+                  .rpg-card-body
+                    .rpg-card-icon
+                      i.fas.fa-scroll
+                    .rpg-card-info
+                      span.rpg-card-title #{quiz.title}
+                      .rpg-card-meta
+                      .rpg-xp-badge
+                        i.fas.fa-star.me-1
+                        | #{quiz.xpReward} XP
+                  .rpg-card-arrow
+                    i.fas.fa-chevron-right
+          else
+            .rpg-empty-state
+              i.fas.fa-inbox.rpg-empty-icon
+              span Няма добавени тестове.
+
+        
+        .rpg-column
+          .rpg-section-header
+            .rpg-section-icon.icon-green
+              i.fas.fa-scroll
+            h3.rpg-section-title.title-green Домашни работи
             if quest.Homework && quest.Homework.length > 0
-                .list-group.shadow-sm
-                    each hw in quest.Homework
-                        - const mySub = hw.HomeworkSubmissions && hw.HomeworkSubmissions[0]
+              .rpg-section-count.count-green #{quest.Homework.length}
+
+          if quest.Homework && quest.Homework.length > 0
+            .rpg-cards-list
+              each hw in quest.Homework
+                - const mySub = hw.HomeworkSubmissions && hw.HomeworkSubmissions[0]
+                - const hasFiles = mySub && mySub.SubmissionFiles && mySub.SubmissionFiles.length > 0
+                - const isGraded = mySub && (mySub.grade || mySub.status === 'graded')
+                - const isSubmitted = mySub && (mySub.status === 'submitted' || hasFiles)
+                - let extension = (mySub && mySub.extensionHours) ? mySub.extensionHours : 0
+                - let originalDate = new Date(hw.endDate)
+                - let effectiveDate = new Date(originalDate.getTime() + extension * 60 * 60 * 1000)
+                - const isExpired = effectiveDate < new Date()
+                - let cardState = isGraded || isSubmitted ? 'submitted' : isExpired ? 'expired' : 'active'
+
+                .rpg-hw-card(class=`rpg-hw-${cardState}`)
+                  .rpg-hw-stripe
+                  .rpg-hw-body
+                    .rpg-hw-top
+                      .rpg-hw-title-row
+                        .rpg-card-icon
+                          i.fas.fa-feather-alt
+                        a.rpg-hw-title(href=`/users/homework/${hw.id}`) #{hw.title}
+                        if extension > 0
+                          span.rpg-mini-badge.badge-info(title="Удължен срок") +#{extension}ч
+                        if mySub && mySub.usedLatePass
+                          span.rpg-mini-badge.badge-warn(title="Ползван Билет") Билет
+                      .rpg-hw-status
+                        if isGraded
+                          .rpg-status-tag.rpg-status-graded
+                            i.fas.fa-award.me-1
+                            | Оценка: #{mySub.grade}
+                        else if isSubmitted
+                          .rpg-status-tag.rpg-status-warn
+                            i.fas.fa-paper-plane.me-1
+                            | Предадено
+                        else if isExpired
+                          .rpg-status-tag.rpg-status-danger
+                            i.fas.fa-skull.me-1
+                            | Изтекъл
+                        else
+                          .rpg-status-tag.rpg-status-active
+                            i.fas.fa-bolt.me-1
+                            | Активно
+
+                    .rpg-hw-deadline
+                      i.far.fa-hourglass.me-1
+                      | Краен срок:&nbsp;
+                      span.rpg-deadline-val #{effectiveDate.toLocaleString('bg-BG')}
+
+                    .rpg-hw-actions
+                      if !isExpired && !isSubmitted && !isGraded
+                        if chronoCount > 0
+                          button.rpg-chrono-btn.btn-chrono(
+                            data-homework-id=hw.id
+                            title="Удължи с 24 часа"
+                          )
+                            i.fas.fa-hourglass-half.me-2
+                            | Удължи (+24ч)
+                            span.chrono-count  (Имаш: #{chronoCount})
+
+                      - const isAdmin = (typeof user !== 'undefined' && user.role === 'admin') || (typeof currentUser !== 'undefined' && currentUser.role === 'admin')
+                      
+                      if isAdmin
                         
-                        - const hasFiles = mySub && mySub.SubmissionFiles && mySub.SubmissionFiles.length > 0
-                        - const isGraded = mySub && (mySub.grade || mySub.status === 'graded')
-                        - const isSubmitted = mySub && (mySub.status === 'submitted' || hasFiles)
+                        - const realSubmissions = hw.HomeworkSubmissions ? hw.HomeworkSubmissions.filter(s => s.status === 'submitted' || s.status === 'graded' || (s.SubmissionFiles && s.SubmissionFiles.length > 0) || (s.submissionText && s.submissionText.trim() !== '')) : []
+                        - const subCount = realSubmissions.length
                         
-                        - let extension = (mySub && mySub.extensionHours) ? mySub.extensionHours : 0
-                        - let originalDate = new Date(hw.endDate)
-                        - let effectiveDate = new Date(originalDate.getTime() + extension * 60 * 60 * 1000)
-                        - const isExpired = effectiveDate < new Date()
+                        if subCount > 0
+                          a.rpg-admin-btn(href=`/admin/homework/${hw.id}/submissions`)
+                            i.fas.fa-gavel.me-2
+                            | Оценяване (#{subCount})
+                        else
+                          button.rpg-admin-btn.disabled(disabled)
+                            i.fas.fa-ban.me-2
+                            | Няма предадени
+          else
+            .rpg-empty-state
+              i.fas.fa-inbox.rpg-empty-icon
+              span Все още няма добавени домашни.
 
-                        .list-group-item.flex-column.align-items-start
-                            .d-flex.w-100.justify-content-between.mb-2
-                                h5.mb-1.fw-bold 
-                                    a.text-decoration-none.text-dark(href=`/users/homework/${hw.id}`) #{hw.title}
-                                    
-                                    if extension > 0
-                                        span.badge.bg-info.text-dark.ms-2(title="Удължен срок") +#{extension}ч
-                                    if mySub && mySub.usedLatePass
-                                        span.badge.bg-warning.text-dark.ms-2(title="Ползван Билет") Билет
-
-                                small
-                                    if isGraded
-                                        span.badge.bg-success Оценка: #{mySub.grade}
-                                    else if isSubmitted
-                                        span.badge.bg-warning.text-dark Предадено
-                                    else if isExpired
-                                        span.badge.bg-danger Изтекъл срок
-                                    else
-                                        span.badge.bg-primary Активно
-
-                            p.mb-1
-                                i.far.fa-clock.me-1
-                                | Краен срок: #{effectiveDate.toLocaleString('bg-BG')}
-                            
-                            if !isExpired && !isSubmitted && !isGraded
-                                if chronoCount > 0
-                                    button.btn.btn-sm.btn-outline-info.btn-chrono.mt-2(
-                                        data-homework-id=hw.id
-                                        title="Удължи с 24 часа"
-                                    ) 
-                                        i.fas.fa-hourglass-half.me-1
-                                        | Удължи (+24ч) (Имаш: #{chronoCount})
-
-                            - const isAdmin = (typeof user !== 'undefined' && user.role === 'admin') || (typeof currentUser !== 'undefined' && currentUser.role === 'admin')
-                            
-                            if isAdmin
-                                - const subCount = hw.HomeworkSubmissions ? hw.HomeworkSubmissions.length : 0
-                                
-                                if subCount > 0
-                                    a.btn.btn-sm.btn-dark.mt-2.ms-2(href=`/admin/homework/${hw.id}/submissions`)
-                                        i.fas.fa-gavel.me-1
-                                        | Оценяване на предадени домашни
-                                else
-                                    button.btn.btn-sm.btn-secondary.mt-2.ms-2(disabled)
-                                        i.fas.fa-ban.me-1
-                                        | Няма предадени домашни
-
-            else
-                .alert.alert-light.border.text-muted Все още няма домашни.
-
-  script(src='/javascripts/homework-items.js')
+  script(src='/javascripts/quest-show.js')

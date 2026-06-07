@@ -3,73 +3,134 @@ extends ../layout
 block content
   link(rel='stylesheet', href='/stylesheets/quest-result.css')
 
-  .container.mt-5
-    .row.justify-content-center
-      .col-md-8
-        .card.result-card.text-white.mb-5
-          .card-header.text-center.border-secondary
-            h4.mb-0.text-muted Резултат от Мисията
+  - const scorePercent = maxPoints > 0 ? Math.round((points / maxPoints) * 100) : 0
+  - const stars = scorePercent >= 80 ? 3 : scorePercent >= 50 ? 2 : isSuccess ? 1 : 0
+  - const rank = scorePercent >= 90 ? 'S' : scorePercent >= 75 ? 'A' : scorePercent >= 60 ? 'B' : scorePercent >= 45 ? 'C' : isSuccess ? 'D' : 'F'
 
-          .card-body.text-center.py-5
-            h1.display-5.text-primary.mb-4 #{questTitle}
+  .qr-scene
+    canvas#qr-particles
 
-            if message
-              div(class=`alert mb-4 ${isSuccess ? 'alert-success' : 'alert-warning'}`)
-                i(class=`fas ${isSuccess ? 'fa-check-circle' : 'fa-exclamation-triangle'} me-2`)
-                | #{message}
+    .qr-overlay
 
-            .score-container.mb-4
-              h2.mb-2
-                span.text-muted Точки: 
-                span#scoreDisplay.score-value(
-                  class=points > 0 ? "text-success-glow" : "text-danger-glow",
-                  data-target=points
-                ) 0
-                span.text-muted  / #{maxPoints}
-              
-              p.lead
-                | Верни отговори: 
-                strong #{correctCount}
+      .qr-banner(class=isSuccess ? 'qr-banner--victory' : 'qr-banner--defeat')
+        .qr-banner__flare
+        .qr-banner__text
+          if isSuccess
+            i.fas.fa-crown.me-3
+            | ПОБЕДА
+          else
+            i.fas.fa-skull.me-3
+            | ПОРАЖЕНИЕ
 
-            hr.border-secondary.my-4
+      .qr-panel
+        .qr-panel__inner
 
-            if xpEarned > 0 || coinsEarned > 0
-              .reward-box.mb-4
-                h4.text-light.mb-3 Спечелени награди:
-                
-                .d-flex.justify-content-center.align-items-center.gap-5.flex-wrap
-                    
+          .qr-quest-title
+            i.fas.fa-scroll.me-2
+            | #{questTitle}
+
+          .qr-stars
+            each val in [1, 2, 3]
+              .qr-star(class=val <= stars ? 'qr-star--lit' : '', data-index=val)
+                i.fas.fa-star
+
+          .qr-body
+
+            .qr-left-col
+
+              .qr-score-hex
+                .qr-score-hex__inner
+                  .qr-score-hex__label Точки
+                  .qr-score-hex__value
+                    span#scoreDisplay(data-target=points) 0
+                  .qr-score-hex__max / #{maxPoints}
+
+              .qr-percent-ring
+                svg(viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg')
+                  circle.qr-ring-bg(cx='60' cy='60' r='52')
+                  circle#qr-ring-fill.qr-ring-fill(
+                    cx='60' cy='60' r='52'
+                    class=isSuccess ? 'qr-ring-fill--success' : 'qr-ring-fill--fail'
+                    data-percent=scorePercent
+                  )
+                .qr-percent-ring__label
+                  span#percentDisplay(data-target=scorePercent) 0
+                  | %
+
+              .qr-stat-row.mt-3
+                i.fas.fa-bullseye.me-2
+                | Верни отговори:
+                strong.qr-stat-val #{correctCount}
+
+            .qr-right-col
+
+              .qr-rank-badge(class=`qr-rank--${rank.toLowerCase()}`)
+                .qr-rank-badge__glow
+                .qr-rank-badge__label Ранг
+                .qr-rank-badge__letter #{rank}
+
+              if message
+                .qr-message(class=isSuccess ? 'qr-message--success' : 'qr-message--fail')
+                  i.fas(class=isSuccess ? 'fa-check-circle' : 'fa-skull-crossbones')
+                  span.ms-2 #{message}
+
+              if xpEarned > 0 || coinsEarned > 0
+                .qr-rewards
+                  .qr-rewards__title
+                    i.fas.fa-gift.me-2
+                    | Спечелени награди
+                  .qr-rewards__items
+
                     if xpEarned > 0
-                        .reward-item
-                            h3.text-success.mb-0 
-                              | + 
-                              span#xpDisplay(data-target=xpEarned) 0 
-                              |  XP
-                            i.fas.fa-bolt.fa-2x.text-success.mt-2
+                      .qr-reward-card.qr-reward-card--xp
+                        .qr-reward-card__icon
+                          i.fas.fa-bolt
+                        .qr-reward-card__value
+                          | +
+                          span#xpDisplay(data-target=xpEarned) 0
+                        .qr-reward-card__label Опит (XP)
 
                     if coinsEarned > 0
-                        .reward-item
-                            h3.text-warning.mb-0 
-                              | + 
-                              span#coinsDisplay(data-target=coinsEarned) 0 
-                              |  KC
-                            i.fas.fa-coins.fa-2x.text-warning.mt-2
+                      .qr-reward-card.qr-reward-card--coins
+                        .qr-reward-card__icon
+                          i.fas.fa-coins
+                        .qr-reward-card__value
+                          | +
+                          span#coinsDisplay(data-target=coinsEarned) 0
+                        .qr-reward-card__label Злато (KC)
 
-                p.mb-0.text-light.mt-4 Поздравления! Героят ти стана по-силен и по-богат!
-            
-            else
-              .reward-box.failed.mb-4
-                .d-flex.justify-content-center.gap-4.mb-2
-                    h3.text-muted 0 XP
-                    h3.text-muted 0 KC
-                
-                if isSuccess
-                   p.mb-0.text-light Вече си усвоил това знание! (Наградите се дават еднократно)
-                   i.fas.fa-check-double.fa-3x.text-muted.mt-3
-                else
-                   p.mb-0.text-light Не се отказвай! Упражнявай се и опитай пак.
-            
-            a.btn.btn-primary.btn-lg.mt-3(href='/quests') 
-              | Обратно към мисиите
+                  if scrollUsed
+                    .qr-item-used
+                      i.fas.fa-scroll.me-2
+                      | Свитък на Мъдростта активиран — XP x2!
+
+                  if midasUsed
+                    .qr-item-used.qr-item-used--gold
+                      i.fas.fa-hand-sparkles.me-2
+                      | Ръкавицата на Мидас активирана — KC x2!
+
+                  p.qr-rewards__footer Поздравления! Героят ти стана по-силен и по-богат!
+
+              else
+                .qr-no-rewards(class=isSuccess ? 'qr-no-rewards--known' : 'qr-no-rewards--fail')
+                  .qr-no-rewards__icons
+                    .qr-no-reward-item
+                      span.qr-zero 0
+                      small XP
+                    .qr-no-reward-item
+                      span.qr-zero 0
+                      small KC
+
+                  if isSuccess
+                    p Вече си усвоил това знание! Наградите се дават еднократно.
+                    i.fas.fa-check-double.fa-2x.qr-icon-known
+                  else
+                    p Не се отказвай! Упражнявай се и опитай пак.
+                    i.fas.fa-skull.fa-2x.qr-icon-fail
+
+          .qr-actions
+            a.qr-btn(href=`/quests/${questId}`)
+              i.fas.fa-arrow-left.me-2
+              | Обратно към мисията
 
   script(src='/javascripts/quest-result.js')

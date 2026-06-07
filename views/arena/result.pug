@@ -1,65 +1,103 @@
 extends ../layout
 
 block content
-  .container.mt-5.mb-5
-    .row.justify-content-center
-      .col-lg-8
-        
-        if isWaiting
-          .card.shadow-lg.border-warning.text-center.p-5
-            i.fas.fa-hourglass-half.fa-4x.text-warning.mb-4.pulse-animation
-            h2.fw-bold Очакваме противника!
-            p.lead Ти предаде своите отговори, но #{isInitiator ? duel.Opponent.User.username : duel.Initiator.User.username} все още решава.
-            p.text-muted Моля, презареди страницата след малко, за да видиш финалния резултат.
-            .mt-4
-              a.btn.btn-outline-warning.btn-lg(href=`/arena/result/${duel.id}`) 
-                i.fas.fa-sync-alt.me-2
-                | Обнови статуса
+  link(rel="stylesheet", href="/stylesheets/arena-rpg.css")
 
-        else
-          if outcome === 'win'
-            .card.shadow-lg.border-success.text-center.overflow-hidden
-              .bg-success.text-white.p-4
-                i.fas.fa-trophy.fa-4x.mb-3
-                h1.fw-bold БЛЕСТЯЩА ПОБЕДА!
-              .card-body.p-5
-                h4 Смаза противника с #{isInitiator ? duel.initiatorScore : duel.opponentScore} на #{isInitiator ? duel.opponentScore : duel.initiatorScore} точки!
-                hr.my-4
-                h5.text-success.fw-bold Ти печелиш:
-                .d-flex.justify-content-center.gap-4.mt-4
-                  .badge.bg-light.text-dark.border.border-success.p-3.fs-5
-                    i.fas.fa-star.text-warning.me-2
-                    | +50 XP
-                  .badge.bg-light.text-dark.border.border-success.p-3.fs-5
-                    i.fas.fa-box-open.text-success.me-2
-                    | #{isInitiator ? duel.OpponentWager.DroppedItem.name : duel.InitiatorWager.DroppedItem.name}
-                p.text-muted.mt-4 Предметът на противника вече е в твоя инвентар!
+  .arena-embers(aria-hidden="true")
+    each _, i in [0,1,2,3,4,5,6,7,8,9]
+      .ember
 
-          else if outcome === 'loss'
-            .card.shadow-lg.border-danger.text-center.overflow-hidden
-              .bg-danger.text-white.p-4
-                i.fas.fa-skull-crossbones.fa-4x.mb-3
-                h1.fw-bold ТЕЖКО ПОРАЖЕНИЕ...
+  .arena-theme
+    .container.mb-5
+      .row.justify-content-center
+        .col-lg-7
+
+          
+          if isWaiting
+            .arena-card.arena-waiting-card.text-center.arena-slide-in
+              .arena-result-banner.tie
+                i.fas.fa-hourglass-half.fa-4x.text-warning.d-block.mb-3.pulse-animation
+                h2.arena-result-title.tie Очакваме противника!
               .card-body.p-5
-                h4 Противникът те надви с #{isInitiator ? duel.opponentScore : duel.initiatorScore} на #{isInitiator ? duel.initiatorScore : duel.opponentScore} точки.
-                hr.my-4
-                h5.text-danger.fw-bold Ти губиш своя залог:
-                .badge.bg-light.text-dark.border.border-danger.p-3.fs-5.mt-3
-                  i.fas.fa-ghost.text-secondary.me-2
-                  s #{isInitiator ? duel.InitiatorWager.DroppedItem.name : duel.OpponentWager.DroppedItem.name}
-                p.text-muted.mt-4 Не се предавай! Учи здраво и си върни загубеното!
+                p.lead.text-light Ти предаде своите отговори, но
+                  strong.text-warning  #{isInitiator ? duel.Opponent.User.username : duel.Initiator.User.username}
+                  |  все още решава.
+                p.text-muted.fst-italic.small Моля, презареди страницата след малко, за да видиш финалния резултат.
+                .mt-4
+                  a.btn.arena-btn.arena-btn-gold.btn-lg.px-5(href=`/arena/result/${duel.id}`)
+                    i.fas.fa-sync-alt.me-2
+                    | Обнови статуса
 
           else
-            .card.shadow-lg.border-secondary.text-center.overflow-hidden
-              .bg-secondary.text-white.p-4
-                i.fas.fa-handshake.fa-4x.mb-3
-                h1.fw-bold РАВЕНСТВО
-              .card-body.p-5
-                h4 И двамата изкарахте по #{duel.initiatorScore} точки!
-                hr.my-4
-                p.lead Битката беше оспорвана. Никой не губи своите предмети, залозите са върнати във вашите инвентари.
+            .arena-card.arena-slide-in
 
-          .text-center.mt-4
-            a.btn.btn-dark.btn-lg.px-5(href="/arena")
-              i.fas.fa-arrow-left.me-2
-              | Обратно в Лобито
+              
+              if outcome === 'win'
+                .arena-result-banner.win
+                  i.fas.fa-trophy.arena-result-icon.text-success
+                  .arena-result-title.win БЛЕСТЯЩА ПОБЕДА!
+
+                .card-body.p-4.p-md-5.text-center
+                  
+                  .arena-score-row.mb-4
+                    .arena-score-block.win-score #{isInitiator ? duel.initiatorScore : duel.opponentScore}
+                    .arena-score-sep :
+                    .arena-score-block.loss-score #{isInitiator ? duel.opponentScore : duel.initiatorScore}
+                  p.text-light.opacity-75.mb-4 Смаза противника!
+
+                  hr(style="border-color:rgba(34,197,94,0.15);")
+
+                  h6.text-success.fw-bold.mb-3.mt-4 Ти печелиш:
+                  .d-flex.flex-wrap.justify-content-center.gap-3.mb-3
+                    .arena-reward
+                      i.fas.fa-star.text-warning.fs-5
+                      span.text-light.fw-bold +50 XP
+                    .arena-reward
+                      i.fas.fa-box-open.text-warning.fs-5
+                      span.text-light.fw-bold #{isInitiator ? duel.OpponentWager.DroppedItem.name : duel.InitiatorWager.DroppedItem.name}
+                  p.text-muted.small.fst-italic Предметът на противника вече е в твоя инвентар!
+
+              
+              else if outcome === 'loss'
+                .arena-result-banner.loss
+                  i.fas.fa-skull-crossbones.arena-result-icon.text-danger
+                  .arena-result-title.loss ТЕЖКО ПОРАЖЕНИЕ...
+
+                .card-body.p-4.p-md-5.text-center
+                  .arena-score-row.mb-4
+                    .arena-score-block.loss-score #{isInitiator ? duel.initiatorScore : duel.opponentScore}
+                    .arena-score-sep :
+                    .arena-score-block.win-score #{isInitiator ? duel.opponentScore : duel.initiatorScore}
+                  p.text-light.opacity-75.mb-4 Противникът те надви.
+
+                  hr(style="border-color:rgba(220,38,38,0.15);")
+
+                  h6.text-danger.fw-bold.mb-3.mt-4 Ти губиш своя залог:
+                  .d-flex.justify-content-center.mb-3
+                    .arena-reward(style="background:rgba(220,38,38,0.06); border-color:rgba(220,38,38,0.25);")
+                      i.fas.fa-ghost.text-danger.fs-5
+                      s.text-muted #{isInitiator ? duel.InitiatorWager.DroppedItem.name : duel.OpponentWager.DroppedItem.name}
+                  p.text-muted.small.fst-italic Не се предавай! Учи здраво и си върни загубеното!
+
+              
+              else
+                .arena-result-banner.tie
+                  i.fas.fa-handshake.arena-result-icon.text-secondary
+                  .arena-result-title.tie РАВЕНСТВО
+
+                .card-body.p-4.p-md-5.text-center
+                  .arena-score-row.mb-4
+                    .arena-score-block(style="color:#94a3b8;") #{duel.initiatorScore}
+                    .arena-score-sep :
+                    .arena-score-block(style="color:#94a3b8;") #{duel.initiatorScore}
+                  p.lead.text-light.opacity-75.mb-3 И двамата изкарахте по #{duel.initiatorScore} точки!
+
+                  hr(style="border-color:rgba(148,163,184,0.15);")
+
+                  p.text-muted.mt-4.fst-italic.small Битката беше оспорвана. Никой не губи своите предмети, залозите са върнати във вашите инвентари.
+
+              
+              .text-center.px-4.pb-5
+                a.btn.arena-btn.arena-btn-outline.btn-lg.px-5(href="/arena")
+                  i.fas.fa-arrow-left.me-2
+                  | Обратно в Лобито

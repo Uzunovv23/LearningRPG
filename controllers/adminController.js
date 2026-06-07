@@ -444,25 +444,25 @@ exports.toggleQuestCompletion = async (req, res) => {
         title: `Оценка Отличен (6)`,
         cost: price6,
         description: `Цена за 1 бр. Изисква ~85% от общия брой точки.`,
-        icon: "fa-certificate text-success",
+        icon: "fa-trophy text-warning",
       },
       {
         title: `Оценка Мн. Добър (5)`,
         cost: price5,
         description: `Цена за 1 бр. Изисква ~70% от общия брой точки.`,
-        icon: "fa-star text-primary",
+        icon: "fa-medal text-primary",
       },
       {
         title: `Оценка Добър (4)`,
         cost: price4,
         description: `Цена за 1 бр. Изисква ~50% от общия брой точки.`,
-        icon: "fa-check-circle text-info",
+        icon: "fa-award text-success",
       },
       {
         title: `Оценка Среден (3)`,
         cost: price3,
         description: `Цена за 1 бр. Изисква ~30% от общия брой точки.`,
-        icon: "fa-life-ring text-warning",
+        icon: "fa-ribbon text-danger",
       },
     ];
 
@@ -632,3 +632,51 @@ exports.gradeHomeworkSubmission = async (req, res) => {
     res.status(500).send("Грешка при оценяване.");
   }
 };
+
+/*
+exports.giveCheatItems = async (req, res) => {
+  const t = await sequelize.transaction();
+
+  try {
+    const userId = req.user.id;
+
+    if (req.user.role !== 'admin') {
+      throw new Error("Тази магия е достъпна само за Боговете (Админите)!");
+    }
+
+    const allItems = await DroppedItem.findAll({ transaction: t });
+
+    if (allItems.length === 0) {
+      await t.rollback();
+      return res.status(404).send("Няма създадени предмети в базата (DroppedItems)!");
+    }
+
+    const cheatInventoryRecords = [];
+
+    for (const item of allItems) {
+      for (let i = 0; i < 10; i++) {
+        cheatInventoryRecords.push({
+          userId: userId,     
+          itemId: item.id,
+          isUsed: false,       
+          isLocked: false     
+        });
+      }
+    }
+
+    
+    await Inventory.bulkCreate(cheatInventoryRecords, { transaction: t });
+
+   
+    await t.commit();
+
+    
+    res.send(`<h1>God Mode Активиран! ⚡</h1><p>Успешно добавени <b>${cheatInventoryRecords.length}</b> артефакта в инвентара ти!</p><a href="/users/my-hero">Обратно към Героя</a>`);
+
+  } catch (error) {
+    await t.rollback();
+    console.error("Cheat Code Error:", error);
+    res.status(500).send(`Грешка при изпълнение на cheat кода: ${error.message}`);
+  }
+};
+*/
