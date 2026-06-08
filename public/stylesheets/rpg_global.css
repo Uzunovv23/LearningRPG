@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Nunito:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&display=swap');
 
 :root {
   --rpg-bg: #0a0e1a;
@@ -18,7 +18,6 @@
   --rpg-scanline: rgba(0, 0, 0, 0.03);
 }
 
-
 *,
 *::before,
 *::after {
@@ -28,7 +27,8 @@
 body.rpg-body {
   background-color: var(--rpg-bg);
   color: var(--rpg-text);
-  font-family: 'Nunito', sans-serif;
+  font-family: Arial, sans-serif;
+  font-size: 1.15rem;
   min-height: 100vh;
   margin: 0;
   display: flex;
@@ -36,7 +36,6 @@ body.rpg-body {
   position: relative;
   overflow-x: hidden;
 }
-
 
 body.rpg-body::before {
   content: '';
@@ -55,7 +54,6 @@ body.rpg-body::before {
   opacity: 0.4;
 }
 
-
 body.rpg-body::after {
   content: '';
   position: fixed;
@@ -68,7 +66,6 @@ body.rpg-body::after {
   z-index: 0;
 }
 
-
 .rpg-navbar {
   background-color: var(--rpg-nav) !important;
   border-bottom: 1px solid var(--rpg-border);
@@ -76,12 +73,11 @@ body.rpg-body::after {
     0 4px 30px rgba(0, 0, 0, 0.8),
     0 1px 0 rgba(59, 130, 246, 0.15),
     inset 0 -1px 0 rgba(59, 130, 246, 0.1);
-  font-family: 'Nunito', sans-serif;
-  padding: 0.6rem 0;
+  font-family: Arial, sans-serif;
+  padding: 0.8rem 0;
   position: relative;
   z-index: 100;
 }
-
 
 .rpg-navbar::before {
   content: '';
@@ -104,7 +100,7 @@ body.rpg-body::after {
   text-shadow:
     0 0 10px rgba(251, 191, 36, 0.5),
     0 0 30px rgba(251, 191, 36, 0.2);
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   letter-spacing: 2px;
   text-transform: uppercase;
   transition: text-shadow 0.3s ease;
@@ -120,10 +116,10 @@ body.rpg-body::after {
   color: #94a3b8 !important;
   transition: all 0.25s ease;
   text-transform: uppercase;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 1.05rem;
+  font-weight: 700;
   letter-spacing: 1px;
-  padding: 0.5rem 0.7rem !important;
+  padding: 0.6rem 0.9rem !important;
   white-space: nowrap;
   position: relative;
 }
@@ -134,7 +130,7 @@ body.rpg-body::after {
   bottom: -2px;
   left: 10%;
   right: 10%;
-  height: 1px;
+  height: 2px;
   background: var(--rpg-gold);
   transition: transform 0.3s ease;
   transform: scaleX(0);
@@ -151,7 +147,6 @@ body.rpg-body::after {
   transform: scaleX(1);
 }
 
-
 .rpg-navbar .nav-link.text-danger,
 .rpg-navbar .nav-link.arena-link {
   color: var(--rpg-red) !important;
@@ -162,12 +157,10 @@ body.rpg-body::after {
   text-shadow: 0 0 15px rgba(239, 68, 68, 0.7);
 }
 
-
 .rpg-navbar .nav-link.active,
 .rpg-navbar .nav-link.fw-bold {
   color: var(--rpg-gold) !important;
 }
-
 
 .rpg-navbar .dropdown-menu {
   background-color: var(--rpg-panel);
@@ -182,26 +175,25 @@ body.rpg-body::after {
 
 .rpg-navbar .dropdown-item {
   color: var(--rpg-text);
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.875rem;
-  padding: 0.6rem 1.2rem;
+  font-family: Arial, sans-serif;
+  font-size: 1.05rem;
+  padding: 0.8rem 1.4rem;
   transition: all 0.2s ease;
 }
 
 .rpg-navbar .dropdown-item:hover {
   background-color: rgba(59, 130, 246, 0.1);
   color: var(--rpg-gold);
-  padding-left: 1.6rem;
+  padding-left: 1.8rem;
 }
 
 .rpg-navbar .dropdown-divider {
   border-color: var(--rpg-border);
 }
 
-
 .rpg-navbar .navbar-text {
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.85rem;
+  font-family: Arial, sans-serif;
+  font-size: 1.05rem;
   color: #64748b !important;
   white-space: nowrap;
 }
@@ -210,7 +202,6 @@ body.rpg-body::after {
   color: var(--rpg-gold) !important;
   text-shadow: 0 0 8px rgba(251, 191, 36, 0.3);
 }
-
 
 .rpg-navbar .navbar-toggler {
   border-color: var(--rpg-border);
@@ -221,19 +212,20 @@ body.rpg-body::after {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2894,163,184,0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
-
 .btn-rpg-outline {
   border: 1px solid var(--rpg-blue);
   color: var(--rpg-blue);
   background: transparent;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.8rem;
+  font-family: Arial, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
-  padding: 0.45rem 1.1rem;
+  padding: 0.6rem 1.4rem;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  border-radius: 6px;
 }
 
 .btn-rpg-outline::before {
@@ -260,13 +252,15 @@ body.rpg-body::after {
   background: linear-gradient(135deg, var(--rpg-blue) 0%, #2563eb 100%);
   border: 1px solid var(--rpg-blue);
   color: #fff;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.8rem;
+  font-family: Arial, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
-  padding: 0.45rem 1.1rem;
+  padding: 0.6rem 1.4rem;
   transition: all 0.3s ease;
   box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+  border-radius: 6px;
 }
 
 .btn-rpg-solid:hover {
@@ -276,20 +270,19 @@ body.rpg-body::after {
   color: #fff;
 }
 
-
 .badge.bg-danger {
   background: linear-gradient(135deg, var(--rpg-red), #dc2626) !important;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.6rem;
+  font-family: Arial, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
   letter-spacing: 1px;
   box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+  padding: 0.4rem 0.6rem;
 }
-
 
 .text-rpg-gold { color: var(--rpg-gold) !important; }
 .text-rpg-blue { color: var(--rpg-blue) !important; }
 .text-rpg-red  { color: var(--rpg-red)  !important; }
-
 
 .rpg-panel {
   position: relative;
@@ -319,7 +312,6 @@ body.rpg-body::after {
   border-radius: 0 0 4px 0;
 }
 
-
 hr.rpg-divider {
   border: none;
   height: 1px;
@@ -328,7 +320,6 @@ hr.rpg-divider {
   );
   margin: 1.5rem 0;
 }
-
 
 a {
   color: var(--rpg-blue);
@@ -340,7 +331,6 @@ a:hover {
   color: var(--rpg-gold);
 }
 
-
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Cormorant Garamond', serif;
   font-weight: 700;
@@ -348,7 +338,6 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--rpg-gold);
   text-shadow: 0 0 10px rgba(251, 191, 36, 0.2);
 }
-
 
 .card {
   background: linear-gradient(135deg, var(--rpg-panel) 0%, rgba(22, 29, 46, 0.8) 100%);
@@ -368,12 +357,14 @@ h1, h2, h3, h4, h5, h6 {
   background: transparent;
 }
 
-
 .form-control {
   background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(20, 28, 45, 0.8) 100%);
   border: 1px solid var(--rpg-border);
   color: var(--rpg-text);
   border-radius: 6px;
+  font-family: Arial, sans-serif;
+  font-size: 1.1rem;
+  padding: 0.75rem 1rem;
 }
 
 .form-control:focus {
@@ -381,6 +372,7 @@ h1, h2, h3, h4, h5, h6 {
   border-color: var(--rpg-blue);
   color: var(--rpg-text);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
 }
 
 .form-control::placeholder {
@@ -389,16 +381,18 @@ h1, h2, h3, h4, h5, h6 {
 
 .form-label {
   color: #cbd5e1;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   letter-spacing: 0.5px;
+  font-family: Arial, sans-serif;
 }
-
 
 .table {
   color: var(--rpg-text);
   border-color: var(--rpg-border);
+  font-family: Arial, sans-serif;
+  font-size: 1.1rem;
 }
 
 .table thead {
@@ -408,10 +402,15 @@ h1, h2, h3, h4, h5, h6 {
 
 .table thead th {
   color: var(--rpg-gold);
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-color: var(--rpg-border-bright);
+  padding: 1rem;
+}
+
+.table tbody td {
+  padding: 1rem;
 }
 
 .table tbody tr {
@@ -423,11 +422,13 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(59, 130, 246, 0.05);
 }
 
-
 .alert {
   border-radius: 6px;
   border: 1px solid;
-  font-weight: 500;
+  font-weight: 600;
+  font-family: Arial, sans-serif;
+  font-size: 1.1rem;
+  padding: 1rem 1.25rem;
 }
 
 .alert-danger {
@@ -448,7 +449,6 @@ h1, h2, h3, h4, h5, h6 {
   color: #93c5fd;
 }
 
-
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -467,10 +467,9 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--rpg-gold);
 }
 
-
 @media (max-width: 768px) {
   h1, h2, h3 {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
   }
 
   .container {

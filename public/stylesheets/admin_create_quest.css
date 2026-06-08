@@ -1,21 +1,21 @@
-
 .rpg-theme {
   padding-top: 1rem;
   padding-bottom: 3rem;
   width: 100%;
+  font-family: Arial, sans-serif;
+  font-size: 1.1rem;
 }
 
 .rpg-container h2 {
   font-family: 'Cormorant Garamond', serif;
   color: var(--rpg-gold, #fbbf24) !important;
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 2px;
   text-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
   margin-bottom: 2rem;
 }
-
 
 .rpg-card {
   background: linear-gradient(145deg, var(--rpg-panel, #161d2e) 0%, rgba(10, 14, 26, 0.8) 100%);
@@ -24,7 +24,6 @@
   box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
   position: relative;
 }
-
 
 .rpg-card::before {
   content: '';
@@ -39,7 +38,7 @@
   background: rgba(0, 0, 0, 0.2);
   border-bottom: 1px solid rgba(251, 191, 36, 0.2);
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   color: var(--rpg-gold, #fbbf24);
   font-weight: 700;
   letter-spacing: 1px;
@@ -47,12 +46,12 @@
   border-radius: 12px 12px 0 0 !important;
 }
 
-
 .rpg-label {
   color: #94a3b8;
   font-weight: 600;
   letter-spacing: 0.5px;
-  font-family: 'Nunito', sans-serif;
+  font-family: Arial, sans-serif;
+  font-size: 1.1rem;
   margin-bottom: 0.4rem;
 }
 
@@ -61,7 +60,8 @@
   color: var(--rpg-text, #e2e8f0) !important;
   border: 1px solid var(--rpg-border, #1e3a5f) !important;
   border-radius: 6px;
-  font-family: 'Nunito', sans-serif;
+  font-family: Arial, sans-serif;
+  font-size: 1.1rem;
   padding: 0.75rem;
   transition: all 0.3s ease;
 }
@@ -73,17 +73,14 @@
   outline: none;
 }
 
-
 .rpg-input::placeholder {
   color: #94a3b8 !important;
   opacity: 0.8;
 }
 
-
 .rpg-file-wrapper {
   position: relative;
 }
-
 
 .rpg-file-wrapper input[type="file"] {
   position: absolute;
@@ -119,7 +116,7 @@
 }
 
 .rpg-file-drop-zone .drop-icon {
-  font-size: 2rem;
+  font-size: 2.5rem;
   color: var(--rpg-blue, #3b82f6);
   opacity: 0.75;
   transition: opacity 0.25s, transform 0.25s;
@@ -132,8 +129,8 @@
 }
 
 .rpg-file-drop-zone .drop-label {
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.9rem;
+  font-family: Arial, sans-serif;
+  font-size: 1.15rem;
   color: #94a3b8;
   line-height: 1.4;
 }
@@ -143,11 +140,10 @@
 }
 
 .rpg-file-drop-zone .drop-hint {
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   color: #64748b;
-  font-family: 'Nunito', sans-serif;
+  font-family: Arial, sans-serif;
 }
-
 
 .rpg-file-list {
   margin-top: 0.75rem;
@@ -163,9 +159,9 @@
   background: rgba(59, 130, 246, 0.08);
   border: 1px solid rgba(59, 130, 246, 0.2);
   border-radius: 6px;
-  padding: 0.45rem 0.8rem;
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.82rem;
+  padding: 0.55rem 0.9rem;
+  font-family: Arial, sans-serif;
+  font-size: 1rem;
   color: #cbd5e1;
   animation: rpg-file-slide-in 0.2s ease;
 }
@@ -173,6 +169,7 @@
 .rpg-file-item i {
   color: var(--rpg-blue, #3b82f6);
   flex-shrink: 0;
+  font-size: 1.1rem;
 }
 
 .rpg-file-item .file-name {
@@ -184,7 +181,7 @@
 
 .rpg-file-item .file-size {
   color: #64748b;
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   flex-shrink: 0;
 }
 
@@ -198,6 +195,7 @@
   transition: opacity 0.2s;
   line-height: 1;
   flex-shrink: 0;
+  font-size: 1.1rem;
 }
 
 .rpg-file-item .file-remove:hover {
@@ -209,11 +207,9 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-
 .rpg-datetime-wrapper {
   position: relative;
 }
-
 
 .rpg-datetime-hidden {
   position: absolute;
@@ -223,7 +219,6 @@
   height: 0;
 }
 
-
 .rpg-datetime-trigger {
   display: flex;
   align-items: center;
@@ -232,8 +227,8 @@
   color: var(--rpg-text, #e2e8f0);
   border: 1px solid var(--rpg-border, #1e3a5f);
   border-radius: 6px;
-  font-family: 'Nunito', sans-serif;
-  padding: 0.75rem 1rem;
+  font-family: Arial, sans-serif;
+  padding: 0.85rem 1.1rem;
   cursor: pointer;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
   user-select: none;
@@ -247,13 +242,13 @@
 
 .rpg-datetime-trigger .dt-icon {
   color: var(--rpg-blue, #3b82f6);
-  font-size: 1rem;
+  font-size: 1.2rem;
   flex-shrink: 0;
 }
 
 .rpg-datetime-trigger .dt-value {
   flex: 1;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
 }
 
 .rpg-datetime-trigger .dt-value.placeholder {
@@ -263,14 +258,13 @@
 
 .rpg-datetime-trigger .dt-chevron {
   color: #64748b;
-  font-size: 0.8rem;
+  font-size: 1rem;
   transition: transform 0.25s ease;
 }
 
 .rpg-datetime-trigger.active .dt-chevron {
   transform: rotate(180deg);
 }
-
 
 .rpg-datetime-panel {
   position: absolute;
@@ -296,7 +290,6 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-
 .rpg-cal-nav {
   display: flex;
   align-items: center;
@@ -309,13 +302,13 @@
   border: 1px solid rgba(59, 130, 246, 0.25);
   color: var(--rpg-blue, #3b82f6);
   border-radius: 5px;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 1rem;
   transition: background 0.2s, box-shadow 0.2s;
   flex-shrink: 0;
 }
@@ -330,12 +323,11 @@
   font-family: 'Cormorant Garamond', serif;
   color: var(--rpg-gold, #fbbf24);
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1.25rem;
   letter-spacing: 1px;
   cursor: pointer;
   text-transform: uppercase;
 }
-
 
 .rpg-cal-dow {
   display: grid;
@@ -345,15 +337,14 @@
 
 .rpg-cal-dow span {
   text-align: center;
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.7rem;
+  font-family: Arial, sans-serif;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   padding: 0.3rem 0;
 }
-
 
 .rpg-cal-days {
   display: grid;
@@ -363,8 +354,8 @@
 
 .rpg-cal-day {
   text-align: center;
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.82rem;
+  font-family: Arial, sans-serif;
+  font-size: 1.05rem;
   color: #94a3b8;
   padding: 0.45rem 0.2rem;
   border-radius: 5px;
@@ -399,25 +390,23 @@
   pointer-events: none;
 }
 
-
 .rpg-cal-divider {
   height: 1px;
   background: rgba(30, 58, 95, 0.6);
   margin: 0.85rem 0;
 }
 
-
 .rpg-cal-time {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-family: 'Nunito', sans-serif;
+  font-family: Arial, sans-serif;
 }
 
 .rpg-cal-time-label {
   color: #64748b;
-  font-size: 0.78rem;
+  font-size: 0.95rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -429,12 +418,12 @@
   color: #e2e8f0 !important;
   border: 1px solid var(--rpg-border, #1e3a5f) !important;
   border-radius: 5px;
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.9rem;
+  font-family: Arial, sans-serif;
+  font-size: 1.1rem;
   font-weight: 700;
   text-align: center;
-  width: 52px;
-  padding: 0.35rem 0.3rem;
+  width: 60px;
+  padding: 0.45rem 0.4rem;
   -moz-appearance: textfield;
   appearance: textfield;
 }
@@ -454,9 +443,8 @@
 .rpg-time-sep {
   color: var(--rpg-gold, #fbbf24);
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
 }
-
 
 .rpg-cal-confirm {
   display: block;
@@ -466,12 +454,12 @@
   color: var(--rpg-green, #22c55e);
   border: 1px solid rgba(34, 197, 94, 0.4);
   border-radius: 6px;
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.78rem;
+  font-family: Arial, sans-serif;
+  font-size: 1rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
-  padding: 0.55rem;
+  padding: 0.75rem;
   cursor: pointer;
   transition: background 0.2s, box-shadow 0.2s;
 }
@@ -482,14 +470,12 @@
   box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
 }
 
-
 .rpg-input-group-text {
   background-color: rgba(0, 0, 0, 0.5);
   border: 1px solid var(--rpg-border, #1e3a5f);
   color: var(--rpg-gold, #fbbf24);
   border-right: none;
 }
-
 
 .quiz-section {
   margin-top: 2rem;
@@ -518,22 +504,20 @@
   margin-bottom: 1.5rem;
 }
 
-
 .rpg-radio {
   accent-color: var(--rpg-green, #22c55e);
   transform: scale(1.3);
   cursor: pointer;
 }
 
-
 .rpg-btn {
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.85rem;
+  font-family: Arial, sans-serif;
+  font-size: 1.05rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
   border-radius: 6px;
-  padding: 0.6rem 1.2rem;
+  padding: 0.75rem 1.4rem;
   transition: all 0.3s ease;
   border: 1px solid transparent;
   cursor: pointer;
@@ -575,7 +559,6 @@
   transform: translateY(-2px);
 }
 
-
 .locked-quiz {
   border-color: rgba(239, 68, 68, 0.4) !important;
 }
@@ -593,18 +576,18 @@
   cursor: not-allowed;
 }
 
-
 .rpg-alert {
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
-  font-family: 'Nunito', sans-serif;
+  font-family: Arial, sans-serif;
+  font-size: 1.1rem;
   font-weight: 600;
   letter-spacing: 0.5px;
   display: flex;
   align-items: center;
 }
-.rpg-alert i { margin-right: 0.5rem; font-size: 1.2rem; }
+.rpg-alert i { margin-right: 0.5rem; font-size: 1.4rem; }
 
 .rpg-alert-success {
   background: rgba(34, 197, 94, 0.1);

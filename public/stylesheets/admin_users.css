@@ -1,5 +1,3 @@
-
-
 @keyframes fadeOut {
   from {
     opacity: 1;
@@ -10,7 +8,6 @@
     transform: translateX(-20px);
   }
 }
-
 
 .rpg-admin-header {
   margin-bottom: 2.5rem;
@@ -44,7 +41,7 @@
 
 .rpg-admin-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 2.5rem;
+  font-size: 2.8rem;
   font-weight: 700;
   color: #fff;
   text-transform: uppercase;
@@ -60,14 +57,13 @@
 }
 
 .rpg-header-subtitle {
-  font-family: 'Nunito', sans-serif;
-  font-size: 1rem;
+  font-family: Arial, sans-serif;
+  font-size: 1.15rem;
   color: #94a3b8;
   letter-spacing: 0.5px;
   margin: 0;
   font-style: italic;
 }
-
 
 .rpg-admin-card {
   background: linear-gradient(145deg, var(--rpg-panel) 0%, rgba(10, 14, 26, 0.8) 100%);
@@ -90,7 +86,6 @@
   border-radius: 12px 12px 0 0;
 }
 
-
 .rpg-admin-table {
   --bs-table-bg: transparent;
   --bs-table-border-color: rgba(30, 58, 95, 0.3);
@@ -103,8 +98,8 @@
 }
 
 .rpg-admin-table th {
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.8rem;
+  font-family: Arial, sans-serif;
+  font-size: 1rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.5px;
@@ -115,8 +110,8 @@
 }
 
 .rpg-admin-table td {
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.95rem;
+  font-family: Arial, sans-serif;
+  font-size: 1.1rem;
   color: #cbd5e1;
   padding: 1rem;
   vertical-align: middle;
@@ -136,7 +131,6 @@
   color: #ffffff;
 }
 
-
 .col-username { width: 20%; }
 .col-email { width: 25%; }
 .col-role { width: 12%; }
@@ -144,8 +138,8 @@
 .col-actions { width: 25%; }
 
 .cell-id {
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.8rem;
+  font-family: Arial, sans-serif;
+  font-size: 0.95rem;
   color: #64748b;
 }
 
@@ -155,7 +149,7 @@
   border-radius: 4px;
   padding: 0.25rem 0.5rem;
   color: #94a3b8;
-  font-size: 0.75rem;
+  font-size: 0.9rem;
 }
 
 .cell-username strong {
@@ -166,14 +160,13 @@
 
 .cell-email {
   color: #cbd5e1;
-  font-size: 0.9rem;
+  font-size: 1.05rem;
 }
 
 .cell-date small {
   color: #64748b;
-  font-size: 0.85rem;
+  font-size: 1rem;
 }
-
 
 .action-buttons {
   display: flex;
@@ -182,10 +175,9 @@
   align-items: center;
 }
 
-
 .rpg-btn {
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.75rem;
+  font-family: Arial, sans-serif;
+  font-size: 0.9rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -217,7 +209,6 @@
   z-index: 1;
 }
 
-
 .rpg-btn-edit {
   background: rgba(59, 130, 246, 0.12);
   color: var(--rpg-blue);
@@ -231,7 +222,6 @@
   box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
   transform: translateY(-2px);
 }
-
 
 .rpg-btn-promote {
   background: rgba(251, 191, 36, 0.12);
@@ -247,7 +237,6 @@
   transform: translateY(-2px);
 }
 
-
 .rpg-btn-revoke {
   background: rgba(34, 197, 94, 0.12);
   color: var(--rpg-green);
@@ -261,7 +250,6 @@
   box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
   transform: translateY(-2px);
 }
-
 
 .rpg-btn-disabled {
   background: rgba(100, 116, 139, 0.08);
@@ -283,7 +271,6 @@
   color: var(--rpg-gold-dark);
 }
 
-
 .rpg-btn-delete {
   background: rgba(239, 68, 68, 0.12);
   color: var(--rpg-red);
@@ -298,7 +285,6 @@
   transform: translateY(-2px);
 }
 
-
 .rpg-btn-cancel {
   background: rgba(100, 116, 139, 0.1);
   color: #64748b;
@@ -312,7 +298,6 @@
   box-shadow: 0 0 10px rgba(100, 116, 139, 0.3);
 }
 
-
 .rpg-btn-save {
   background: linear-gradient(135deg, var(--rpg-blue) 0%, #2563eb 100%);
   color: #fff;
@@ -325,12 +310,11 @@
   transform: translateY(-2px);
 }
 
-
 .rpg-badge {
   display: inline-flex;
   align-items: center;
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.8rem;
+  font-family: Arial, sans-serif;
+  font-size: 0.95rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -354,7 +338,6 @@
   border-color: var(--rpg-blue);
 }
 
-
 .rpg-modal .modal-content {
   background: var(--rpg-panel);
   border: 1px solid var(--rpg-border);
@@ -372,7 +355,7 @@
 
 .rpg-modal .modal-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: var(--rpg-gold);
   letter-spacing: 1px;
@@ -383,8 +366,8 @@
 }
 
 .rpg-modal .form-label {
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.9rem;
+  font-family: Arial, sans-serif;
+  font-size: 1.05rem;
   font-weight: 700;
   color: #94a3b8;
   letter-spacing: 0.5px;
@@ -396,8 +379,8 @@
   border: 1px solid var(--rpg-border);
   border-radius: 6px;
   color: var(--rpg-text);
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.95rem;
+  font-family: Arial, sans-serif;
+  font-size: 1.1rem;
   padding: 0.75rem;
   transition: all 0.3s ease;
 }
@@ -423,7 +406,6 @@
   gap: 0.75rem;
 }
 
-
 .rpg-modal .btn-close-light {
   filter: invert(1) brightness(0.8);
   opacity: 0.7;
@@ -434,10 +416,9 @@
   opacity: 1;
 }
 
-
 @media (max-width: 1200px) {
   .rpg-admin-title {
-    font-size: 2rem;
+    font-size: 2.3rem;
   }
 
   .rpg-admin-table th,
@@ -457,7 +438,7 @@
   }
 
   .rpg-admin-title {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     letter-spacing: 1px;
   }
 
@@ -466,7 +447,7 @@
   }
 
   .rpg-header-subtitle {
-    font-size: 0.9rem;
+    font-size: 1.05rem;
   }
 
   .rpg-admin-card {
@@ -474,17 +455,17 @@
   }
 
   .rpg-admin-table {
-    font-size: 0.85rem;
+    font-size: 1rem;
   }
 
   .rpg-admin-table th {
-    font-size: 0.7rem;
+    font-size: 0.85rem;
     padding: 0.8rem 0.5rem;
   }
 
   .rpg-admin-table td {
     padding: 0.75rem 0.5rem;
-    font-size: 0.85rem;
+    font-size: 1rem;
   }
 
   .col-username { width: 18%; }
@@ -505,7 +486,7 @@
   .rpg-btn {
     width: 100%;
     padding: 0.45rem 0.6rem;
-    font-size: 0.7rem;
+    font-size: 0.85rem;
   }
 
   .rpg-modal .modal-header,
@@ -514,13 +495,13 @@
   }
 
   .rpg-modal .modal-title {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
   }
 }
 
 @media (max-width: 576px) {
   .rpg-admin-title {
-    font-size: 1.25rem;
+    font-size: 1.45rem;
   }
 
   .rpg-admin-table thead {

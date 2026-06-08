@@ -1,5 +1,3 @@
-
-
 .register-container {
   position: relative;
   min-height: 100vh;
@@ -8,8 +6,8 @@
   justify-content: center;
   padding: 2rem 1rem;
   overflow: hidden;
+  font-family: Arial, sans-serif;
 }
-
 
 .register-container::before {
   content: '';
@@ -27,12 +25,8 @@
 }
 
 @keyframes bgPulse {
-  0%, 100% {
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 0.6;
-  }
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
 }
 
 .register-content {
@@ -41,7 +35,6 @@
   width: 100%;
   max-width: 500px;
 }
-
 
 .register-card {
   background: linear-gradient(135deg, rgba(22, 29, 46, 0.95) 0%, rgba(17, 24, 39, 0.95) 100%);
@@ -58,16 +51,9 @@
 }
 
 @keyframes cardEntrance {
-  0% {
-    opacity: 0;
-    transform: translateY(40px) scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  0% { opacity: 0; transform: translateY(40px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
-
 
 .register-card:hover {
   border-color: var(--rpg-border);
@@ -76,7 +62,6 @@
     inset 0 1px 0 rgba(251, 191, 36, 0.2),
     0 0 40px rgba(59, 130, 246, 0.2);
 }
-
 
 .register-header {
   text-align: center;
@@ -88,13 +73,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 70px;
-  height: 70px;
+  width: 80px;
+  height: 80px;
   background: linear-gradient(135deg, var(--rpg-blue), #2563eb);
   border: 2px solid var(--rpg-gold);
   border-radius: 50%;
   margin-bottom: 1.5rem;
-  font-size: 2.5rem;
+  font-size: 2.8rem;
   color: #fff;
   box-shadow:
     0 0 30px rgba(59, 130, 246, 0.4),
@@ -119,7 +104,7 @@
 
 .register-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 2.5rem;
+  font-size: 2.8rem;
   font-weight: 700;
   color: var(--rpg-gold);
   text-shadow:
@@ -132,8 +117,8 @@
 }
 
 .register-subtitle {
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.95rem;
+  font-family: Arial, sans-serif;
+  font-size: 1.2rem;
   color: #94a3b8;
   margin: 0;
   font-weight: 300;
@@ -141,31 +126,23 @@
   text-transform: capitalize;
 }
 
-
 .alert-register {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%);
   border: 1px solid rgba(239, 68, 68, 0.4);
   color: #fca5a5;
   border-radius: 8px;
-  padding: 1rem;
+  padding: 1.2rem;
   margin-bottom: 2rem;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   display: flex;
   align-items: center;
   animation: slideDown 0.4s ease-out;
 }
 
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
 
 .register-form {
   display: flex;
@@ -187,8 +164,8 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.9rem;
+  font-family: Arial, sans-serif;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #cbd5e1;
   margin-bottom: 0.7rem;
@@ -204,7 +181,7 @@
 .label-icon {
   display: inline-flex;
   align-items: center;
-  font-size: 1rem;
+  font-size: 1.2rem;
   color: var(--rpg-blue);
   transition: all 0.3s ease;
 }
@@ -213,7 +190,6 @@
   color: var(--rpg-gold);
   transform: scale(1.1);
 }
-
 
 .input-wrapper {
   position: relative;
@@ -224,9 +200,9 @@
   border: 2px solid var(--rpg-border);
   border-radius: 8px;
   color: #e2e8f0;
-  font-family: 'Nunito', sans-serif;
-  padding: 0.9rem 1.2rem;
-  font-size: 0.95rem;
+  font-family: Arial, sans-serif;
+  padding: 1.1rem 1.2rem;
+  font-size: 1.15rem;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
 }
@@ -259,8 +235,8 @@
 }
 
 .input-hint {
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.75rem;
+  font-family: Arial, sans-serif;
+  font-size: 0.95rem;
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -271,14 +247,13 @@
   color: var(--rpg-blue);
 }
 
-
 .form-divider {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin: 0.5rem 0;
   color: #64748b;
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -288,24 +263,19 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    var(--rpg-border-bright) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, transparent 0%, var(--rpg-border-bright) 50%, transparent 100%);
 }
-
 
 .btn-register {
   background: linear-gradient(135deg, var(--rpg-blue) 0%, #2563eb 50%, var(--rpg-gold) 100%);
   border: 2px solid var(--rpg-gold);
   color: #fff;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.1rem;
+  font-family: Arial, sans-serif;
+  font-size: 1.3rem;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  padding: 1rem 2rem;
+  padding: 1.2rem 2rem;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -362,18 +332,9 @@
 }
 
 @keyframes buttonGlow {
-  0%, 100% {
-    box-shadow:
-      0 0 15px rgba(251, 191, 36, 0.4),
-      0 0 25px rgba(59, 130, 246, 0.2);
-  }
-  50% {
-    box-shadow:
-      0 0 25px rgba(251, 191, 36, 0.6),
-      0 0 35px rgba(59, 130, 246, 0.4);
-  }
+  0%, 100% { box-shadow: 0 0 15px rgba(251, 191, 36, 0.4), 0 0 25px rgba(59, 130, 246, 0.2); }
+  50% { box-shadow: 0 0 25px rgba(251, 191, 36, 0.6), 0 0 35px rgba(59, 130, 246, 0.4); }
 }
-
 
 .register-footer {
   text-align: center;
@@ -383,8 +344,8 @@
 }
 
 .login-redirect {
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.9rem;
+  font-family: Arial, sans-serif;
+  font-size: 1.15rem;
   color: #94a3b8;
   margin: 0;
   line-height: 1.6;
@@ -423,7 +384,6 @@
   background: var(--rpg-gold);
 }
 
-
 .register-decoration {
   position: absolute;
   inset: 0;
@@ -440,41 +400,15 @@
   text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
 }
 
-.decoration-1 {
-  top: 10%;
-  left: 5%;
-  animation-delay: 0s;
-}
-
-.decoration-2 {
-  top: 60%;
-  right: 8%;
-  animation-delay: 1.5s;
-}
-
-.decoration-3 {
-  bottom: 15%;
-  left: 8%;
-  animation-delay: 3s;
-  font-size: 2.5rem;
-}
-
-.decoration-4 {
-  top: 20%;
-  right: 5%;
-  animation-delay: 2s;
-  font-size: 2rem;
-}
+.decoration-1 { top: 10%; left: 5%; animation-delay: 0s; }
+.decoration-2 { top: 60%; right: 8%; animation-delay: 1.5s; }
+.decoration-3 { bottom: 15%; left: 8%; animation-delay: 3s; font-size: 2.5rem; }
+.decoration-4 { top: 20%; right: 5%; animation-delay: 2s; font-size: 2rem; }
 
 @keyframes float {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-20px) rotate(5deg);
-  }
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
 }
-
 
 .password-input-wrapper {
   position: relative;
@@ -498,7 +432,7 @@
 }
 
 .show-password-label i {
-  font-size: 1rem;
+  font-size: 1.2rem;
   color: #94a3b8;
   transition: all 0.3s ease;
 }
@@ -556,8 +490,8 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.9rem;
+  font-family: Arial, sans-serif;
+  font-size: 1.1rem;
   font-weight: 600;
   color: var(--rpg-gold);
   margin-bottom: 0.8rem;
@@ -566,7 +500,7 @@
 }
 
 .tooltip-header i {
-  font-size: 1rem;
+  font-size: 1.2rem;
   color: var(--rpg-blue);
 }
 
@@ -580,14 +514,14 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  font-family: 'Nunito', sans-serif;
-  font-size: 0.8rem;
+  font-family: Arial, sans-serif;
+  font-size: 1rem;
   color: #94a3b8;
   transition: all 0.3s ease;
 }
 
 .requirement-icon {
-  font-size: 0.5rem;
+  font-size: 0.7rem;
   color: #64748b;
   transition: all 0.3s ease;
   flex-shrink: 0;
@@ -599,10 +533,9 @@
 
 .requirement.met .requirement-icon {
   color: var(--rpg-green);
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   text-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
 }
-
 
 .form-field.input-valid .input-custom {
   border-color: var(--rpg-green);
@@ -636,99 +569,34 @@
   color: var(--rpg-red);
 }
 
-
 @keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
 @keyframes shake {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-5px);
-  }
-  75% {
-    transform: translateX(5px);
-  }
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }
 
-
 @media (max-width: 768px) {
-  .register-container {
-    padding: 1rem;
-  }
-
-  .register-card {
-    padding: 2rem 1.5rem;
-  }
-
-  .register-title {
-    font-size: 2rem;
-  }
-
-  .register-subtitle {
-    font-size: 0.85rem;
-  }
-
-  .header-icon {
-    width: 60px;
-    height: 60px;
-    font-size: 2rem;
-  }
-
-  .btn-register {
-    font-size: 1rem;
-    padding: 0.9rem 1.5rem;
-  }
-
-  .input-custom {
-    font-size: 0.9rem;
-    padding: 0.8rem 1rem;
-  }
-
-  .decoration-element {
-    font-size: 2rem;
-    opacity: 0.05;
-  }
+  .register-container { padding: 1rem; }
+  .register-card { padding: 2rem 1.5rem; }
+  .register-title { font-size: 2.3rem; }
+  .register-subtitle { font-size: 1.05rem; }
+  .header-icon { width: 70px; height: 70px; font-size: 2.2rem; }
+  .btn-register { font-size: 1.15rem; padding: 1rem 1.6rem; }
+  .input-custom { font-size: 1.05rem; padding: 0.9rem 1.1rem; }
+  .decoration-element { font-size: 2.2rem; opacity: 0.05; }
 }
 
 @media (max-width: 480px) {
-  .register-card {
-    padding: 1.5rem 1rem;
-    border-radius: 10px;
-  }
-
-  .register-title {
-    font-size: 1.7rem;
-  }
-
-  .register-subtitle {
-    font-size: 0.8rem;
-  }
-
-  .header-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 1.5rem;
-  }
-
-  .form-label-custom {
-    font-size: 0.8rem;
-  }
-
-  .input-custom {
-    font-size: 0.85rem;
-    padding: 0.7rem 0.9rem;
-  }
-
-  .btn-register {
-    font-size: 0.9rem;
-    padding: 0.8rem 1.2rem;
-  }
+  .register-card { padding: 1.5rem 1rem; border-radius: 10px; }
+  .register-title { font-size: 1.9rem; }
+  .register-subtitle { font-size: 0.95rem; }
+  .header-icon { width: 60px; height: 60px; font-size: 1.8rem; }
+  .form-label-custom { font-size: 1rem; }
+  .input-custom { font-size: 1rem; padding: 0.8rem 1rem; }
+  .btn-register { font-size: 1.05rem; padding: 0.9rem 1.4rem; }
 }

@@ -1,4 +1,6 @@
 .btn-chrono {
+    font-family: Arial, sans-serif;
+    font-size: 1.1rem;
     transition: all 0.3s ease;
     border-width: 2px;
     font-weight: 600;
@@ -18,6 +20,9 @@
 }
 
 .badge-late-pass {
+    font-family: Arial, sans-serif;
+    font-size: 1.05rem;
+    padding: 0.4rem 0.8rem;
     background-color: #ffc107;
     color: #212529;
     border: 1px dashed #d39e00;
@@ -31,6 +36,9 @@
 }
 
 .badge-extension {
+    font-family: Arial, sans-serif;
+    font-size: 1.05rem;
+    padding: 0.4rem 0.8rem;
     background-color: #e0f7fa; 
     color: #006064;
     border: 1px solid #4dd0e1;
