@@ -220,3 +220,19 @@
   letter-spacing: 0.5px;
   font-size: 1rem;
 }
+
+.read-more-btn {
+  font-size: 0.95rem;
+  text-decoration: none;
+  vertical-align: baseline;
+  transition: color 0.2s;
+  box-shadow: none !important;
+}
+
+.read-more-btn:hover {
+  color: var(--rpg-gold, #fbbf24) !important;
+}
+
+#textModal .modal-content {
+  background: linear-gradient(145deg, #161d2e 0%, #0a0e1a 100%);
+}

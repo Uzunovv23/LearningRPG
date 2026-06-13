@@ -1,0 +1,151 @@
+extends ../../layout
+
+block content
+  link(rel='stylesheet', href='/stylesheets/admin_create_quest.css')
+
+  .rpg-theme
+    .container.rpg-container(style="max-width: 800px;")
+      h2.text-center.mb-4
+        i.fas.fa-edit.me-2.text-rpg-gold
+        | Редактиране на Домашно
+
+      if query && query.status === 'error'
+        .rpg-alert.rpg-alert-danger
+          i.fas.fa-exclamation-circle
+          | Възникна грешка при запазването.
+
+      .card.rpg-card.mb-5
+        .card-header.rpg-card-header
+          i.fas.fa-scroll.me-2
+          | Редактиране: #{homework.title}
+        .card-body.p-4
+          form(action=`/admin/homework/${homework.id}/edit` method="POST" enctype="multipart/form-data")
+
+            .mb-4
+              label.form-label.rpg-label
+                i.fas.fa-map.me-1
+                | Свързан Куест
+              input.form-control.rpg-input(type="text" value=(homework.Quest ? homework.Quest.title : 'Неизвестен') disabled)
+
+            .mb-4
+              label.form-label.rpg-label(for="title")
+                i.fas.fa-feather-alt.me-1
+                | Заглавие на домашното
+              input.form-control.rpg-input(type="text" name="title" required value=homework.title)
+
+            .mb-4
+              label.form-label.rpg-label(for="description")
+                i.fas.fa-align-left.me-1
+                | Условие / Описание
+              textarea.form-control.rpg-input(name="description" rows="5" required)= homework.description
+
+            
+            .row
+              .col-md-6.mb-4
+                label.form-label.rpg-label
+                  i.fas.fa-hourglass-start.me-1
+                  | Начало
+
+                .rpg-datetime-wrapper
+                  input.rpg-datetime-hidden(type="datetime-local" name="startDate" required value=homework.startDateFormatted)
+
+                  .rpg-datetime-trigger(
+                    role="button"
+                    tabindex="0"
+                    data-placeholder="Избери начална дата"
+                  )
+                    i.fas.fa-calendar-alt.dt-icon
+                    span.dt-value.placeholder Избери начална дата
+                    i.fas.fa-chevron-down.dt-chevron
+
+                  .rpg-datetime-panel
+                    .rpg-cal-nav
+                      button.rpg-cal-nav-btn.rpg-cal-prev(type="button")
+                        i.fas.fa-chevron-left
+                      span.rpg-cal-month-label
+                      button.rpg-cal-nav-btn.rpg-cal-next(type="button")
+                        i.fas.fa-chevron-right
+
+                    .rpg-cal-dow
+                      each day in ['Пн','Вт','Ср','Чт','Пт','Сб','Нд']
+                        span= day
+
+                    .rpg-cal-days
+                    .rpg-cal-divider
+                    .rpg-cal-time
+                      span.rpg-cal-time-label
+                        i.fas.fa-clock.me-1
+                        | Час
+                      input.rpg-time-input.rpg-hour(type="number" min="0" max="23" placeholder="00")
+                      span.rpg-time-sep :
+                      input.rpg-time-input.rpg-min(type="number" min="0" max="59" placeholder="00")
+
+                      button.rpg-cal-confirm(type="button")
+                        i.fas.fa-check.me-1
+                        | Потвърди
+
+              .col-md-6.mb-4
+                label.form-label.rpg-label
+                  i.fas.fa-hourglass-end.me-1
+                  | Краен срок
+
+                .rpg-datetime-wrapper
+                  input.rpg-datetime-hidden(type="datetime-local" name="endDate" required value=homework.endDateFormatted)
+
+                  .rpg-datetime-trigger(
+                    role="button"
+                    tabindex="0"
+                    data-placeholder="Избери краен срок"
+                  )
+                    i.fas.fa-calendar-check.dt-icon
+                    span.dt-value.placeholder Избери краен срок
+                    i.fas.fa-chevron-down.dt-chevron
+
+                  .rpg-datetime-panel
+                    .rpg-cal-nav
+                      button.rpg-cal-nav-btn.rpg-cal-prev(type="button")
+                        i.fas.fa-chevron-left
+                      span.rpg-cal-month-label
+                      button.rpg-cal-nav-btn.rpg-cal-next(type="button")
+                        i.fas.fa-chevron-right
+
+                    .rpg-cal-dow
+                      each day in ['Пн','Вт','Ср','Чт','Пт','Сб','Нд']
+                        span= day
+
+                    .rpg-cal-days
+                    .rpg-cal-divider
+                    .rpg-cal-time
+                      span.rpg-cal-time-label
+                        i.fas.fa-clock.me-1
+                        | Час
+                      input.rpg-time-input.rpg-hour(type="number" min="0" max="23" placeholder="00")
+                      span.rpg-time-sep :
+                      input.rpg-time-input.rpg-min(type="number" min="0" max="59" placeholder="00")
+
+                      button.rpg-cal-confirm(type="button")
+                        i.fas.fa-check.me-1
+                        | Потвърди
+
+            .mb-5
+              label.form-label.rpg-label
+                i.fas.fa-file-archive.me-1
+                | Добави ОЩЕ Материали (незадължително)
+
+              .rpg-file-wrapper
+                input(type="file" name="materials" multiple)
+
+                .rpg-file-drop-zone
+                  i.fas.fa-cloud-upload-alt.drop-icon
+                  p.drop-label.mb-0
+                    strong Кликни за избор
+                    |  или провлачи файловете тук
+                  span.drop-hint PDF, Word, JPG и др. &mdash; може да изберете няколко
+
+                .rpg-file-list
+
+            button.btn.rpg-btn.rpg-btn-role.btn-lg.w-100(type="submit")
+              i.fas.fa-save.me-2
+              | Запази Промените
+
+  script(src='/javascripts/admin_create_homework.js')

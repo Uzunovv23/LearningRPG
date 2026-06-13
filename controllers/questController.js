@@ -40,6 +40,16 @@ exports.show = async (req, res) => {
 
     const currentUser = req.user || req.session.user;
     const userId = currentUser ? currentUser.id : null;
+    const isAdmin = currentUser && currentUser.role === "admin";
+
+    const submissionInclude = {
+      model: HomeworkSubmission,
+      required: false,
+    };
+
+    if (!isAdmin) {
+      submissionInclude.where = { userId: userId };
+    }
 
     const quest = await Quest.findByPk(questId, {
       include: [
@@ -49,14 +59,7 @@ exports.show = async (req, res) => {
         },
         {
           model: Homework,
-          include: [
-            { model: HomeworkMaterial },
-            {
-              model: HomeworkSubmission,
-              required: false,
-              where: { userId: userId },
-            },
-          ],
+          include: [{ model: HomeworkMaterial }, submissionInclude],
         },
       ],
       order: [[{ model: Homework }, "endDate", "ASC"]],
@@ -104,6 +107,7 @@ exports.show = async (req, res) => {
       alertType: status,
       alertMessage: msg,
       chronoCount: chronoCount,
+      userId: userId,
     });
   } catch (error) {
     console.error(error);
@@ -128,9 +132,26 @@ exports.showQuiz = async (req, res) => {
           include: [{ model: Answer, attributes: ["id", "text"] }],
         },
       ],
+      order: [[Question, "id", "ASC"]],
     });
 
     if (!quiz) return res.status(404).send("Quiz not found.");
+
+    if (req.user && req.user.role !== "admin") {
+      if (quiz.Questions) {
+        quiz.Questions.forEach((question) => {
+          if (question.Answers) {
+            for (let i = question.Answers.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [question.Answers[i], question.Answers[j]] = [
+                question.Answers[j],
+                question.Answers[i],
+              ];
+            }
+          }
+        });
+      }
+    }
 
     let jokerCount = 0;
     let elixirCount = 0;
@@ -436,4 +457,3 @@ exports.useElixir = async (req, res) => {
       .json({ success: false, message: "Грешка при използване на еликсира." });
   }
 };
-

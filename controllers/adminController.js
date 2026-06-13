@@ -64,6 +64,32 @@ exports.createQuest = async (req, res) => {
   try {
     const { title, description, xpReward, quizzes } = req.body;
 
+    if (quizzes && quizzes.length > 0) {
+      for (const quiz of quizzes) {
+        if (quiz.Questions && quiz.Questions.length > 0) {
+          for (const q of quiz.Questions) {
+            if (!q.text || q.text.trim() === "") {
+              return res.status(400).json({
+                success: false,
+                message: "Не можете да създадете куест с празен въпрос!",
+              });
+            }
+            const hasCorrectAnswer =
+              q.Answers &&
+              q.Answers.some(
+                (a) => a.isCorrect === true || a.isCorrect === "true",
+              );
+            if (!hasCorrectAnswer) {
+              return res.status(400).json({
+                success: false,
+                message: `Въпросът "${q.text}" няма маркиран верен отговор!`,
+              });
+            }
+          }
+        }
+      }
+    }
+
     await Quest.create(
       {
         title,
@@ -111,6 +137,7 @@ exports.editQuestForm = async (req, res) => {
       order: [
         [Quiz, "createdAt", "ASC"],
         [Quiz, Question, "createdAt", "ASC"],
+        [Quiz, Question, Answer, "id", "ASC"],
       ],
     });
 
@@ -145,6 +172,32 @@ exports.updateQuest = async (req, res) => {
   try {
     const questId = req.params.id;
     const { title, description, xpReward, quizzes } = req.body;
+
+    if (quizzes && quizzes.length > 0) {
+      for (const quiz of quizzes) {
+        if (quiz.Questions && quiz.Questions.length > 0) {
+          for (const q of quiz.Questions) {
+            if (!q.text || q.text.trim() === "") {
+              return res.status(400).json({
+                success: false,
+                message: "Не можете да запазите празен въпрос!",
+              });
+            }
+            const hasCorrectAnswer =
+              q.Answers &&
+              q.Answers.some(
+                (a) => a.isCorrect === true || a.isCorrect === "true",
+              );
+            if (!hasCorrectAnswer) {
+              return res.status(400).json({
+                success: false,
+                message: `Въпросът "${q.text}" няма маркиран верен отговор!`,
+              });
+            }
+          }
+        }
+      }
+    }
 
     await Quest.update(
       { title, description, xpReward },
@@ -328,70 +381,20 @@ exports.deleteUser = async (req, res) => {
 };
 
 exports.deleteQuest = async (req, res) => {
-  const t = await sequelize.transaction();
-
   try {
     const questId = req.params.id;
-    const quest = await Quest.findByPk(questId, { transaction: t });
+    const quest = await Quest.findByPk(questId);
 
     if (!quest) {
-      await t.rollback();
       return res.status(404).send("Куестът не е намерен.");
     }
 
-    const shopItems = await ShopItem.findAll({
-      where: { questId: quest.id },
-      attributes: ["id"],
-      transaction: t,
-    });
+    await quest.destroy();
 
-    const shopItemIds = shopItems.map((item) => item.id);
-
-    if (shopItemIds.length > 0) {
-      await Purchase.destroy({
-        where: { shopItemId: shopItemIds },
-        transaction: t,
-      });
-
-      await ShopItem.destroy({
-        where: { id: shopItemIds },
-        transaction: t,
-      });
-    }
-
-    const quizzes = await Quiz.findAll({
-      where: { questId: quest.id },
-      attributes: ["id"],
-      transaction: t,
-    });
-
-    const quizIds = quizzes.map((q) => q.id);
-
-    if (quizIds.length > 0) {
-      await Question.destroy({
-        where: { quizId: quizIds },
-        transaction: t,
-      });
-
-      await Quiz.destroy({
-        where: { id: quizIds },
-        transaction: t,
-      });
-    }
-
-    await HeroBalance.destroy({
-      where: { questId: quest.id },
-      transaction: t,
-    });
-
-    await quest.destroy({ transaction: t });
-
-    await t.commit();
-    console.log(`Quest ${questId} and ALL related data deleted.`);
+    console.log(`Quest ${questId} and ALL related data deleted cleanly.`);
     res.redirect("/quests");
   } catch (error) {
-    await t.rollback();
-    console.error("Delete Quest Error (Deep Clean):", error);
+    console.error("Delete Quest Error:", error);
     res.status(500).send("Грешка при изтриване: " + error.message);
   }
 };
@@ -443,25 +446,25 @@ exports.toggleQuestCompletion = async (req, res) => {
       {
         title: `Оценка Отличен (6)`,
         cost: price6,
-        description: `Цена за 1 бр. Изисква ~85% от общия брой точки.`,
+        description: `Цена за 1 бр. Общо ${gradesCount} бр. за оформяне изискват ~85% от всички точки.`,
         icon: "fa-trophy text-warning",
       },
       {
         title: `Оценка Мн. Добър (5)`,
         cost: price5,
-        description: `Цена за 1 бр. Изисква ~70% от общия брой точки.`,
+        description: `Цена за 1 бр. Общо ${gradesCount} бр. за оформяне изискват ~70% от всички точки.`,
         icon: "fa-medal text-primary",
       },
       {
         title: `Оценка Добър (4)`,
         cost: price4,
-        description: `Цена за 1 бр. Изисква ~50% от общия брой точки.`,
+        description: `Цена за 1 бр. Общо ${gradesCount} бр. за оформяне изискват ~50% от всички точки.`,
         icon: "fa-award text-success",
       },
       {
         title: `Оценка Среден (3)`,
         cost: price3,
-        description: `Цена за 1 бр. Изисква ~30% от общия брой точки.`,
+        description: `Цена за 1 бр. Общо ${gradesCount} бр. за оформяне изискват ~30% от всички точки.`,
         icon: "fa-ribbon text-danger",
       },
     ];
@@ -540,6 +543,170 @@ exports.storeHomework = async (req, res) => {
     await t.rollback();
     console.error("Create Homework Error:", error);
     res.redirect("/admin/homework/create?status=error");
+  }
+};
+
+exports.editHomeworkPage = async (req, res) => {
+  try {
+    const homeworkId = req.params.id;
+    const homework = await Homework.findByPk(homeworkId, {
+      include: [
+        { model: Quest, attributes: ["id", "title"] },
+        { model: HomeworkSubmission },
+      ],
+    });
+
+    if (!homework) {
+      return res.status(404).send("Домашното не е намерено.");
+    }
+
+    const hasGraded =
+      homework.HomeworkSubmissions &&
+      homework.HomeworkSubmissions.some(
+        (sub) => sub.grade !== null || sub.status === "graded",
+      );
+
+    if (hasGraded) {
+      return res.redirect(
+        `/quests/${homework.questId}?status=error&msg=${encodeURIComponent("Не можете да редактирате домашно, което вече има оценени работи.")}`,
+      );
+    }
+
+    if (new Date() > new Date(homework.endDate)) {
+      return res.redirect(
+        `/quests/${homework.questId}?status=error&msg=${encodeURIComponent("Срокът на домашното е изтекъл и то вече не може да бъде редактирано.")}`,
+      );
+    }
+
+    const formatForInput = (dateObj) => {
+      if (!dateObj) return "";
+      const d = new Date(dateObj);
+      return (
+        d.getFullYear() +
+        "-" +
+        String(d.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(d.getDate()).padStart(2, "0") +
+        "T" +
+        String(d.getHours()).padStart(2, "0") +
+        ":" +
+        String(d.getMinutes()).padStart(2, "0")
+      );
+    };
+
+    homework.startDateFormatted = formatForInput(homework.startDate);
+    homework.endDateFormatted = formatForInput(homework.endDate);
+
+    res.render("admin/homework/edit", {
+      title: "Редактиране на Домашно",
+      homework: homework,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Грешка при зареждане на страницата за редакция.");
+  }
+};
+
+exports.updateHomework = async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    const homeworkId = req.params.id;
+    const { title, description, startDate, endDate } = req.body;
+    const files = req.files;
+
+    const homework = await Homework.findByPk(homeworkId, {
+      include: [{ model: HomeworkSubmission }],
+      transaction: t,
+    });
+
+    if (!homework) {
+      await t.rollback();
+      return res.status(404).send("Домашното не е намерено.");
+    }
+
+    const hasGraded =
+      homework.HomeworkSubmissions &&
+      homework.HomeworkSubmissions.some(
+        (sub) => sub.grade !== null || sub.status === "graded",
+      );
+
+    if (hasGraded) {
+      await t.rollback();
+      return res.redirect(
+        `/quests/${homework.questId}?status=error&msg=${encodeURIComponent("Не можете да редактирате домашно, което вече има оценени работи.")}`,
+      );
+    }
+
+    if (new Date() > new Date(homework.endDate)) {
+      await t.rollback();
+      return res.redirect(
+        `/quests/${homework.questId}?status=error&msg=${encodeURIComponent("Срокът на домашното е изтекъл и запазването на промените е блокирано.")}`,
+      );
+    }
+
+    homework.title = title;
+    homework.description = description;
+    homework.startDate = startDate;
+    homework.endDate = endDate;
+    await homework.save({ transaction: t });
+
+    if (files && files.length > 0) {
+      const fileData = files.map((file) => ({
+        fileName: file.originalname,
+        filePath: file.filename,
+        mimeType: file.mimetype,
+        homeworkId: homework.id,
+      }));
+      await HomeworkMaterial.bulkCreate(fileData, { transaction: t });
+    }
+
+    await HomeworkSubmission.update(
+      { status: "pending" },
+      {
+        where: { homeworkId: homework.id },
+        transaction: t,
+      },
+    );
+
+    await t.commit();
+    res.redirect(
+      `/quests/${homework.questId}?status=success&msg=Домашното+е+редактирано+успешно!`,
+    );
+  } catch (error) {
+    await t.rollback();
+    console.error("Update Homework Error:", error);
+    res.redirect(`/admin/homework/${req.params.id}/edit?status=error`);
+  }
+};
+
+exports.deleteHomework = async (req, res) => {
+  try {
+    const homeworkId = req.params.id;
+    const homework = await Homework.findByPk(homeworkId, {
+      include: [{ model: HomeworkSubmission }],
+    });
+
+    if (!homework) {
+      return res.status(404).send("Домашното не е намерено.");
+    }
+
+    const hasGraded = homework.HomeworkSubmissions.some(
+      (sub) => sub.grade !== null || sub.status === "graded",
+    );
+    if (hasGraded) {
+      return res.redirect(
+        `/quests/${homework.questId}?status=error&msg=${encodeURIComponent("Не можете да изтриете домашно, което вече има оценени работи!")}`,
+      );
+    }
+
+    await homework.destroy();
+
+    res.redirect(
+      `/quests/${homework.questId}?status=success&msg=${encodeURIComponent("Домашното беше изтрито успешно!")}`,
+    );
+  } catch (error) {
+    console.error("Delete Homework Error:", error);
+    res.status(500).send("Грешка при изтриване на домашното.");
   }
 };
 

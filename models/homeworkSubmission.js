@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       HomeworkSubmission.belongsTo(models.User, { foreignKey: "userId" });
       HomeworkSubmission.belongsTo(models.Homework, { foreignKey: "homeworkId" });
-      HomeworkSubmission.hasMany(models.SubmissionFile, { foreignKey: "submissionId", onDelete: 'CASCADE' });
+      HomeworkSubmission.hasMany(models.SubmissionFile, { foreignKey: "submissionId", onDelete: 'CASCADE', hooks: true });
     }
   }
 

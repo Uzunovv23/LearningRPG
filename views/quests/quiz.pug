@@ -50,6 +50,12 @@ block content
                 i.fas.fa-scroll
               .rpg-item-label Свитъци
               .rpg-item-count #{scrollCount}
+          else
+            .rpg-item-slot.rpg-item-empty(title='Нямаш свитъци')
+              .rpg-item-icon
+                i.fas.fa-scroll
+              .rpg-item-label Свитъци
+              .rpg-item-count 0
 
           if midasCount > 0
             .rpg-item-slot.rpg-item-midas(title='Мидас – двойно Coins')
@@ -57,6 +63,12 @@ block content
                 i.fas.fa-hand-holding-usd
               .rpg-item-label Мидас
               .rpg-item-count #{midasCount}
+          else
+            .rpg-item-slot.rpg-item-empty(title='Нямаш ръкавици')
+              .rpg-item-icon
+                i.fas.fa-hand-holding-usd
+              .rpg-item-label Мидас
+              .rpg-item-count 0
 
       
       .rpg-quest-header.mb-5
@@ -90,7 +102,7 @@ block content
                     span.rpg-qnum-total / #{totalQ}
                 .rpg-xp-badge
                   i.fas.fa-star.me-1
-                  | #{question.points} XP
+                  | #{question.points} Точки
                 .rpg-question-actions
                   if jokerCount > 0
                     button.rpg-action-btn.rpg-action-joker(

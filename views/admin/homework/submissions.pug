@@ -53,7 +53,16 @@ block content
                                       if sub.submissionText
                                           small.text-muted.d-block.mt-1
                                               i.fas.fa-comment-dots.me-1.text-warning
-                                              | "#{sub.submissionText.substring(0, 30)}..."
+                                              if sub.submissionText.length > 35
+                                                  | "#{sub.submissionText.substring(0, 35)}..."
+                                                  button.btn.btn-link.text-info.p-0.ms-1.read-more-btn(
+                                                      type="button" 
+                                                      data-bs-toggle="modal" 
+                                                      data-bs-target="#textModal" 
+                                                      data-text=sub.submissionText
+                                                  ) [Виж цялото]
+                                              else
+                                                  | "#{sub.submissionText}"
                                   td
                                       if sub.SubmissionFiles && sub.SubmissionFiles.length > 0
                                           ul.list-unstyled.mb-0
@@ -110,5 +119,18 @@ block content
                           button.btn.rpg-btn.rpg-btn-role(type="submit")
                               i.fas.fa-save.me-2
                               | Запиши Оценката
+
+      #textModal.modal.fade.rpg-modal(tabindex="-1" aria-hidden="true")
+          .modal-dialog.modal-dialog-centered.modal-dialog-scrollable.modal-lg
+              .modal-content
+                  .modal-header
+                      h5.modal-title 
+                          i.fas.fa-book-open.me-2
+                          | Пълно текстово решение
+                      button.btn-close(type="button" data-bs-dismiss="modal" aria-label="Close")
+                  .modal-body.p-4
+                      p#fullTextContainer.text-light.mb-0(style="white-space: pre-wrap; font-size: 1.15rem; line-height: 1.6;")
+                  .modal-footer
+                      button.btn.rpg-btn.rpg-btn-edit(type="button" data-bs-dismiss="modal") Затвори
 
   script(src='/javascripts/admin_submissions.js')

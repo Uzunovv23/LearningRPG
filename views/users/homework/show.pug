@@ -3,163 +3,195 @@ extends ../../layout
 block content
   link(rel='stylesheet', href='/stylesheets/homework-show.css')
 
-  
-  mixin submissionForm(homework, isLate)
-      form.submission-form(action=`/users/homework/${homework.id}/submit` method="POST" enctype="multipart/form-data")
-          .mb-4
-              label.form-label.rpg-label(for="submissionText") 
-                i.fas.fa-align-left.me-2
-                | Текстово решение / Коментар
-              textarea.form-control.rpg-input(name="submissionText" rows="4" placeholder="Напишете своето решение или бележка към учителя тук...")
-          
-          .mb-5
-              label.form-label.rpg-label(for="solutionFiles") 
-                i.fas.fa-paperclip.me-2
-                | Прикачи файлове
-              input.form-control.rpg-input(type="file" name="solutionFiles" multiple)
-          
-          if isLate
-              button.btn.rpg-btn.rpg-btn-warning.btn-lg.w-100(type="submit") 
-                  i.fas.fa-ticket-alt.me-2
-                  | Предай с Билет за закъснение
+  mixin submissionForm(homework, isLate, existingText, isEdit)
+    form.submission-form(action=`/users/homework/${homework.id}/submit` method="POST" enctype="multipart/form-data")
+      .mb-4
+        label.form-label.rpg-label(for="submissionText") 
+          i.fas.fa-align-left.me-2
+          | Текстово решение / Коментар
+        textarea.form-control.rpg-input(name="submissionText" rows="4" placeholder="Напишете своето решение или бележка към учителя тук...")= existingText || ''
+      
+      .mb-5
+        label.form-label.rpg-label(for="solutionFiles") 
+          i.fas.fa-paperclip.me-2
+          if isEdit
+            | Прикачи НОВИ файлове (ще заменят старите)
           else
-              button.btn.rpg-btn.rpg-btn-success.btn-lg.w-100(type="submit") 
-                  i.fas.fa-paper-plane.me-2
-                  | Предай решението
+            | Прикачи файлове
+        input.form-control.rpg-input(type="file" name="solutionFiles" multiple)
+      
+      if isLate && !isEdit
+        button.btn.rpg-btn.rpg-btn-warning.btn-lg.w-100(type="submit") 
+          i.fas.fa-ticket-alt.me-2
+          | Предай с Билет за закъснение
+      else if isEdit
+        button.btn.rpg-btn.rpg-btn-info.btn-lg.w-100(type="submit") 
+          i.fas.fa-edit.me-2
+          | Запази промените
+      else
+        button.btn.rpg-btn.rpg-btn-success.btn-lg.w-100(type="submit") 
+          i.fas.fa-paper-plane.me-2
+          | Предай решението
 
   .rpg-theme
     .container.col-lg-9
       
       a.btn.rpg-btn.rpg-btn-edit.mb-4(href=`/quests/${homework.questId}`) 
-          i.fas.fa-arrow-left.me-2
-          | Назад към Куеста
+        i.fas.fa-arrow-left.me-2
+        | Назад към Куеста
 
       if query.success
-          .rpg-alert.rpg-alert-success.mb-4
-              i.fas.fa-check-circle.me-3.fs-4
-              div #{query.success}
+        .rpg-alert.rpg-alert-success.mb-4
+          i.fas.fa-check-circle.me-3.fs-4
+          div #{query.success}
       if query.error
-          .rpg-alert.rpg-alert-danger.mb-4
-              i.fas.fa-exclamation-triangle.me-3.fs-4
-              div #{query.error}
+        .rpg-alert.rpg-alert-danger.mb-4
+          i.fas.fa-exclamation-triangle.me-3.fs-4
+          div #{query.error}
 
       .card.rpg-card.mb-5
-          .card-header.rpg-card-header
-              i.fas.fa-scroll.me-2
-              | Детайли за Мисията (Домашно)
+        .card-header.rpg-card-header
+          i.fas.fa-scroll.me-2
+          | Детайли за Мисията (Домашно)
+        
+        .card-body.p-4.p-md-5
+          h2.rpg-title.mb-4= homework.title
           
-          .card-body.p-4.p-md-5
-              h2.rpg-title.mb-4= homework.title
-              
-              - let extension = (submission && submission.extensionHours) ? submission.extensionHours : 0
-              - let originalDate = new Date(homework.endDate)
-              - let effectiveDate = new Date(originalDate.getTime() + extension * 60 * 60 * 1000)
-              - let isExpired = effectiveDate < new Date()
-              
-              .d-flex.align-items-center.mb-4.flex-wrap.gap-3
-                  .rpg-badge.rpg-badge-primary
-                      i.far.fa-clock.me-2
-                      | Краен срок: #{effectiveDate.toLocaleString('bg-BG')}
-                  if extension > 0
-                      .rpg-badge(style="background: rgba(6, 182, 212, 0.15); color: #22d3ee; border-color: rgba(6, 182, 212, 0.4);")
-                          i.fas.fa-hourglass-half.me-1
-                          | +#{extension} часа
-              
-              if homework.description
-                  .rpg-desc-box.mb-4
-                      p.mb-0= homework.description
+          - let extension = (submission && submission.extensionHours) ? submission.extensionHours : 0
+          - let originalDate = new Date(homework.endDate)
+          - let effectiveDate = new Date(originalDate.getTime() + extension * 60 * 60 * 1000)
+          - let isExpired = effectiveDate < new Date()
+          
+          .d-flex.align-items-center.mb-4.flex-wrap.gap-3
+            .rpg-badge.rpg-badge-primary
+              i.far.fa-clock.me-2
+              | Краен срок: #{effectiveDate.toLocaleString('bg-BG')}
+            if extension > 0
+              .rpg-badge(style="background: rgba(6, 182, 212, 0.15); color: #22d3ee; border-color: rgba(6, 182, 212, 0.4);")
+                i.fas.fa-hourglass-half.me-1
+                | +#{extension} часа
+          
+          if homework.description
+            .rpg-desc-box.mb-4
+              p.mb-0= homework.description
 
-              if homework.HomeworkMaterials && homework.HomeworkMaterials.length > 0
-                  h5.text-light.mb-3.mt-5
-                      i.fas.fa-paperclip.me-2.text-warning
-                      | Прикачени материали от учителя:
-                  
-                  .list-group.rpg-list-group
-                      each mat in homework.HomeworkMaterials
-                          .list-group-item.rpg-list-item.d-flex.justify-content-between.align-items-center.p-3
-                              span.text-light.fw-bold
-                                  i.far.fa-file-alt.me-2.text-info
-                                  | #{mat.title || 'Свали файл'}
-                              a.btn.rpg-btn.rpg-btn-primary.btn-sm(href=`/users/download/material/${mat.id}`) 
-                                  i.fas.fa-download.me-1
-                                  | Свали
+          if homework.HomeworkMaterials && homework.HomeworkMaterials.length > 0
+            h5.text-light.mb-3.mt-5
+              i.fas.fa-paperclip.me-2.text-warning
+              | Прикачени материали от учителя:
+            
+            .list-group.rpg-list-group
+              each mat in homework.HomeworkMaterials
+                .list-group-item.rpg-list-item.d-flex.justify-content-between.align-items-center.p-3
+                  span.text-light.fw-bold
+                    i.far.fa-file-alt.me-2.text-info
+                    | #{mat.title || 'Свали файл'}
+                  a.btn.rpg-btn.rpg-btn-primary.btn-sm(href=`/users/download/material/${mat.id}`) 
+                    i.fas.fa-download.me-1
+                    | Свали
 
       .card.rpg-card.shadow-lg
-          .card-header.rpg-card-header
-              i.fas.fa-pen-nib.me-2
-              | Вашето решение
+        .card-header.rpg-card-header
+          i.fas.fa-pen-nib.me-2
+          | Вашето решение
+        
+        .card-body.p-4.p-md-5
           
-          .card-body.p-4.p-md-5
-              
-              if submission && (submission.status === 'submitted' || submission.status === 'graded' || submission.grade)
-                  .rpg-alert.rpg-alert-success.d-block.mb-4
-                      h4.alert-heading.mb-2 
-                        i.fas.fa-shield-check.me-2
-                        | Добра работа!
-                      p.mb-0 Решението е предадено успешно на <strong>#{new Date(submission.updatedAt).toLocaleString('bg-BG')}</strong>.
-                      
-                      if submission.usedLatePass
-                          hr.border-success.opacity-25.my-3
-                          p.mb-0.text-warning.fw-bold 
-                              i.fas.fa-ticket-alt.me-2
-                              | Използван е Билет за закъснение.
-                  
-                  if submission.SubmissionFiles && submission.SubmissionFiles.length > 0
-                      h5.text-light.mb-3 Качени файлове:
-                      .list-group.rpg-list-group.mb-4
-                          each file in submission.SubmissionFiles
-                              .list-group-item.rpg-list-item.d-flex.justify-content-between.align-items-center.p-3
-                                  span.text-light.fw-bold
-                                      i.fas.fa-file-upload.me-2.text-success
-                                      | #{file.fileName}
-                                  .d-flex.gap-2
-                                      a.btn.rpg-btn.rpg-btn-primary.btn-sm(href=`/users/homework/file/${file.id}/download` title="Свали") 
-                                          i.fas.fa-download
-                                      if !isExpired && !submission.grade
-                                          form.delete-file-form(action=`/users/homework/file/${file.id}/delete` method="POST" style="display:inline")
-                                              button.btn.rpg-btn.rpg-btn-delete.btn-sm(type="submit" title="Изтрий") 
-                                                  i.fas.fa-trash-alt
-                  
-                  if submission.grade
-                      .grade-box.text-center.p-4.mt-4
-                          h3.text-light.mb-2 Оценка: 
-                          .score-value.text-success-glow #{submission.grade} 
-                          if submission.feedback
-                              .rpg-feedback-box.mt-4.p-3
-                                  p.text-light.fst-italic.mb-0
-                                    i.fas.fa-comment-dots.me-2.text-warning
-                                    | Коментар от учителя: "#{submission.feedback}"
-                  else
-                      .text-center.mt-5.mb-3
-                          span.rpg-badge.rpg-badge-warning.fs-6(style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border-color: rgba(245, 158, 11, 0.4);")
-                              i.fas.fa-spinner.fa-spin.me-2
-                              | Очаква се оценяване от учителя...
+          if submission && (submission.status === 'submitted' || submission.status === 'graded' || submission.grade)
+            .rpg-alert.rpg-alert-success.d-block.mb-4
+              h4.alert-heading.mb-2 
+                i.fas.fa-shield-check.me-2
+                | Добра работа!
+              p.mb-0 Решението е предадено успешно на <strong>#{new Date(submission.updatedAt).toLocaleString('bg-BG')}</strong>.
 
+            if submission.usedLatePass
+              hr.border-success.opacity-25.my-3
+              p.mb-0.text-warning.fw-bold 
+                i.fas.fa-ticket-alt.me-2
+                | Използван е Билет за закъснение.
+
+            if submission.SubmissionFiles && submission.SubmissionFiles.length > 0
+              h5.text-light.mb-3 Качени файлове:
+              .list-group.rpg-list-group.mb-4
+                each file in submission.SubmissionFiles
+                  .list-group-item.rpg-list-item.d-flex.justify-content-between.align-items-center.p-3
+                    span.text-light.fw-bold
+                      i.fas.fa-file-upload.me-2.text-success
+                      | #{file.fileName}
+                    .d-flex.gap-2
+                      a.btn.rpg-btn.rpg-btn-primary.btn-sm(href=`/users/homework/file/${file.id}/download` title="Свали") 
+                        i.fas.fa-download
+            
+            if submission.submissionText
+              .rpg-desc-box.mb-4
+                h5.text-light.mb-2 Текстово решение:
+                p.mb-0= submission.submissionText
+
+            if submission.grade
+              .grade-box.text-center.p-4.mt-4
+                h3.text-light.mb-2 Оценка: 
+                .score-value.text-success-glow #{submission.grade} 
+                if submission.feedback
+                  .rpg-feedback-box.mt-4.p-3
+                    p.text-light.fst-italic.mb-0
+                      i.fas.fa-comment-dots.me-2.text-warning
+                      | Коментар от учителя: "#{submission.feedback}"
+            else
+              .text-center.mt-5.mb-3
+                span.rpg-badge.rpg-badge-warning.fs-6(style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border-color: rgba(245, 158, 11, 0.4);")
+                  i.fas.fa-spinner.fa-spin.me-2
+                  | Очаква се оценяване от учителя...
+
+            if !isExpired
+              hr.border-light.opacity-25.my-5
+              h4.text-warning.mb-4
+                i.fas.fa-edit.me-2
+                | Редактиране на решението
+              p.text-muted.mb-4 Ако прикачите нови файлове, те ще <strong>заменят</strong> досегашните. Ако оставите полето за файлове празно, старите файлове ще се запазят.
+              +submissionForm(homework, false, submission.submissionText, true)
+
+          else
+            
+            if submission && submission.status === 'pending' && (submission.submissionText || (submission.SubmissionFiles && submission.SubmissionFiles.length > 0))
+              .rpg-alert.rpg-alert-warning.d-block.mb-4
+                h4.alert-heading.mb-2 
+                  i.fas.fa-exclamation-triangle.me-2
+                  | Домашното е обновено!
+                p.mb-0 Учителят е редактирал условието. Моля, прегледайте промените и предайте своето решение наново. Предишните ви отговори са запазени във формата по-долу.
+
+            if submission && submission.SubmissionFiles && submission.SubmissionFiles.length > 0
+              h5.text-light.mb-3 Вашите предишни файлове (при ново предаване ще бъдат заменени):
+              .list-group.rpg-list-group.mb-4
+                each file in submission.SubmissionFiles
+                  .list-group-item.rpg-list-item.d-flex.justify-content-between.align-items-center.p-3
+                    span.text-light.fw-bold
+                      i.fas.fa-file-upload.me-2.text-success
+                      | #{file.fileName}
+                    a.btn.rpg-btn.rpg-btn-primary.btn-sm(href=`/users/homework/file/${file.id}/download` title="Свали") 
+                      i.fas.fa-download
+
+            if isExpired
+              if latePassCount > 0
+                .rpg-alert.late-pass-box.d-block.p-4.mb-5.rounded
+                  .d-flex.align-items-center.mb-3
+                    i.fas.fa-ticket-alt.fa-3x.me-4
+                    div
+                      h4.alert-heading.mb-1 Закъсняхте!
+                      p.mb-0 Имате <strong>#{latePassCount} Билета за закъснение</strong>.
+                  p.mb-0.small.fst-italic Един билет ще бъде използван автоматично, когато натиснете "Предай с Билет".
+
+                +submissionForm(homework, true, submission ? submission.submissionText : '', false)
+                
               else
-                  
-                  if isExpired
-                      if latePassCount > 0
-                          .rpg-alert.late-pass-box.d-block.p-4.mb-5.rounded
-                              .d-flex.align-items-center.mb-3
-                                  i.fas.fa-ticket-alt.fa-3x.me-4
-                                  div
-                                      h4.alert-heading.mb-1 Закъсняхте!
-                                      p.mb-0 Имате <strong>#{latePassCount} Билета за закъснение</strong>.
-                              p.mb-0.small.fst-italic Един билет ще бъде използван автоматично, когато натиснете "Предай с Билет".
-                          
-                          +submissionForm(homework, true)
-                          
-                      else
-                          .rpg-alert.rpg-alert-danger.d-block.text-center.p-5.mb-0
-                              i.fas.fa-lock.fa-3x.mb-3.text-danger
-                              h3 Крайният срок изтече!
-                              p.text-light.mb-4 Нямате "Билет за Закъснение" в инвентара си.
-                              a.btn.rpg-btn.rpg-btn-primary(href="/quests") 
-                                i.fas.fa-map-marked-alt.me-2
-                                | Към куестовете
+                .rpg-alert.rpg-alert-danger.d-block.text-center.p-5.mb-0
+                  i.fas.fa-lock.fa-3x.mb-3.text-danger
+                  h3 Крайният срок изтече!
+                  p.text-light.mb-4 Нямате "Билет за Закъснение" в инвентара си.
+                  a.btn.rpg-btn.rpg-btn-primary(href="/quests") 
+                    i.fas.fa-map-marked-alt.me-2
+                    | Към куестовете
 
-                  else
-                      +submissionForm(homework, false)
+            else
+              +submissionForm(homework, false, submission ? submission.submissionText : '', false)
 
-  
   script(src='/javascripts/homework-show.js')

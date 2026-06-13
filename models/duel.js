@@ -5,14 +5,11 @@ module.exports = (sequelize, DataTypes) => {
   class Duel extends Model {
     static associate(models) {
       Duel.belongsTo(models.Hero, { as: "Initiator", foreignKey: "initiatorId" });
-      Duel.belongsTo(models.Hero, { as: "Opponent", foreignKey: "opponentId" });
-      
+      Duel.belongsTo(models.Hero, { as: "Opponent", foreignKey: "opponentId" });     
       Duel.belongsTo(models.Inventory, { as: "InitiatorWager", foreignKey: "initiatorWagerId" });
       Duel.belongsTo(models.Inventory, { as: "OpponentWager", foreignKey: "opponentWagerId" });
-
       Duel.belongsTo(models.Hero, { as: "Winner", foreignKey: "winnerId" });
-
-      Duel.belongsToMany(models.Quiz, { through: models.DuelQuiz, foreignKey: "duelId" });
+      Duel.belongsToMany(models.Quiz, { through: models.DuelQuiz, foreignKey: "duelId", onDelete: "CASCADE" });
     }
   }
 

@@ -21,4 +21,17 @@ document.addEventListener("DOMContentLoaded", function () {
       modal.show();
     });
   });
+
+  const readMoreBtns = document.querySelectorAll(".read-more-btn");
+  const fullTextContainer = document.getElementById("fullTextContainer");
+
+  readMoreBtns.forEach((btn) => {
+    btn.addEventListener("click", function () {
+      const fullText = this.getAttribute("data-text");
+
+      if (fullTextContainer) {
+        fullTextContainer.textContent = fullText;
+      }
+    });
+  });
 });

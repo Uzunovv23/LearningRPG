@@ -5,11 +5,12 @@ module.exports = (sequelize, DataTypes) => {
   class Quest extends Model {
     static associate(models) {
       Quest.hasMany(models.Quiz, { foreignKey: 'questId', onDelete: 'CASCADE' });
-      Quest.belongsToMany(models.Hero, { through: models.HeroQuest, foreignKey: 'questId' }); 
-      Quest.hasMany(models.Score, { foreignKey: 'questId' });
-      Quest.hasMany(models.ShopItem, { foreignKey: "questId" });
-      Quest.hasMany(models.Homework, { foreignKey: "questId" });
-    }
+      Quest.belongsToMany(models.Hero, { through: models.HeroQuest, foreignKey: 'questId', onDelete: 'CASCADE' }); 
+      Quest.hasMany(models.Score, { foreignKey: 'questId', onDelete: 'CASCADE' });
+      Quest.hasMany(models.ShopItem, { foreignKey: "questId", onDelete: 'CASCADE' });
+      Quest.hasMany(models.Homework, { foreignKey: "questId", onDelete: 'CASCADE' });
+      Quest.hasMany(models.HeroBalance, { foreignKey: 'questId', onDelete: 'CASCADE' });
+  }
   }
 
   Quest.init(

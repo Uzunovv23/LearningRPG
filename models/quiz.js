@@ -5,9 +5,9 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Quiz.belongsTo(models.Quest, { foreignKey: 'questId', onDelete: 'CASCADE' });
       Quiz.hasMany(models.Question, { foreignKey: 'quizId', onDelete: 'CASCADE' });
-      Quiz.hasMany(models.Score, { foreignKey: 'quizId' });
-      Quiz.belongsToMany(models.Duel, { through: models.DuelQuiz, foreignKey: 'quizId' });
-    }
+      Quiz.hasMany(models.Score, { foreignKey: 'quizId', onDelete: 'CASCADE' });
+      Quiz.belongsToMany(models.Duel, { through: models.DuelQuiz, foreignKey: 'quizId', onDelete: 'CASCADE' });
+  }
   }
   
   Quiz.init({

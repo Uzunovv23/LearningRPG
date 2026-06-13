@@ -1,5 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
+const fs = require("fs");
+const path = require("path");
 
 module.exports = (sequelize, DataTypes) => {
   class SubmissionFile extends Model {
@@ -20,6 +22,16 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "SubmissionFile",
+      hooks: {
+        beforeDestroy: (file, options) => {
+          if (file.filePath) {
+            const absolutePath = path.join(__dirname, "../private_uploads", file.filePath);
+            if (fs.existsSync(absolutePath)) {
+              fs.unlinkSync(absolutePath);
+            }
+          }
+        }
+      }
     },
   );
   return SubmissionFile;

@@ -5,8 +5,8 @@ module.exports = (sequelize, DataTypes) => {
   class Homework extends Model {
     static associate(models) {
       Homework.belongsTo(models.Quest, { foreignKey: "questId" });
-      Homework.hasMany(models.HomeworkMaterial, { foreignKey: "homeworkId", onDelete: 'CASCADE' });
-      Homework.hasMany(models.HomeworkSubmission, { foreignKey: "homeworkId", onDelete: 'CASCADE' });
+      Homework.hasMany(models.HomeworkMaterial, { foreignKey: "homeworkId", onDelete: 'CASCADE', hooks: true });
+      Homework.hasMany(models.HomeworkSubmission, { foreignKey: "homeworkId", onDelete: 'CASCADE', hooks: true });
     }
   }
 

@@ -67,11 +67,13 @@ exports.show = async (req, res) => {
     });
     const allDroppedItems = await DroppedItem.findAll();
 
-    const groupedInventory = allDroppedItems.map(item => {
-      const count = inventory.filter(inv => inv.DroppedItem && inv.DroppedItem.id === item.id).length;
+    const groupedInventory = allDroppedItems.map((item) => {
+      const count = inventory.filter(
+        (inv) => inv.DroppedItem && inv.DroppedItem.id === item.id,
+      ).length;
       return {
         item: item,
-        count: count
+        count: count,
       };
     });
 
@@ -211,6 +213,12 @@ exports.submitHomework = async (req, res) => {
       },
     });
 
+    if (submission.status === "graded" || submission.grade !== null) {
+      return res.redirect(
+        `/users/homework/${homeworkId}?error=${encodeURIComponent("Домашното вече е оценено и не може да бъде променяно!")}`,
+      );
+    }
+
     const effectiveDeadline = new Date(homework.endDate);
     if (submission.extensionHours) {
       effectiveDeadline.setHours(
@@ -223,6 +231,12 @@ exports.submitHomework = async (req, res) => {
     let usedLatePassNow = false;
 
     if (isExpired) {
+      if (submission.status === "submitted") {
+        return res.redirect(
+          `/users/homework/${homeworkId}?error=${encodeURIComponent("Срокът за редакция е изтекъл!")}`,
+        );
+      }
+
       const latePassItem = await Inventory.findOne({
         where: { userId: userId, isUsed: false },
         include: [
@@ -239,9 +253,23 @@ exports.submitHomework = async (req, res) => {
         submission.usedLatePass = true;
       } else {
         return res.redirect(
-          `/users/homework/${homeworkId}?error=Срокът+е+изтекъл+и+нямате+Билет+за+Закъснение!`,
+          `/users/homework/${homeworkId}?error=${encodeURIComponent("Срокът е изтекъл и нямате Билет за Закъснение!")}`,
         );
       }
+    }
+
+    const existingFiles = await SubmissionFile.findAll({
+      where: { submissionId: submission.id },
+    });
+
+    const hasText = submissionText && submissionText.trim() !== "";
+    const hasNewFiles = files && files.length > 0;
+    const hasOldFiles = existingFiles.length > 0;
+
+    if (!hasText && !hasNewFiles && !hasOldFiles) {
+      return res.redirect(
+        `/users/homework/${homeworkId}?error=${encodeURIComponent("Моля, добавете текстово решение или прикачете файл!")}`,
+      );
     }
 
     if (submissionText !== undefined) {
@@ -251,7 +279,19 @@ exports.submitHomework = async (req, res) => {
     submission.status = "submitted";
     await submission.save();
 
-    if (files && files.length > 0) {
+    if (hasNewFiles) {
+      for (const oldFile of existingFiles) {
+        const absolutePath = path.join(
+          __dirname,
+          "../private_uploads",
+          oldFile.filePath,
+        );
+        if (fs.existsSync(absolutePath)) {
+          fs.unlinkSync(absolutePath);
+        }
+        await oldFile.destroy();
+      }
+
       const fileData = files.map((f) => ({
         fileName: f.originalname,
         filePath: f.filename,
@@ -262,13 +302,15 @@ exports.submitHomework = async (req, res) => {
       await SubmissionFile.bulkCreate(fileData);
     }
 
-    let msg = "Решението+е+запазено+успешно!";
+    let msg = "Решението+е+запазено/обновено+успешно!";
     if (usedLatePassNow) msg += "+(Използван+Билет+за+Закъснение!)";
 
     res.redirect(`/users/homework/${homeworkId}?success=${msg}`);
   } catch (error) {
     console.error("Submit Homework Error:", error);
-    res.redirect(`/users/homework/${req.params.id}?error=Възникна+грешка.`);
+    res.redirect(
+      `/users/homework/${req.params.id}?error=${encodeURIComponent("Възникна грешка.")}`,
+    );
   }
 };
 
@@ -290,6 +332,13 @@ exports.deleteSubmissionFile = async (req, res) => {
     }
 
     const submission = file.HomeworkSubmission;
+
+    if (submission.status === "graded" || submission.grade !== null) {
+      return res.redirect(
+        `/users/homework/${submission.homeworkId}?error=${encodeURIComponent("Не можете да изтриете файл от вече оценено домашно!")}`,
+      );
+    }
+
     const effectiveDeadline = new Date(submission.Homework.endDate);
     if (submission.extensionHours) {
       effectiveDeadline.setHours(
@@ -301,7 +350,7 @@ exports.deleteSubmissionFile = async (req, res) => {
 
     if (isExpired) {
       return res.redirect(
-        `/users/homework/${submission.homeworkId}?error=Срокът+е+изтекъл!`,
+        `/users/homework/${submission.homeworkId}?error=${encodeURIComponent("Срокът е изтекъл!")}`,
       );
     }
 
@@ -317,7 +366,9 @@ exports.deleteSubmissionFile = async (req, res) => {
     const homeworkId = submission.homeworkId;
     await file.destroy();
 
-    res.redirect(`/users/homework/${homeworkId}?success=Файлът+е+изтрит.`);
+    res.redirect(
+      `/users/homework/${homeworkId}?success=${encodeURIComponent("Файлът е изтрит.")}`,
+    );
   } catch (error) {
     console.error("Delete File Error:", error);
     res.redirect("back");

@@ -126,15 +126,19 @@ document.addEventListener("DOMContentLoaded", function () {
   document
     .getElementById("saveQuestBtn")
     .addEventListener("click", async function () {
-      const title = document.getElementById("questTitle").value;
+      const title = document.getElementById("questTitle").value.trim();
       const quizzesData = [];
       let calculatedTotalXP = 0;
+      let hasError = false;
+      let errorMessage = "";
 
       document.querySelectorAll(".quiz-section").forEach((quizCard) => {
+        if (hasError) return;
+
         const existingId = quizCard.getAttribute("data-id");
         const isLocked = quizCard.classList.contains("locked-quiz");
 
-        const quizTitle = quizCard.querySelector(".quiz-title").value;
+        const quizTitle = quizCard.querySelector(".quiz-title").value.trim();
         const xpInput = quizCard.querySelector(".quiz-xp");
         const quizXP = xpInput ? parseInt(xpInput.value) || 0 : 0;
         calculatedTotalXP += quizXP;
@@ -143,34 +147,54 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!existingId || (existingId && !isLocked)) {
           quizCard.querySelectorAll(".question-card").forEach((qCard) => {
-            const qText = qCard.querySelector(".q-text").value;
+            if (hasError) return;
+
+            const qText = qCard.querySelector(".q-text").value.trim();
             const qPoints = qCard.querySelector(".q-points").value;
             const answers = [];
+
+            if (!qText) {
+              hasError = true;
+              errorMessage =
+                "Имате въпрос без попълнен текст! Моля, напишете въпроса или го изтрийте.";
+              return;
+            }
+
             const answerInputs = qCard.querySelectorAll(".q-answer");
             const radioInputs = qCard.querySelectorAll(".q-correct");
+            let hasValidCorrectAnswer = false;
 
             answerInputs.forEach((inp, idx) => {
-              if (inp.value.trim() !== "") {
+              const answerText = inp.value.trim();
+              if (answerText !== "") {
+                const isCorrect = radioInputs[idx].checked;
                 answers.push({
-                  text: inp.value,
-                  isCorrect: radioInputs[idx].checked,
+                  text: answerText,
+                  isCorrect: isCorrect,
                 });
+                if (isCorrect) {
+                  hasValidCorrectAnswer = true;
+                }
               }
             });
 
-            if (qText) {
-              quizQuestions.push({
-                text: qText,
-                points: qPoints,
-                Answers: answers,
-              });
+            if (!hasValidCorrectAnswer) {
+              hasError = true;
+              errorMessage = `Въпросът "${qText}" няма маркиран или попълнен верен отговор!`;
+              return;
             }
+
+            quizQuestions.push({
+              text: qText,
+              points: qPoints,
+              Answers: answers,
+            });
           });
         }
 
-        if (quizTitle) {
+        if (quizTitle || quizQuestions.length > 0) {
           const quizObj = {
-            title: quizTitle,
+            title: quizTitle || "Раздел",
             xpReward: quizXP,
             Questions: quizQuestions,
           };
@@ -178,6 +202,11 @@ document.addEventListener("DOMContentLoaded", function () {
           quizzesData.push(quizObj);
         }
       });
+
+      if (hasError) {
+        alert(errorMessage);
+        return;
+      }
 
       const data = {
         title: title,
