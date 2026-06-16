@@ -139,6 +139,14 @@ document.addEventListener("DOMContentLoaded", function () {
         const isLocked = quizCard.classList.contains("locked-quiz");
 
         const quizTitle = quizCard.querySelector(".quiz-title").value.trim();
+
+        if (!quizTitle) {
+          hasError = true;
+          errorMessage =
+            "Имате раздел без заглавие! Моля, въведете име на всеки един от разделите.";
+          return;
+        }
+
         const xpInput = quizCard.querySelector(".quiz-xp");
         const quizXP = xpInput ? parseInt(xpInput.value) || 0 : 0;
         calculatedTotalXP += quizXP;
@@ -192,15 +200,13 @@ document.addEventListener("DOMContentLoaded", function () {
           });
         }
 
-        if (quizTitle || quizQuestions.length > 0) {
-          const quizObj = {
-            title: quizTitle || "Раздел",
-            xpReward: quizXP,
-            Questions: quizQuestions,
-          };
-          if (existingId) quizObj.id = existingId;
-          quizzesData.push(quizObj);
-        }
+        const quizObj = {
+          title: quizTitle, 
+          xpReward: quizXP,
+          Questions: quizQuestions,
+        };
+        if (existingId) quizObj.id = existingId;
+        quizzesData.push(quizObj);
       });
 
       if (hasError) {

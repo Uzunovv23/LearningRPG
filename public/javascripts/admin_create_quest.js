@@ -114,6 +114,14 @@ document.addEventListener("DOMContentLoaded", function () {
         if (hasError) return;
 
         const quizTitle = quizCard.querySelector(".quiz-title").value.trim();
+
+        if (!quizTitle) {
+          hasError = true;
+          errorMessage =
+            "Имате раздел без заглавие! Моля, въведете име на всеки един от разделите.";
+          return;
+        }
+
         const xpInput = quizCard.querySelector(".quiz-xp");
         const quizXP = xpInput ? parseInt(xpInput.value) || 0 : 0;
 
@@ -166,13 +174,11 @@ document.addEventListener("DOMContentLoaded", function () {
           });
         });
 
-        if (quizTitle || quizQuestions.length > 0) {
-          quizzesData.push({
-            title: quizTitle || "Раздел",
-            xpReward: quizXP,
-            Questions: quizQuestions,
-          });
-        }
+        quizzesData.push({
+          title: quizTitle,
+          xpReward: quizXP,
+          Questions: quizQuestions,
+        });
       });
 
       if (hasError) {
