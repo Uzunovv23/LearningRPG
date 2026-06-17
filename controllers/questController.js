@@ -94,7 +94,7 @@ exports.show = async (req, res) => {
     let chronoCount = 0;
     if (currentUser) {
       chronoCount = await Inventory.count({
-        where: { userId: currentUser.id, isUsed: false },
+        where: { userId: currentUser.id, isUsed: false, isLocked: false },
         include: [{ model: DroppedItem, where: { name: "Пясъчен часовник" } }],
       });
     }
@@ -160,26 +160,26 @@ exports.showQuiz = async (req, res) => {
 
     if (userId) {
       jokerCount = await Inventory.count({
-        where: { userId: userId, isUsed: false },
+        where: { userId: userId, isUsed: false, isLocked: false },
         include: [{ model: DroppedItem, where: { name: "Жокера" } }],
       });
 
       elixirCount = await Inventory.count({
-        where: { userId: userId, isUsed: false },
+        where: { userId: userId, isUsed: false, isLocked: false },
         include: [
           { model: DroppedItem, where: { name: "Еликсир на паметта" } },
         ],
       });
 
       scrollCount = await Inventory.count({
-        where: { userId: userId, isUsed: false },
+        where: { userId: userId, isUsed: false, isLocked: false },
         include: [
           { model: DroppedItem, where: { name: "Свитък на Мъдростта" } },
         ],
       });
 
       midasCount = await Inventory.count({
-        where: { userId: userId, isUsed: false },
+        where: { userId: userId, isUsed: false, isLocked: false },
         include: [
           { model: DroppedItem, where: { name: "Ръкавицата на Мидас" } },
         ],
@@ -262,7 +262,7 @@ exports.submitQuiz = async (req, res) => {
 
           if (useScroll) {
             const scrollItem = await Inventory.findOne({
-              where: { userId: userId, isUsed: false },
+              where: { userId: userId, isUsed: false, isLocked: false },
               include: [
                 { model: DroppedItem, where: { name: "Свитък на Мъдростта" } },
               ],
@@ -277,7 +277,7 @@ exports.submitQuiz = async (req, res) => {
             }
           } else if (useMidas) {
             const midasItem = await Inventory.findOne({
-              where: { userId: userId, isUsed: false },
+              where: { userId: userId, isUsed: false, isLocked: false },
               include: [
                 { model: DroppedItem, where: { name: "Ръкавицата на Мидас" } },
               ],
@@ -361,14 +361,15 @@ exports.useJoker = async (req, res) => {
         .json({ success: false, message: "Не сте логнат." });
 
     const jokerItem = await Inventory.findOne({
-      where: { userId: userId, isUsed: false },
+      where: { userId: userId, isUsed: false, isLocked: false },
       include: [{ model: DroppedItem, where: { name: "Жокера" } }],
     });
 
     if (!jokerItem) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Нямаш налични Жокери!" });
+      return res.status(400).json({
+        success: false,
+        message: "Нямаш налични Жокери (или са заложени в Арената)!",
+      });
     }
 
     jokerItem.isUsed = true;
@@ -384,7 +385,7 @@ exports.useJoker = async (req, res) => {
     const idsToKeep = [correctAnswer.id, randomWrong.id];
 
     const remainingJokers = await Inventory.count({
-      where: { userId: userId, isUsed: false },
+      where: { userId: userId, isUsed: false, isLocked: false },
       include: [{ model: DroppedItem, where: { name: "Жокера" } }],
     });
 
@@ -416,14 +417,15 @@ exports.useElixir = async (req, res) => {
         .json({ success: false, message: "Не сте логнат." });
 
     const elixirItem = await Inventory.findOne({
-      where: { userId: userId, isUsed: false },
+      where: { userId: userId, isUsed: false, isLocked: false },
       include: [{ model: DroppedItem, where: { name: "Еликсир на паметта" } }],
     });
 
     if (!elixirItem) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Нямаш наличен Еликсир на паметта!" });
+      return res.status(400).json({
+        success: false,
+        message: "Нямаш наличен Еликсир на паметта (или е заложен)!",
+      });
     }
 
     elixirItem.isUsed = true;
@@ -441,7 +443,7 @@ exports.useElixir = async (req, res) => {
       });
 
     const remainingElixirs = await Inventory.count({
-      where: { userId: userId, isUsed: false },
+      where: { userId: userId, isUsed: false, isLocked: false },
       include: [{ model: DroppedItem, where: { name: "Еликсир на паметта" } }],
     });
 

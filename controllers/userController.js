@@ -62,6 +62,7 @@ exports.show = async (req, res) => {
       where: {
         userId: userId,
         isUsed: false,
+        isLocked: false,
       },
       include: [DroppedItem],
     });
@@ -163,12 +164,12 @@ exports.getHomework = async (req, res) => {
 
     if (userId) {
       chronoCount = await Inventory.count({
-        where: { userId: userId, isUsed: false },
+        where: { userId: userId, isUsed: false, isLocked: false },
         include: [{ model: DroppedItem, where: { name: "Пясъчен часовник" } }],
       });
 
       latePassCount = await Inventory.count({
-        where: { userId: userId, isUsed: false },
+        where: { userId: userId, isUsed: false, isLocked: false },
         include: [
           { model: DroppedItem, where: { name: "Билет за Закъснение" } },
         ],
@@ -238,7 +239,7 @@ exports.submitHomework = async (req, res) => {
       }
 
       const latePassItem = await Inventory.findOne({
-        where: { userId: userId, isUsed: false },
+        where: { userId: userId, isUsed: false, isLocked: false },
         include: [
           { model: DroppedItem, where: { name: "Билет за Закъснение" } },
         ],
@@ -425,14 +426,15 @@ exports.useChronoGlass = async (req, res) => {
     const { homeworkId } = req.body;
 
     const chronoItem = await Inventory.findOne({
-      where: { userId: userId, isUsed: false },
+      where: { userId: userId, isUsed: false, isLocked: false },
       include: [{ model: DroppedItem, where: { name: "Пясъчен часовник" } }],
     });
 
     if (!chronoItem) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Нямаш Пясъчен часовник!" });
+      return res.status(400).json({
+        success: false,
+        message: "Нямаш Пясъчен часовник (или е заложен в дуел)!",
+      });
     }
 
     const homework = await Homework.findByPk(homeworkId);
@@ -445,6 +447,13 @@ exports.useChronoGlass = async (req, res) => {
       where: { userId: userId, homeworkId: homeworkId },
       defaults: { status: "pending", extensionHours: 0 },
     });
+
+    if (submission.status === "graded" || submission.grade !== null) {
+      return res.status(400).json({
+        success: false,
+        message: "Това домашно вече е оценено! Няма смисъл да хабиш часовник.",
+      });
+    }
 
     const currentDeadline = new Date(homework.endDate);
     currentDeadline.setHours(
@@ -466,7 +475,7 @@ exports.useChronoGlass = async (req, res) => {
     await chronoItem.save();
 
     const remaining = await Inventory.count({
-      where: { userId: userId, isUsed: false },
+      where: { userId: userId, isUsed: false, isLocked: false },
       include: [{ model: DroppedItem, where: { name: "Пясъчен часовник" } }],
     });
 

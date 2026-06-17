@@ -153,6 +153,7 @@ exports.getMatchmaking = async (req, res) => {
         id: wagerId,
         userId: userId,
         isLocked: false,
+        isUsed: false,
       },
       include: [{ model: DroppedItem }],
     });
@@ -220,20 +221,49 @@ exports.postChallenge = async (req, res) => {
       quizIds = [quizIds];
     }
 
-    const initiator = await Hero.findOne({ where: { userId: userId } });
+    const initiator = await Hero.findOne({
+      where: { userId: userId },
+      transaction: t,
+    });
+
+    const opponent = await Hero.findByPk(opponentId, { transaction: t });
+    if (!opponent) {
+      throw new Error("Противникът не е намерен.");
+    }
+
+    const initiatorPassed = await Score.count({
+      where: { userId: userId, quizId: quizIds, isPassed: true },
+      distinct: true,
+      col: "quizId",
+      transaction: t,
+    });
+
+    const opponentPassed = await Score.count({
+      where: { userId: opponent.userId, quizId: quizIds, isPassed: true },
+      distinct: true,
+      col: "quizId",
+      transaction: t,
+    });
+
+    if (initiatorPassed < quizIds.length || opponentPassed < quizIds.length) {
+      throw new Error(
+        "Опит за измама: Избрани са тестове, които един от играчите не е завършил!",
+      );
+    }
 
     const wagerItem = await Inventory.findOne({
       where: {
         id: wagerId,
         userId: userId,
         isLocked: false,
+        isUsed: false,
       },
       transaction: t,
     });
 
     if (!wagerItem) {
       throw new Error(
-        "Опит за измама или невалиден залог: Този предмет не съществува или вече е заложен.",
+        "Опит за измама или невалиден залог: Този предмет не съществува, вече е използван или е заложен в друг дуел.",
       );
     }
 
@@ -337,6 +367,7 @@ exports.postAccept = async (req, res) => {
         id: opponentWagerId,
         userId: userId,
         isLocked: false,
+        isUsed: false,
       },
       transaction: t,
     });

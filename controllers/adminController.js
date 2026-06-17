@@ -25,6 +25,7 @@ const giveRewards = async (userId, submissionId, grade, t) => {
     where: {
       submissionId: submissionId,
       isUsed: false,
+      isLocked: false,
     },
     transaction: t,
   });
