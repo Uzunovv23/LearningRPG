@@ -28,10 +28,14 @@ exports.getIndex = async (req, res) => {
       });
 
       leaderboard = topHeroes.map((hero) => {
+       
+        const xpPerLevel = 1000; 
+        const calculatedLevel = Math.floor((hero.xp || 0) / xpPerLevel) + 1;
+
         return {
           user: hero.User,
           xp: hero.xp || 0,
-          level: hero.level, 
+          level: calculatedLevel, 
         };
       });
     }

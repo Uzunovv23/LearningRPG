@@ -292,6 +292,8 @@ exports.submitQuiz = async (req, res) => {
           }
 
           hero.xp += rewardXP;
+          const xpPerLevel = 1000;
+          hero.level = Math.floor(hero.xp / xpPerLevel) + 1;
           await hero.save();
 
           const [balance] = await HeroBalance.findOrCreate({
